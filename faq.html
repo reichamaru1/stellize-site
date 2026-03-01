@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="よくある質問 - Stellizeの講座に関するよくあるご質問にお答えします。">
+    <title>よくある質問 | Stellize</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* アコーディオン専用スタイル */
+        .accordion-item {
+            background-color: white;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .accordion-item:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .accordion-header {
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            background-color: white;
+            transition: background-color 0.3s ease;
+        }
+        
+        .accordion-header:hover {
+            background-color: var(--bg-section);
+        }
+        
+        .accordion-question {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            flex: 1;
+        }
+        
+        .accordion-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--color-accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+        
+        .accordion-item.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        
+        .accordion-item.active .accordion-content {
+            max-height: 1000px;
+        }
+        
+        .accordion-body {
+            padding: 0 2rem 2rem 2rem;
+            color: var(--text-secondary);
+            line-height: 2;
+        }
+        
+        @media (max-width: 768px) {
+            .accordion-header {
+                padding: 1.25rem 1.5rem;
+            }
+            
+            .accordion-question {
+                font-size: 1rem;
+            }
+            
+            .accordion-body {
+                padding: 0 1.5rem 1.5rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Stellize</a>
+            <nav class="nav">
+                <a href="index.html">トップ</a>
+                <a href="index.html#about">企業情報</a>
+                <a href="index.html#business">事業紹介</a>
+                <a href="blog.html">ブログ</a>
+                <a href="faq.html">よくある質問</a>
+                <a href="contact.html" class="btn-contact">お問い合わせ</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- ページヒーロー -->
+    <section class="page-hero">
+        <div class="container">
+            <p class="label">FAQ</p>
+            <h1>よくある質問</h1>
+            <p class="lead">講座やサービスに関するご質問にお答えします。</p>
+        </div>
+    </section>
+    
+    <!-- FAQ: 講座について -->
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>講座について</h2>
+            </div>
+            
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="accordion-item fade-in">
+                    <div class="accordion-header">
+                        <p class="accordion-question">SNSを使ったことがなくても大丈夫ですか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>はい、大丈夫です。基礎から丁寧にお教えしますので、初めての方でも安心して始められます。アカウントの作り方から、投稿の仕方まで、一つずつステップを踏んで学んでいきますので、ご安心ください。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.05s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">1講座はどのくらいの期間で終わりますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>1講座は、およそ1〜2週間を目安としていますが、あなたのペースで進めていただけます。早く理解できれば短く、じっくり取り組みたい場合は時間をかけても構いません。無理なく続けることを大切にしています。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.1s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">講座の受講に必要なものはありますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>スマートフォンまたはパソコン、そしてインターネット環境があれば受講できます。特別な機材や高価なソフトウェアは必要ありません。無料で使えるアプリやツールを活用しながら学んでいきます。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.15s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">途中で挫折しそうで不安です</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>無理なく続けられるよう、1講座1テーマで小さく区切っています。また、困ったときはいつでも相談できるサポート体制を整えています。「できた」を一緒に喜び、「難しい」と感じたら一緒に解決策を考えます。あなたのペースで大丈夫です。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ: サポートについて -->
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>サポートについて</h2>
+            </div>
+            
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="accordion-item fade-in">
+                    <div class="accordion-header">
+                        <p class="accordion-question">分からないことがあったら質問できますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>はい、いつでも質問していただけます。オンライン相談やメッセージでの質問に対応しています。どんな小さな疑問でも、お気軽にご相談ください。丁寧にお答えいたします。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.05s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">個別のサポートはありますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>はい、あります。一人ひとりの状況に合わせた個別サポートを提供しています。発信内容のフィードバックや、進捗に応じたアドバイスなど、あなたに寄り添ったサポートを心がけています。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.1s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">施設のスタッフも相談できますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>はい、もちろんです。施設のスタッフの方々とも連携しながら、受講者をサポートいたします。スタッフ向けの研修や、定期的な進捗共有の機会も設けています。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ: 導入について -->
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>導入について</h2>
+            </div>
+            
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="accordion-item fade-in">
+                    <div class="accordion-header">
+                        <p class="accordion-question">施設での導入を検討していますが、どうすればいいですか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>まずはお問い合わせフォームよりご連絡ください。施設の状況やご要望をお伺いし、最適なプランをご提案いたします。説明会や体験講座も実施していますので、お気軽にご相談ください。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.05s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">導入までにどのくらいの期間がかかりますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>お問い合わせから導入まで、通常1〜2ヶ月程度です。説明会、体験講座、スタッフ研修などを経て、準備が整ってから講座を開始します。急ぎの場合はご相談ください。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.1s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">費用について教えてください</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>施設の規模や受講者数、サポート内容によって異なります。詳しくはお問い合わせの際にご説明いたします。予算に応じた柔軟なプラン設計も可能ですので、ご相談ください。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.15s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">オンラインでの講座提供は可能ですか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>はい、オンラインでの講座提供も可能です。対面とオンラインを組み合わせたハイブリッド形式にも対応しています。施設の状況に合わせて、最適な形をご提案いたします。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ: その他 -->
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>その他</h2>
+            </div>
+            
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="accordion-item fade-in">
+                    <div class="accordion-header">
+                        <p class="accordion-question">実際に仕事につながりますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>講座を通じてSNSでの発信を続けることで、実際に仕事の依頼をいただいた方もいらっしゃいます。ただし、すぐに仕事につながることを保証するものではありません。焦らず、着実に発信を続けることで、少しずつ可能性が広がっていきます。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.05s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">どんなSNSに対応していますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>Instagram、X（旧Twitter）、Facebookなど、主要なSNSに対応しています。あなたの発信内容や目的に合わせて、適したSNSをご提案いたします。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item fade-in" style="transition-delay: 0.1s;">
+                    <div class="accordion-header">
+                        <p class="accordion-question">就労支援施設以外でも利用できますか?</p>
+                        <div class="accordion-icon">+</div>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-body">
+                            <p>基本的には就労支援施設向けのプログラムとして設計していますが、他の福祉施設や教育機関でのご利用もご相談可能です。お気軽にお問い合わせください。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="section">
+        <div class="container">
+            <div class="section-bg" style="text-align: center; padding: 4rem 2rem;">
+                <h2 style="margin-bottom: 1rem;">その他のご質問はお気軽に</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.8;">
+                    ここに記載されていないご質問や、<br>
+                    詳しく聞きたいことがございましたら、<br>
+                    お気軽にお問い合わせください。
+                </p>
+                <a href="contact.html" class="btn btn-primary">お問い合わせフォームへ</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Stellize</h3>
+                    <p style="margin-top: 1rem; line-height: 1.8; font-size: 0.95rem;">
+                        就労支援施設向けSNS講座<br>
+                        自分の「できる」を見つける場所
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>サイトマップ</h3>
+                    <ul>
+                        <li><a href="index.html">トップ</a></li>
+                        <li><a href="about.html">Stellizeについて</a></li>
+                        <li><a href="business.html">事業内容</a></li>
+                        <li><a href="course.html">SNS講座</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>情報</h3>
+                    <ul>
+                        <li><a href="cases.html">導入事例</a></li>
+                        <li><a href="faq.html">よくある質問</a></li>
+                        <li><a href="contact.html">お問い合わせ</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Stellize. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+</html>

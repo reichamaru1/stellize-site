@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="就労支援向けクリエイティブ講座 - 利用者の工賃向上・通所率向上につながるSNSスキルを習得。オンライン・対面選択可。" />
+  <title>就労継続支援B型向けクリエイティブ講座 | Stellize</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- このページ用：崩れ防止＆デザイン底上げ（style.cssが未完成でも動く） -->
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg2:#f6f7fb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:rgba(15,23,42,.10);
+      --shadow:0 18px 60px rgba(15,23,42,.10);
+      --shadow2:0 10px 28px rgba(15,23,42,.10);
+      --r:18px;
+      --r2:26px;
+      --accent:#2563eb;
+      --accent2:#9333ea;
+      --max:1120px;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:"Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(900px 480px at 10% 0%, rgba(37,99,235,.10), transparent 55%),
+        radial-gradient(900px 520px at 90% 10%, rgba(147,51,234,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      letter-spacing:.02em;
+    }
+    img{max-width:100%; display:block}
+    a{color:inherit}
+    .container{max-width:var(--max); margin:0 auto; padding:0 18px}
+
+    /* Header（既存クラスに上書きで磨く） */
+    .header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.72);
+      border-bottom: 1px solid rgba(15,23,42,.06);
+    }
+    .header-container{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0}
+    .logo{font-weight:700; text-decoration:none}
+    .nav{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .nav a{
+      text-decoration:none;
+      border-radius:999px;
+      padding:8px 12px;
+      transition:.18s ease;
+      color:rgba(15,23,42,.85);
+    }
+    .nav a:hover{background: rgba(37,99,235,.08)}
+    .btn-contact{
+      border:1px solid rgba(37,99,235,.35);
+      background: rgba(37,99,235,.10);
+    }
+
+    /* Page Hero（“編集デザイン”寄せ） */
+    .page-hero{
+      padding: 44px 0 22px;
+    }
+    .label{
+      letter-spacing:.22em;
+      font-size:.84rem;
+      color:rgba(15,23,42,.55);
+      margin:0 0 10px;
+      text-transform:uppercase;
+    }
+    h1{
+      font-family:"Noto Serif JP", serif;
+      letter-spacing:.05em;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height:1.25;
+      margin:0 0 12px;
+    }
+    .lead{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+      max-width: 46rem;
+    }
+
+    /* Section */
+    .section{padding:70px 0}
+    .bg-light{background: rgba(255,255,255,.55)}
+    h2{
+      font-family:"Noto Serif JP", serif;
+      letter-spacing:.05em;
+      font-size: clamp(22px, 2.4vw, 32px);
+      margin: 0 0 16px;
+    }
+    .text-center{text-align:center; color:var(--muted); line-height:1.9}
+
+    /* Cards / Grids */
+    .feature-grid,
+    .merit-grid,
+    .pricing-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .feature-card,
+    .merit-card,
+    .pricing-card,
+    .note-box{
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow2);
+      padding: 18px;
+    }
+    .feature-card h3,
+    .merit-card h3,
+    .pricing-card h3{
+      margin:0 0 10px;
+      font-size: 16px;
+      letter-spacing:.03em;
+      color:rgba(15,23,42,.92);
+    }
+    .feature-card p,
+    .merit-card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+      font-size: 14px;
+    }
+
+    /* Steps（ここが今回の「1,2画像見えない」問題の本丸対策） */
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+    .step-card{
+      overflow: hidden; /* 画像だけ綺麗に切る */
+      border-radius: var(--r2);
+      border: 1px solid rgba(15,23,42,.08);
+      background: rgba(255,255,255,.78);
+      box-shadow: var(--shadow2);
+      transition: .22s ease;
+      min-height: 100%;
+    }
+    .step-card:hover{
+      transform: translateY(-6px);
+      box-shadow: var(--shadow);
+      border-color: rgba(37,99,235,.18);
+    }
+    .step-card img{
+      width:100%;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+      display:block;
+    }
+    .step-content{
+      padding: 14px 16px 16px;
+    }
+    .step-number{
+      margin:0 0 6px;
+      font-weight:700;
+      letter-spacing:.16em;
+      font-size: 12px;
+      color: rgba(37,99,235,.95);
+      text-transform: uppercase;
+    }
+    .step-content h3{
+      margin:0 0 8px;
+      font-family:"Noto Serif JP", serif;
+      letter-spacing:.05em;
+      font-size: 18px;
+      color:rgba(15,23,42,.95);
+    }
+    .step-content p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+      font-size: 14px;
+    }
+
+    /* Pricing */
+    .price{
+      font-family:"Noto Serif JP", serif;
+      font-size: 34px;
+      margin: 10px 0 14px;
+      letter-spacing:.03em;
+      color: rgba(15,23,42,.95);
+    }
+    .price span{font-size: 14px; color: var(--muted); margin-left: 4px}
+    .pricing-features{margin:0 0 16px; padding-left: 1.1rem; color: var(--muted); line-height:2}
+    .btn{display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius: 14px; padding: 12px 16px; text-decoration:none; transition:.18s ease}
+    .btn:hover{transform: translateY(-1px)}
+    .btn-primary{background: linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff}
+    .btn-secondary{background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.12)}
+    .note-box h4{margin:0 0 10px}
+    .note-box p{margin:0; color: var(--muted); line-height:1.9}
+
+    /* CTA */
+    .cta-section .container{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      text-align:center;
+    }
+    .cta-buttons{margin-top: 12px}
+
+    /* Footer（最低限の見栄え確保） */
+    .footer{padding: 44px 0 18px; border-top: 1px solid rgba(15,23,42,.08); background: rgba(255,255,255,.58)}
+    .footer-content{
+      display:grid;
+      grid-template-columns: 1.4fr repeat(4, 1fr);
+      gap: 16px;
+      align-items:start;
+    }
+    .footer-col h3,.footer-col h4{margin:0 0 10px}
+    .footer-col a{display:block; text-decoration:none; color:rgba(15,23,42,.78); padding:4px 0}
+    .footer-col a:hover{color:rgba(37,99,235,.95)}
+    .footer-bottom{padding-top: 14px; margin-top: 16px; border-top: 1px solid rgba(15,23,42,.08); color: var(--muted); font-size: 13px; text-align:center}
+    .coming-soon{opacity:.7}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .feature-grid,.merit-grid,.pricing-grid,.steps{grid-template-columns: 1fr}
+      .footer-content{grid-template-columns: 1fr; gap: 12px}
+      .nav{display:none}
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="header-container container">
+      <a href="index.html" class="logo">Stellize</a>
+      <nav class="nav" aria-label="グローバルナビゲーション">
+        <a href="index.html">トップ</a>
+        <a href="index.html#about">企業情報</a>
+        <a href="index.html#business">事業紹介</a>
+        <a href="blog.html">ブログ</a>
+        <a href="faq.html">よくある質問</a>
+        <a href="contact.html" class="btn-contact">お問い合わせ</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ページヒーロー -->
+  <section class="page-hero">
+    <div class="container">
+      <p class="label">Creative Course for Type-B Employment Support</p>
+      <h1>就労継続支援B型向け<br>クリエイティブ講座</h1>
+      <p class="lead">施設職員がクリエイティブスキルを学び、利用者の工賃向上・通所率向上につなげる。</p>
+    </div>
+  </section>
+
+  <!-- 概要 -->
+  <section class="section">
+    <div class="container">
+      <h2>講座の特徴</h2>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>📱 実践的なSNS運用</h3>
+          <p>Instagram、X（旧Twitter）など、施設の魅力を発信するための実践的なスキルを学びます。</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>💡 利用者の工賃向上</h3>
+          <p>SNSを活用して施設の商品やサービスを発信し、売上・工賃の向上を目指します。</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>🎯 通所率の改善</h3>
+          <p>施設の活動を発信することで、利用者のモチベーション向上と通所率改善につながります。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 講座の流れ -->
+  <section class="section bg-light">
+    <div class="container">
+      <h2>講座の進め方</h2>
+      <p class="text-center">3つのステップで、無理なくSNSスキルを身につけます。</p>
+
+     <!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="就労支援向けクリエイティブ講座 - 利用者の工賃向上・通所率向上につながるSNSスキルを習得。オンライン・対面選択可。" />
+  <title>就労継続支援B型向けクリエイティブ講座 | Stellize</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- このページ用：崩れ防止＆デザイン底上げ（style.cssが未完成でも動く） -->
+  <style>
+    :root{
+      --bg:#ffffff;
+      --bg2:#f6f7fb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:rgba(15,23,42,.10);
+      --shadow:0 18px 60px rgba(15,23,42,.10);
+      --shadow2:0 10px 28px rgba(15,23,42,.10);
+      --r:18px;
+      --r2:26px;
+      --accent:#2563eb;
+      --accent2:#9333ea;
+      --max:1120px;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:"Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(900px 480px at 10% 0%, rgba(37,99,235,.10), transparent 55%),
+        radial-gradient(900px 520px at 90% 10%, rgba(147,51,234,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      letter-spacing:.02em;
+    }
+    img{max-width:100%; display:block}
+    a{color:inherit}
+    .container{max-width:var(--max); margin:0 auto; padding:0 18px}
+
+    /* Header（既存クラスに上書きで磨く） */
+    .header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.72);
+      border-bottom: 1px solid rgba(15,23,42,.06);
+    }
+    .header-container{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0}
+    .logo{font-weight:700; text-decoration:none}
+    .nav{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .nav a{
+      text-decoration:none;
+      border-radius:999px;
+      padding:8px 12px;
+      transition:.18s ease;
+      color:rgba(15,23,42,.85);
+    }
+    .nav a:hover{background: rgba(37,99,235,.08)}
+    .btn-contact{
+      border:1px solid rgba(37,99,235,.35);
+      background: rgba(37,99,235,.10);
+    }
+
+    /* Page Hero（“編集デザイン”寄せ） */
+    .page-hero{
+      padding: 44px 0 22px;
+    }
+    .label{
+      letter-spacing:.22em;
+      font-size:.84rem;
+      color:rgba(15,23,42,.55);
+      margin:0 0 10px;
+      text-transform:uppercase;
+    }
+    h1{
+      font-family:"Noto Serif JP", serif;
+      letter-spacing:.05em;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height:1.25;
+      margin:0 0 12px;
+    }
+    .lead{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+      max-width: 46rem;
+    }
+
+    /* Section */
+    .section{padding:70px 0}
+    .bg-light{background: rgba(255,255,255,.55)}
+    h2{
+      font-family:"Noto Serif JP", serif;
+      letter-spacing:.05em;
+      font-size: clamp(22px, 2.4vw, 32px);
+      margin: 0 0 16px;
+    }
+    .text-center{text-align:center; color:var(--muted); line-height:1.9}
+
+    /* Cards / Grids */
+    .feature-grid,
+    .merit-grid,
+    .pricing-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .feature-card,
+    .merit-card,
+    .pricing-card,
+    .note-box{
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow2);
+      padding: 18px;
+    }
+    .feature-card h3,
+    .merit-card h3,
+    .pricing-card h3{
+      margin:0 0 10px;
+      font-size: 16px;
+      letter-spacing:.03em;
+      color:rgba(15,23,42,.92);
+    }
+    .feature-card p,
+    .merit-card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+      font-size: 14px;
+    }
+
+    /* Steps（ここが今回の「1,2画像見えない」問題の本丸対策） */
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+    .step-card{
+      overflow: hidden; /* 画像だけ綺麗に切る */
+      border-radius: var(--r2);
+      border: 1px solid rgba(15,23,42,.08);
+      background: rgba(255,255,255,.78);
+      box-shadow: var(--shadow2);
+      transition: .22s ease;
+      min-height: 100%;
+    }
+    .step-card:hover{
+      transform: translateY(-6px);
+      box-shadow: var(--shadow);
+      border-color: rgba(37,99,235,.18);
+    }
+    .step-card img{
+      width:100%;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+      display:block;
+    }
+    .step-content{
+      padding: 14px 16px 16px;
+    }
+    .step-number{
+      margin:0 0 6px;
+      font-weight:700;
+      letter-spacing:.16em;
+      font-size: 12px;
+      color: rgba(37,99,235,.95);
+      text-transform: uppercase;
+    }
+    .step-content h3{
+      margin:0 0 8px;
+      font-family:"Noto Serif JP", serif;
+      letter-spacing:.05em;
+      font-size: 18px;
+      color:rgba(15,23,42,.95);
+    }
+    .step-content p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+      font-size: 14px;
+    }
+
+    /* Pricing */
+    .price{
+      font-family:"Noto Serif JP", serif;
+      font-size: 34px;
+      margin: 10px 0 14px;
+      letter-spacing:.03em;
+      color: rgba(15,23,42,.95);
+    }
+    .price span{font-size: 14px; color: var(--muted); margin-left: 4px}
+    .pricing-features{margin:0 0 16px; padding-left: 1.1rem; color: var(--muted); line-height:2}
+    .btn{display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius: 14px; padding: 12px 16px; text-decoration:none; transition:.18s ease}
+    .btn:hover{transform: translateY(-1px)}
+    .btn-primary{background: linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff}
+    .btn-secondary{background: rgba(255,255,255,.72); border: 1px solid rgba(15,23,42,.12)}
+    .note-box h4{margin:0 0 10px}
+    .note-box p{margin:0; color: var(--muted); line-height:1.9}
+
+    /* CTA */
+    .cta-section .container{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      text-align:center;
+    }
+    .cta-buttons{margin-top: 12px}
+
+    /* Footer（最低限の見栄え確保） */
+    .footer{padding: 44px 0 18px; border-top: 1px solid rgba(15,23,42,.08); background: rgba(255,255,255,.58)}
+    .footer-content{
+      display:grid;
+      grid-template-columns: 1.4fr repeat(4, 1fr);
+      gap: 16px;
+      align-items:start;
+    }
+    .footer-col h3,.footer-col h4{margin:0 0 10px}
+    .footer-col a{display:block; text-decoration:none; color:rgba(15,23,42,.78); padding:4px 0}
+    .footer-col a:hover{color:rgba(37,99,235,.95)}
+    .footer-bottom{padding-top: 14px; margin-top: 16px; border-top: 1px solid rgba(15,23,42,.08); color: var(--muted); font-size: 13px; text-align:center}
+    .coming-soon{opacity:.7}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .feature-grid,.merit-grid,.pricing-grid,.steps{grid-template-columns: 1fr}
+      .footer-content{grid-template-columns: 1fr; gap: 12px}
+      .nav{display:none}
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="header-container container">
+      <a href="index.html" class="logo">Stellize</a>
+      <nav class="nav" aria-label="グローバルナビゲーション">
+        <a href="index.html">トップ</a>
+        <a href="index.html#about">企業情報</a>
+        <a href="index.html#business">事業紹介</a>
+        <a href="blog.html">ブログ</a>
+        <a href="faq.html">よくある質問</a>
+        <a href="contact.html" class="btn-contact">お問い合わせ</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ページヒーロー -->
+  <section class="page-hero">
+    <div class="container">
+      <p class="label">Creative Course for Type-B Employment Support</p>
+      <h1>就労継続支援B型向け<br>クリエイティブ講座</h1>
+      <p class="lead">施設職員がクリエイティブスキルを学び、利用者の工賃向上・通所率向上につなげる。</p>
+    </div>
+  </section>
+
+  <!-- 概要 -->
+  <section class="section">
+    <div class="container">
+      <h2>講座の特徴</h2>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>📱 実践的なSNS運用</h3>
+          <p>Instagram、X（旧Twitter）など、施設の魅力を発信するための実践的なスキルを学びます。</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>💡 利用者の工賃向上</h3>
+          <p>SNSを活用して施設の商品やサービスを発信し、売上・工賃の向上を目指します。</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>🎯 通所率の改善</h3>
+          <p>施設の活動を発信することで、利用者のモチベーション向上と通所率改善につながります。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 講座の流れ -->
+  <section class="section bg-light">
+    <div class="container">
+      <h2>講座の進め方</h2>
+      <p class="text-center">3つのステップで、無理なくSNSスキルを身につけます。</p>
+
+      <div class="steps">
+        <div class="step-card">
+          <img src="/assets/images/qyTjIVoK.jpeg?v=1" alt="STEP 1 学ぶ" loading="lazy" decoding="async" fetchpriority="high" onerror="this.onerror=null;this.src='/assets/images/LVGr42mG.jpeg?v=1';" />
+          <div class="step-content">
+            <p class="step-number">STEP 1</p>
+            <h3>学ぶ</h3>
+            <p>SNSの基礎から実践的な運用方法まで、わかりやすく学習します。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <img src="/assets/images/7JZwlWma.jpeg?v=1" alt="STEP 2 ワーク" loading="lazy" decoding="async" />
+          <div class="step-content">
+            <p class="step-number">STEP 2</p>
+            <h3>ワーク</h3>
+            <p>実際に投稿を作成し、施設の魅力を伝える練習をします。</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <img src="/assets/images/LVGr42mG.jpeg?v=1" alt="STEP 3 シェア" loading="lazy" decoding="async" />
+          <div class="step-content">
+            <p class="step-number">STEP 3</p>
+            <h3>シェア</h3>
+            <p>作成した投稿を実際に発信し、フィードバックを受けながら改善します。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 導入メリット -->
+  <section class="section">
+    <div class="container">
+      <h2>施設導入のメリット</h2>
+
+      <div class="merit-grid">
+        <div class="merit-card">
+          <h3>工賃向上</h3>
+          <p>SNSを活用して商品やサービスの認知度を高め、売上・工賃の向上が期待できます。</p>
+        </div>
+
+        <div class="merit-card">
+          <h3>施設の魅力向上</h3>
+          <p>活動や商品を発信することで、施設のブランディングが強化され、利用者・職員のモチベーションアップにつながります。</p>
+        </div>
+
+        <div class="merit-card">
+          <h3>就労移行の土台</h3>
+          <p>SNSスキルは就労移行後も活用できる実践的なスキル。将来の選択肢を広げます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 料金 -->
+  <section class="section bg-light">
+    <div class="container">
+      <h2>料金プラン</h2>
+      <p class="text-center">施設の状況に合わせて、オンライン・対面を選択できます。</p>
+
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>オンライン</h3>
+          <p class="price">¥20,000<span>/回</span></p>
+          <ul class="pricing-features">
+            <li>☑︎週1回 or 月2回選択可</li>
+            <li>☑︎全国どこからでも参加可能</li>
+            <li>☑︎柔軟なスケジュール調整</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary">お問い合わせ</a>
+        </div>
+
+        <div class="pricing-card">
+          <h3>対面</h3>
+          <p class="price">¥40,000<span>/回</span></p>
+          <ul class="pricing-features">
+            <li>☑︎月1回 or 月2回選択可</li>
+            <li>☑︎直接指導でより実践的</li>
+            <li>☑︎きめ細やかなサポート</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary">お問い合わせ</a>
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-top:16px;">
+        <h4>💼 職員向けSNS案件獲得研修もご用意しています</h4>
+        <p>キャリアアップ助成金を活用できる職員向け研修プログラムもございます。詳しくはお問い合わせください。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section cta-section">
+    <div class="container">
+      <h2>まずはお気軽にご相談ください</h2>
+      <p style="color:var(--muted); line-height:1.9; margin:0;">
+        導入事例や詳細について、<br />お気軽にお問い合わせください。
+      </p>
+      <div class="cta-buttons">
+        <a href="contact.html" class="btn btn-primary">お問い合わせフォーム</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-col">
+          <h3>Stellize合同会社</h3>
+          <p style="color:var(--muted); line-height:1.9; margin:0;">
+            自分の価値に、気づく。<br />誰もが自分らしく働ける社会へ。
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>ページ</h4>
+          <a href="index.html">トップ</a>
+          <a href="index.html#about">企業情報</a>
+          <a href="index.html#business">事業紹介</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>サービス</h4>
+          <a href="course.html">クリエイティブ講座</a>
+          <a href="gpac.html">G-Pac</a>
+          <a href="base.html">鵠沼BASE</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>情報</h4>
+          <a href="blog.html">ブログ</a>
+          <a href="faq.html">よくある質問</a>
+          <a href="contact.html">お問い合わせフォーム</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>SNS</h4>
+          <a href="#" class="coming-soon">TikTok <span>Coming Soon</span></a>
+          <a href="#" class="coming-soon">公式LINE <span>Coming Soon</span></a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2024 Stellize. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
+
+  <!-- 導入メリット -->
+  <section class="section">
+    <div class="container">
+      <h2>施設導入のメリット</h2>
+
+      <div class="merit-grid">
+        <div class="merit-card">
+          <h3>工賃向上</h3>
+          <p>SNSを活用して商品やサービスの認知度を高め、売上・工賃の向上が期待できます。</p>
+        </div>
+
+        <div class="merit-card">
+          <h3>施設の魅力向上</h3>
+          <p>活動や商品を発信することで、施設のブランディングが強化され、利用者・職員のモチベーションアップにつながります。</p>
+        </div>
+
+        <div class="merit-card">
+          <h3>就労移行の土台</h3>
+          <p>SNSスキルは就労移行後も活用できる実践的なスキル。将来の選択肢を広げます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 料金 -->
+  <section class="section bg-light">
+    <div class="container">
+      <h2>料金プラン</h2>
+      <p class="text-center">施設の状況に合わせて、オンライン・対面を選択できます。</p>
+
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>オンライン</h3>
+          <p class="price">¥20,000<span>/回</span></p>
+          <ul class="pricing-features">
+            <li>☑︎週1回 or 月2回選択可</li>
+            <li>☑︎全国どこからでも参加可能</li>
+            <li>☑︎柔軟なスケジュール調整</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary">お問い合わせ</a>
+        </div>
+
+        <div class="pricing-card">
+          <h3>対面</h3>
+          <p class="price">¥40,000<span>/回</span></p>
+          <ul class="pricing-features">
+            <li>☑︎月1回 or 月2回選択可</li>
+            <li>☑︎直接指導でより実践的</li>
+            <li>☑︎きめ細やかなサポート</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary">お問い合わせ</a>
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-top:16px;">
+        <h4>💼 職員向けSNS案件獲得研修もご用意しています</h4>
+        <p>キャリアアップ助成金を活用できる職員向け研修プログラムもございます。詳しくはお問い合わせください。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section cta-section">
+    <div class="container">
+      <h2>まずはお気軽にご相談ください</h2>
+      <p style="color:var(--muted); line-height:1.9; margin:0;">
+        導入事例や詳細について、<br />お気軽にお問い合わせください。
+      </p>
+      <div class="cta-buttons">
+        <a href="contact.html" class="btn btn-primary">お問い合わせフォーム</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-col">
+          <h3>Stellize合同会社</h3>
+          <p style="color:var(--muted); line-height:1.9; margin:0;">
+            自分の価値に、気づく。<br />誰もが自分らしく働ける社会へ。
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>ページ</h4>
+          <a href="index.html">トップ</a>
+          <a href="index.html#about">企業情報</a>
+          <a href="index.html#business">事業紹介</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>サービス</h4>
+          <a href="course.html">クリエイティブ講座</a>
+          <a href="gpac.html">G-Pac</a>
+          <a href="base.html">鵠沼BASE</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>情報</h4>
+          <a href="blog.html">ブログ</a>
+          <a href="faq.html">よくある質問</a>
+          <a href="contact.html">お問い合わせフォーム</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>SNS</h4>
+          <a href="#" class="coming-soon">TikTok <span>Coming Soon</span></a>
+          <a href="#" class="coming-soon">公式LINE <span>Coming Soon</span></a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2024 Stellize. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

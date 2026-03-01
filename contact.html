@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="お問い合わせ - Stellizeへのご質問、ご相談はこちらからお気軽にお問い合わせください。">
+    <title>お問い合わせ | Stellize</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* フォーム専用スタイル */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .form-label.required::after {
+            content: '必須';
+            background-color: var(--color-accent);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+        
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--bg-section);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: 'Noto Sans JP', sans-serif;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+        
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-sub);
+            box-shadow: 0 0 0 3px rgba(183, 199, 176, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .form-note {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            max-width: 400px;
+            padding: 1.25rem 3rem;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-input,
+            .form-textarea,
+            .form-select {
+                padding: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Stellize</a>
+            <nav class="nav">
+                <a href="index.html">トップ</a>
+                <a href="index.html#about">企業情報</a>
+                <a href="index.html#business">事業紹介</a>
+                <a href="blog.html">ブログ</a>
+                <a href="faq.html">よくある質問</a>
+                <a href="contact.html" class="btn-contact">お問い合わせ</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- ページヒーロー -->
+    <section class="page-hero">
+        <div class="container">
+            <p class="label">Contact</p>
+            <h1>お問い合わせ</h1>
+            <p class="lead">ご質問・ご相談は、こちらからお気軽にお問い合わせください。</p>
+        </div>
+    </section>
+    
+    <!-- お問い合わせ前の案内 -->
+    <section class="section">
+        <div class="container">
+            <div class="section-bg">
+                <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                    <h2 style="margin-bottom: 1.5rem;">お問い合わせの前に</h2>
+                    <p style="line-height: 2; color: var(--text-secondary); margin-bottom: 2rem;">
+                        よくあるご質問をまとめたページもご用意しています。<br>
+                        お問い合わせの前に、ぜひご確認ください。
+                    </p>
+                    <a href="faq.html" class="btn btn-outline">よくある質問を見る</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- お問い合わせフォーム -->
+    <section class="section">
+        <div class="container">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="card" style="padding: 3rem 2rem;">
+                    <form id="contactForm">
+                        <!-- お名前 -->
+                        <div class="form-group fade-in">
+                            <label for="name" class="form-label required">お名前</label>
+                            <input 
+                                type="text" 
+                                id="name" 
+                                name="name" 
+                                class="form-input" 
+                                placeholder="山田 太郎"
+                                required
+                            >
+                        </div>
+                        
+                        <!-- 施設名・団体名 -->
+                        <div class="form-group fade-in" style="transition-delay: 0.05s;">
+                            <label for="organization" class="form-label">施設名・団体名</label>
+                            <input 
+                                type="text" 
+                                id="organization" 
+                                name="organization" 
+                                class="form-input" 
+                                placeholder="〇〇就労支援センター"
+                            >
+                            <p class="form-note">施設・団体からのお問い合わせの場合はご記入ください</p>
+                        </div>
+                        
+                        <!-- メールアドレス -->
+                        <div class="form-group fade-in" style="transition-delay: 0.1s;">
+                            <label for="email" class="form-label required">メールアドレス</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="form-input" 
+                                placeholder="example@email.com"
+                                required
+                            >
+                        </div>
+                        
+                        <!-- 電話番号 -->
+                        <div class="form-group fade-in" style="transition-delay: 0.15s;">
+                            <label for="phone" class="form-label">お電話番号</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone" 
+                                class="form-input" 
+                                placeholder="090-1234-5678"
+                            >
+                            <p class="form-note">お電話でのご連絡をご希望の場合はご記入ください</p>
+                        </div>
+                        
+                        <!-- お問い合わせ種別 -->
+                        <div class="form-group fade-in" style="transition-delay: 0.2s;">
+                            <label for="inquiry-type" class="form-label required">お問い合わせ種別</label>
+                            <select id="inquiry-type" name="inquiry-type" class="form-select" required>
+                                <option value="">選択してください</option>
+                                <option value="施設導入について">施設への導入について</option>
+                                <option value="講座内容について">講座内容について</option>
+                                <option value="費用について">費用について</option>
+                                <option value="説明会について">説明会・体験講座について</option>
+                                <option value="その他">その他のご質問</option>
+                            </select>
+                        </div>
+                        
+                        <!-- お問い合わせ内容 -->
+                        <div class="form-group fade-in" style="transition-delay: 0.25s;">
+                            <label for="message" class="form-label required">お問い合わせ内容</label>
+                            <textarea 
+                                id="message" 
+                                name="message" 
+                                class="form-textarea" 
+                                placeholder="お問い合わせ内容をできるだけ詳しくご記入ください"
+                                required
+                            ></textarea>
+                        </div>
+                        
+                        <!-- プライバシーポリシー -->
+                        <div class="form-group fade-in" style="transition-delay: 0.3s;">
+                            <div style="background-color: var(--bg-section); padding: 1.5rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                                <p style="font-size: 0.9rem; line-height: 1.8; color: var(--text-secondary);">
+                                    お預かりした個人情報は、お問い合わせへの回答、サービスのご案内のみに使用し、第三者への開示や他の目的での使用はいたしません。
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- 送信ボタン -->
+                        <div class="form-group fade-in" style="text-align: center; transition-delay: 0.35s;">
+                            <button type="submit" class="btn btn-primary submit-btn">
+                                送信する
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- その他の連絡方法 -->
+    <section class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>その他のご連絡方法</h2>
+            </div>
+            
+            <div class="grid grid-2" style="max-width: 800px; margin: 0 auto;">
+                <div class="card fade-in" style="background-color: var(--bg-section);">
+                    <div style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">📧</div>
+                    <h3 class="card-title" style="text-align: center;">メールでのお問い合わせ</h3>
+                    <p class="card-text" style="text-align: center;">
+                        フォームからのお問い合わせが難しい場合は、<br>
+                        メールでも受け付けております。
+                    </p>
+                    <p style="text-align: center; margin-top: 1rem; color: var(--color-sub2); font-weight: 500;">
+                        info@stellize.example.com
+                    </p>
+                </div>
+                
+                <div class="card fade-in" style="background-color: var(--bg-section); transition-delay: 0.1s;">
+                    <div style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">⏰</div>
+                    <h3 class="card-title" style="text-align: center;">対応時間</h3>
+                    <p class="card-text" style="text-align: center;">
+                        <strong>平日 10:00〜17:00</strong><br>
+                        （土日祝日を除く）
+                    </p>
+                    <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                        お問い合わせいただいてから、<br>
+                        3営業日以内にご返信いたします。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="section">
+        <div class="container">
+            <div class="section-bg" style="text-align: center; padding: 4rem 2rem;">
+                <h2 style="margin-bottom: 1rem;">まずは資料をご覧になりたい方へ</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.8;">
+                    講座の詳細や導入事例をまとめた資料をご用意しています。<br>
+                    お問い合わせフォームより「資料請求」を選択してください。
+                </p>
+                <div>
+                    <a href="course.html" class="btn btn-secondary" style="margin-right: 1rem;">SNS講座を見る</a>
+                    <a href="cases.html" class="btn btn-outline">導入事例を見る</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Stellize</h3>
+                    <p style="margin-top: 1rem; line-height: 1.8; font-size: 0.95rem;">
+                        就労支援施設向けSNS講座<br>
+                        自分の「できる」を見つける場所
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>サイトマップ</h3>
+                    <ul>
+                        <li><a href="index.html">トップ</a></li>
+                        <li><a href="about.html">Stellizeについて</a></li>
+                        <li><a href="business.html">事業内容</a></li>
+                        <li><a href="course.html">SNS講座</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>情報</h3>
+                    <ul>
+                        <li><a href="cases.html">導入事例</a></li>
+                        <li><a href="faq.html">よくある質問</a></li>
+                        <li><a href="contact.html">お問い合わせ</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Stellize. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+</html>

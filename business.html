@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Stellizeの事業内容 - 就労支援施設向けSNS講座の提供、個別サポート、導入支援など、私たちが提供するサービスをご紹介します。">
+  <title>事業内容 | Stellize</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Fallback（style.cssに変数が無くても最低限動く保険） -->
+  <style>
+    :root{
+      --color-accent: #2563eb;
+      --color-sub: #64748b;
+      --color-sub2: #0f172a;
+      --text-secondary: #475569;
+      --radius: 16px;
+    }
+
+    /* 最低限の見た目＆レイアウト保険（style.cssが未完成でも破綻しにくく） */
+    body{
+      font-family: "Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Zen Maru Gothic", sans-serif;
+    }
+
+    /* ハンバーガー用の最低限（style.cssに無ければ効く） */
+    .hamburger{cursor:pointer; user-select:none;}
+    .nav-menu{list-style:none; margin:0; padding:0; display:flex; gap:14px; align-items:center;}
+    .nav-menu a{text-decoration:none;}
+
+    /* モバイル時に開閉する保険（style.cssに同等があれば上書きされてもOK） */
+    @media (max-width: 960px){
+      .nav-menu{display:none; flex-direction:column; gap:10px; padding:14px; background:#fff; border-radius: var(--radius);}
+      .header.is-open .nav-menu{display:flex;}
+    }
+
+    /* fade-inがstyle.cssに無ければ効く */
+    .fade-in{opacity:0; transform:translateY(10px); transition: .6s ease;}
+    .fade-in.is-in{opacity:1; transform:translateY(0);}
+  </style>
+</head>
+
+<body>
+
+  <!-- ヘッダー -->
+  <header class="header" id="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">Stellize</a>
+
+      <nav aria-label="グローバルナビゲーション">
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html">トップ</a></li>
+          <li><a href="about.html">Stellizeについて</a></li>
+          <li><a href="business.html" aria-current="page">事業内容</a></li>
+          <li><a href="course.html">SNS講座</a></li>
+          <li><a href="cases.html">導入事例</a></li>
+          <li><a href="faq.html">よくある質問</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </nav>
+
+      <button class="hamburger" id="hamburger" type="button" aria-label="メニューを開閉" aria-controls="navMenu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ページヒーロー -->
+  <section class="hero" style="min-height: 60vh;">
+    <div class="container">
+      <div class="hero-content">
+        <p class="en-title" style="color: var(--color-sub); font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 1rem;">BUSINESS</p>
+        <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 2.75rem);">事業内容</h1>
+        <p class="hero-subtitle">就労支援施設のための、包括的なSNS講座サービス</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- サービス概要 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-title">
+        <h2>提供サービス</h2>
+        <p class="subtitle">施設の特性に合わせた、柔軟なサポート</p>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card fade-in">
+          <div class="card-icon" style="background-color: var(--color-accent); color: white; font-size: 1.75rem;">📚</div>
+          <h3 class="card-title">SNS講座プログラム</h3>
+          <p class="card-text" style="margin-bottom: 1.5rem;">
+            選択理論心理学をベースにした、体系的なSNS運用講座。1講座1テーマで、無理なく学べる構成です。
+          </p>
+          <ul style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+            <li>基礎から実践まで段階的に学習</li>
+            <li>各SNSプラットフォームに対応</li>
+            <li>ワークシート・課題付き</li>
+          </ul>
+        </div>
+
+        <div class="card fade-in" style="transition-delay: 0.1s;">
+          <div class="card-icon" style="background-color: var(--color-sub); color: white; font-size: 1.75rem;">🤝</div>
+          <h3 class="card-title">個別サポート</h3>
+          <p class="card-text" style="margin-bottom: 1.5rem;">
+            受講者一人ひとりに寄り添った、きめ細やかなサポート体制。疑問や不安に、丁寧にお答えします。
+          </p>
+          <ul style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+            <li>オンライン相談対応</li>
+            <li>進捗に応じたアドバイス</li>
+            <li>発信内容のフィードバック</li>
+          </ul>
+        </div>
+
+        <div class="card fade-in" style="transition-delay: 0.2s;">
+          <div class="card-icon" style="background-color: var(--color-sub2); color: white; font-size: 1.75rem;">🏢</div>
+          <h3 class="card-title">施設向け導入支援</h3>
+          <p class="card-text" style="margin-bottom: 1.5rem;">
+            導入から運用まで、施設スタッフの皆様をサポート。スムーズな講座開始をお手伝いします。
+          </p>
+          <ul style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+            <li>導入前のご相談・説明会</li>
+            <li>スタッフ向け研修</li>
+            <li>運用マニュアルの提供</li>
+          </ul>
+        </div>
+
+        <div class="card fade-in" style="transition-delay: 0.3s;">
+          <!-- ★ここが文法エラーだった：末尾の ) を削除 -->
+          <div class="card-icon" style="background-color: #F3B7C3; color: white; font-size: 1.75rem;">📊</div>
+          <h3 class="card-title">継続的なフォローアップ</h3>
+          <p class="card-text" style="margin-bottom: 1.5rem;">
+            導入後も安心。定期的な振り返りと改善で、より効果的な講座運営をサポートします。
+          </p>
+          <ul style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+            <li>定期的な進捗確認</li>
+            <li>カリキュラムの見直し</li>
+            <li>成功事例の共有</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 講座の流れ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-bg">
+        <div class="section-title">
+          <h2>講座導入の流れ</h2>
+          <p class="subtitle">初めての方でも安心して始められます</p>
+        </div>
+
+        <div style="max-width: 900px; margin: 0 auto;">
+          <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <!-- ステップ1 -->
+            <div class="card" style="background-color: white; position: relative; padding-left: 5rem;">
+              <div style="position: absolute; left: 1.5rem; top: 1.5rem; width: 50px; height: 50px; border-radius: 50%; background-color: var(--color-accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">1</div>
+              <h3 class="card-title" style="color: var(--color-sub2);">お問い合わせ・ご相談</h3>
+              <p class="card-text">
+                まずはお気軽にお問い合わせください。施設の状況やご要望をお伺いし、最適なプランをご提案いたします。
+              </p>
+            </div>
+
+            <!-- ステップ2 -->
+            <div class="card" style="background-color: white; position: relative; padding-left: 5rem;">
+              <div style="position: absolute; left: 1.5rem; top: 1.5rem; width: 50px; height: 50px; border-radius: 50%; background-color: var(--color-sub); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">2</div>
+              <h3 class="card-title" style="color: var(--color-sub2);">説明会・体験講座</h3>
+              <p class="card-text">
+                実際の講座内容を体験いただけます。スタッフの方にも、講座の雰囲気や進め方をご理解いただけます。
+              </p>
+            </div>
+
+            <!-- ステップ3 -->
+            <div class="card" style="background-color: white; position: relative; padding-left: 5rem;">
+              <div style="position: absolute; left: 1.5rem; top: 1.5rem; width: 50px; height: 50px; border-radius: 50%; background-color: var(--color-sub2); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">3</div>
+              <h3 class="card-title" style="color: var(--color-sub2);">導入準備・スタッフ研修</h3>
+              <p class="card-text">
+                スタッフの皆様向けに、講座の進め方や受講者サポートのポイントをお伝えします。必要な準備もサポートします。
+              </p>
+            </div>
+
+            <!-- ステップ4 -->
+            <div class="card" style="background-color: white; position: relative; padding-left: 5rem;">
+              <div style="position: absolute; left: 1.5rem; top: 1.5rem; width: 50px; height: 50px; border-radius: 50%; background-color: #F3B7C3; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">4</div>
+              <h3 class="card-title" style="color: var(--color-sub2);">講座開始</h3>
+              <p class="card-text">
+                いよいよ講座スタート。受講者の方々のペースに合わせて、一歩ずつ進めていきます。
+              </p>
+            </div>
+
+            <!-- ステップ5 -->
+            <div class="card" style="background-color: white; position: relative; padding-left: 5rem;">
+              <div style="position: absolute; left: 1.5rem; top: 1.5rem; width: 50px; height: 50px; border-radius: 50%; background-color: #B7C7B0; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">5</div>
+              <h3 class="card-title" style="color: var(--color-sub2);">継続サポート</h3>
+              <p class="card-text">
+                定期的に進捗を確認し、改善点や新たな取り組みをご提案。長期的にサポートいたします。
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- こんな施設におすすめ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-title">
+        <h2>こんな施設におすすめです</h2>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card fade-in">
+          <h3 class="card-title">✓ 新しい訓練プログラムを探している</h3>
+          <p class="card-text">
+            SNSという、今の時代に求められるスキルを学べる講座です。利用者の方々の新たな可能性を広げます。
+          </p>
+        </div>
+
+        <div class="card fade-in" style="transition-delay: 0.1s;">
+          <h3 class="card-title">✓ 利用者の主体性を育てたい</h3>
+          <p class="card-text">
+            選択理論心理学をベースにした設計で、自ら考え、自ら行動する力を育てます。
+          </p>
+        </div>
+
+        <div class="card fade-in" style="transition-delay: 0.2s;">
+          <h3 class="card-title">✓ 実践的なスキルを身につけてほしい</h3>
+          <p class="card-text">
+            学んだことをすぐに活かせる実践的な内容。仕事につながる力を育てます。
+          </p>
+        </div>
+
+        <div class="card fade-in" style="transition-delay: 0.3s;">
+          <h3 class="card-title">✓ 個々のペースを大切にしたい</h3>
+          <p class="card-text">
+            1講座1テーマで、一人ひとりのペースで進められます。無理なく、着実に成長できる環境です。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="section-bg" style="text-align: center; padding: 4rem 2rem;">
+        <h2 style="margin-bottom: 1rem;">まずはお気軽にご相談ください</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.8;">
+          施設の状況に合わせた導入プランをご提案いたします。<br>
+          説明会や体験講座も随時開催しています。
+        </p>
+        <div>
+          <a href="contact.html" class="btn btn-primary" style="margin-right: 1rem;">お問い合わせ</a>
+          <a href="course.html" class="btn btn-secondary">SNS講座の詳細</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Stellize</h3>
+          <p style="margin-top: 1rem; line-height: 1.8; font-size: 0.95rem;">
+            就労支援施設向けSNS講座<br>
+            自分の「できる」を見つける場所
+          </p>
+        </div>
+
+        <div class="footer-section">
+          <h3>サイトマップ</h3>
+          <ul>
+            <li><a href="index.html">トップ</a></li>
+            <li><a href="about.html">Stellizeについて</a></li>
+            <li><a href="business.html">事業内容</a></li>
+            <li><a href="course.html">SNS講座</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h3>情報</h3>
+          <ul>
+            <li><a href="cases.html">導入事例</a></li>
+            <li><a href="faq.html">よくある質問</a></li>
+            <li><a href="contact.html">お問い合わせ</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2024 Stellize. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="js/main.js"></script>
+
+  <!-- main.jsが無くても最低限動く保険 -->
+  <script>
+    (function(){
+      const header = document.getElementById('header');
+      const btn = document.getElementById('hamburger');
+      const menu = document.getElementById('navMenu');
+      if(!header || !btn || !menu) return;
+
+      btn.addEventListener('click', () => {
+        const isOpen = header.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      // fade-in（IntersectionObserver）
+      const targets = document.querySelectorAll('.fade-in');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-in');
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        targets.forEach(t => io.observe(t));
+      } else {
+        targets.forEach(t => t.classList.add('is-in'));
+      }
+    })();
+  </script>
+</body>
+</html>

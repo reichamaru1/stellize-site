@@ -1,0 +1,1234 @@
+/* Stellize株式会社 コーポレートサイト - kiracu風シンプルデザイン */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #FAF7F2;
+    --bg-white: #FFFFFF;
+    --color-primary: #AE9FC4;
+    --color-secondary: #5C7C6F;
+    --color-accent: #E8BFC8;
+    --text-primary: #3A3A3A;
+    --text-secondary: #6B6B6B;
+    --text-light: #999999;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.8;
+    font-size: 16px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ヘッダー */
+.header {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 20px 0;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+}
+
+.logo span {
+    font-size: 0.7rem;
+    display: block;
+    margin-top: -5px;
+    letter-spacing: 0.15em;
+}
+
+.nav a {
+    margin-left: 30px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav a:hover {
+    color: var(--color-primary);
+}
+
+.btn-contact {
+    background: var(--color-primary);
+    color: white !important;
+    padding: 10px 25px;
+    border-radius: 50px;
+}
+
+.btn-contact:hover {
+    background: #9B8DB3;
+}
+
+/* ヒーロー */
+.hero {
+    padding: 140px 0 80px;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, #F5F1EB 100%);
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-image {
+    width: 100%;
+    max-width: 900px;
+    height: auto;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 15px 50px rgba(110, 90, 100, 0.12);
+}
+
+.hero-text h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 25px;
+    letter-spacing: 0.08em;
+}
+
+.hero-text h1 span {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+}
+
+.hero-text p {
+    font-size: 1.2rem;
+    line-height: 2;
+    color: var(--text-secondary);
+    margin-bottom: 35px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ボタン */
+.btn {
+    display: inline-block;
+    padding: 15px 40px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.05rem;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary), #D4CBDE);
+    color: white;
+    box-shadow: 0 8px 25px rgba(174, 159, 196, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(174, 159, 196, 0.4);
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* セクション */
+.section {
+    padding: 80px 0;
+}
+
+.label {
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.section h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+/* ABOUT */
+.about-section {
+    background: white;
+}
+
+.about-text {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.philosophy-box {
+    background: linear-gradient(135deg, #F8F5FF 0%, #FFF9FB 100%);
+    padding: 40px 50px;
+    border-radius: 20px;
+    text-align: center;
+    margin: 40px 0;
+    border-left: 6px solid var(--color-primary);
+}
+
+.philosophy-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    letter-spacing: 0.15em;
+}
+
+.philosophy-box h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    color: var(--color-primary);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+}
+
+.story {
+    margin: 50px 0;
+}
+
+.story h4 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.story p {
+    font-size: 1.05rem;
+    line-height: 2.2;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.story strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.highlight {
+    background: linear-gradient(135deg, #F8F5FF 0%, white 100%);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 4px solid var(--color-primary);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.mission {
+    margin-top: 50px;
+}
+
+.mission h4 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.mission > p {
+    font-size: 1.1rem;
+    line-height: 2;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.mission-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.mission-item {
+    padding: 25px;
+    background: linear-gradient(135deg, #F8F5FF 0%, white 100%);
+    border-radius: 15px;
+    border-left: 4px solid var(--color-primary);
+}
+
+.mission-item h5 {
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.mission-item p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+/* 事業紹介 */
+.business-section {
+    background: #F5F1EB;
+}
+
+.business-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 35px;
+    margin-top: 50px;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(110, 90, 100, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 50px rgba(110, 90, 100, 0.15);
+}
+
+.card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.card h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: 25px 25px 15px;
+    line-height: 1.5;
+}
+
+.card p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    margin: 0 25px 20px;
+}
+
+.btn-link {
+    display: inline-block;
+    margin: 0 25px 25px;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.btn-link:hover {
+    color: #9B8DB3;
+}
+
+/* CTA */
+.cta-section {
+    background: linear-gradient(135deg, #F8F5FF 0%, #FFF9FB 100%);
+    text-align: center;
+}
+
+.cta-section h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.cta-section p {
+    font-size: 1.1rem;
+    line-height: 2;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* フッター */
+.footer {
+    background: linear-gradient(180deg, #F5F1EB 0%, var(--color-secondary) 100%);
+    color: white;
+    padding: 60px 0 30px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer-col h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.footer-col h4 {
+    font-size: 1.05rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.footer-col p {
+    line-height: 2;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.footer-col a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    opacity: 0.85;
+    margin-bottom: 10px;
+    transition: opacity 0.3s;
+}
+
+.footer-col a:hover {
+    opacity: 1;
+}
+
+.coming-soon {
+    position: relative;
+    cursor: not-allowed;
+}
+
+.coming-soon span {
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+}
+
+/* ブログページ */
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 35px;
+    margin-top: 50px;
+}
+
+.blog-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(110, 90, 100, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.blog-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 50px rgba(110, 90, 100, 0.15);
+}
+
+.blog-image {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+}
+
+.blog-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.blog-card:hover .blog-image img {
+    transform: scale(1.05);
+}
+
+.blog-content {
+    padding: 25px;
+}
+
+.blog-date {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+}
+
+.blog-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.blog-excerpt {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.blog-link {
+    display: inline-block;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.blog-link:hover {
+    color: #9B8DB3;
+}
+
+.coming-soon-card {
+    opacity: 0.7;
+}
+
+.coming-soon-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #F8F5FF 0%, #FFF9FB 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coming-soon-placeholder p {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: center;
+}
+
+.category-tag {
+    display: inline-block;
+    padding: 10px 25px;
+    background: white;
+    border-radius: 50px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(110, 90, 100, 0.08);
+}
+
+.category-tag:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(174, 159, 196, 0.3);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.motto {
+    font-family: 'Noto Serif JP', serif;
+    margin-top: 10px;
+    letter-spacing: 0.15em;
+}
+
+/* 追加スタイル - ABOUTセクション */
+.philosophy-description {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-top: 15px;
+    line-height: 1.9;
+}
+
+/* 選択理論心理学 */
+.choice-theory {
+    margin: 60px 0;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #F8F5FF 0%, #FFF9FB 100%);
+    border-radius: 20px;
+}
+
+.choice-theory h4 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.choice-theory-lead {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.choice-theory-box {
+    background: white;
+    padding: 30px 35px;
+    border-radius: 15px;
+    border-left: 4px solid var(--color-primary);
+    margin-bottom: 35px;
+}
+
+.choice-theory-box h5 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    color: var(--color-primary);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.choice-theory-box p {
+    font-size: 1.05rem;
+    line-height: 2;
+    color: var(--text-secondary);
+}
+
+.choice-theory-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 35px;
+}
+
+.point-item {
+    background: white;
+    padding: 25px 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 25px rgba(110, 90, 100, 0.08);
+}
+
+.point-item h5 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.point-item p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+.choice-theory-summary {
+    font-size: 1.05rem;
+    line-height: 2.2;
+    color: var(--text-primary);
+    text-align: center;
+    font-weight: 500;
+}
+
+/* 代表情報 */
+.founder-info {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.founder-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: block;
+    box-shadow: 0 10px 35px rgba(110, 90, 100, 0.15);
+}
+
+.founder-name {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+}
+
+.mission-lead {
+    font-size: 1.15rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.mission-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 15px;
+}
+
+.mission-item {
+    text-align: center;
+}
+
+.story-image {
+    width: 100%;
+    max-width: 700px;
+    height: auto;
+    border-radius: 15px;
+    margin: 25px auto;
+    display: block;
+    box-shadow: 0 10px 35px rgba(110, 90, 100, 0.1);
+}
+
+.story-text {
+    font-size: 1.05rem;
+    line-height: 2.2;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.story-highlight {
+    background: linear-gradient(135deg, #F8F5FF 0%, white 100%);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 4px solid var(--color-primary);
+    font-weight: 500;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    margin: 30px 0;
+    text-align: center;
+}
+
+/* 詳細ページ用スタイル */
+.page-hero {
+    padding: 140px 0 80px;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, white 100%);
+    text-align: center;
+}
+
+.page-hero h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    letter-spacing: 0.08em;
+}
+
+.lead {
+    font-size: 1.2rem;
+    line-height: 2;
+    color: var(--text-secondary);
+    margin-top: 20px;
+}
+
+.bg-light {
+    background: #F5F1EB;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Feature Grid */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.feature-card {
+    background: white;
+    padding: 35px 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(110, 90, 100, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(110, 90, 100, 0.12);
+}
+
+.feature-card h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.feature-card p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+/* Steps */
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin-top: 50px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step-card {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(110, 90, 100, 0.08);
+}
+
+.step-card img {
+    width: 200px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-number {
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+}
+
+.step-card h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.step-card p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+/* Merit Grid */
+.merit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.merit-card {
+    background: white;
+    padding: 35px 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(110, 90, 100, 0.08);
+}
+
+.merit-card h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.merit-card p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+/* Pricing */
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 35px;
+    margin-top: 50px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pricing-card {
+    background: white;
+    padding: 40px 35px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(110, 90, 100, 0.1);
+    text-align: center;
+}
+
+.pricing-card h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.price {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 3rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+.price span {
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+.pricing-features {
+    list-style: none;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.pricing-features li {
+    padding: 10px 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.note {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-top: 25px;
+}
+
+.note-box {
+    background: white;
+    padding: 30px 35px;
+    border-radius: 15px;
+    margin-top: 40px;
+    border-left: 4px solid var(--color-primary);
+    box-shadow: 0 6px 25px rgba(110, 90, 100, 0.08);
+}
+
+.note-box h4 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.note-box p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* D-PaC専用 */
+.dpac-image {
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+.dpac-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 15px 50px rgba(110, 90, 100, 0.12);
+}
+
+.problem-grid, .solution-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    margin-top: 50px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.problem-card {
+    background: #FFF0F0;
+    padding: 30px 25px;
+    border-radius: 15px;
+    border-left: 4px solid #E57373;
+}
+
+.problem-card h3 {
+    font-size: 1.1rem;
+    color: #C62828;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.problem-card p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.solution-card {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 15px;
+    border-left: 4px solid var(--color-primary);
+    box-shadow: 0 8px 30px rgba(110, 90, 100, 0.08);
+}
+
+.solution-card h3 {
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.solution-card p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.service-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 50px;
+}
+
+.service-item {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 15px;
+    box-shadow: 0 6px 25px rgba(110, 90, 100, 0.08);
+}
+
+.service-item h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.service-item p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+/* BASE専用 */
+.base-hero-image {
+    max-width: 1000px;
+    margin: 40px auto;
+}
+
+.base-hero-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 15px 50px rgba(110, 90, 100, 0.12);
+}
+
+.base-image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.base-image-grid img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 10px 35px rgba(110, 90, 100, 0.1);
+}
+
+.experience-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 50px;
+}
+
+.experience-item {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 15px;
+    box-shadow: 0 6px 25px rgba(110, 90, 100, 0.08);
+}
+
+.experience-item h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.experience-item p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.community-values {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.value-item {
+    background: white;
+    padding: 35px 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(110, 90, 100, 0.08);
+}
+
+.value-item h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.value-item p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+.info-box {
+    background: white;
+    padding: 30px 35px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 6px 25px rgba(110, 90, 100, 0.08);
+}
+
+.info-box h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.info-box p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .nav {
+        display: none;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+    }
+    
+    .business-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .mission-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .step-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .step-card img {
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    .feature-grid,
+    .merit-grid,
+    .pricing-grid,
+    .service-list,
+    .experience-list,
+    .community-values {
+        grid-template-columns: 1fr;
+    }
+    
+    .problem-grid,
+    .solution-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .base-image-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .philosophy-box {
+        padding: 30px 25px;
+    }
+}
