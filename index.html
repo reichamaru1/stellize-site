@@ -8,200 +8,42 @@
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="css/style.css">
-
-  <!-- ★ デザイン強化（index.html内だけで完結） -->
-  <style>
-    :root{
-      --bg: #ffffff;
-      --bg2:#f6f7fb;
-      --text:#0f172a;
-      --muted:#64748b;
-      --line: rgba(15, 23, 42, .10);
-      --shadow: 0 18px 60px rgba(15,23,42,.10);
-      --shadow2: 0 10px 28px rgba(15,23,42,.10);
-      --radius: 18px;
-      --radius2: 26px;
-      --accent: #2563eb;
-      --accent2:#9333ea;
-      --max: 1120px;
-    }
-
-    html{scroll-behavior:smooth}
-    body{
-      background:
-        radial-gradient(900px 480px at 10% 0%, rgba(37,99,235,.10), transparent 55%),
-        radial-gradient(900px 520px at 90% 10%, rgba(147,51,234,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
-      color:var(--text);
-      letter-spacing:.02em;
-    }
-
-    /* Layout density */
-    .container{max-width:var(--max); margin:0 auto; padding:0 18px}
-    .section{padding:72px 0}
-
-    /* Header polish */
-    .header{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(10px);
-      background: rgba(255,255,255,.72);
-      border-bottom: 1px solid rgba(15,23,42,.06);
-    }
-    .header-container{padding:14px 0}
-    .nav a{border-radius:999px; padding:8px 12px; transition:.18s ease}
-    .nav a:hover{background: rgba(37,99,235,.08)}
-    .btn-contact{
-      border:1px solid rgba(37,99,235,.35);
-      background: rgba(37,99,235,.10);
-    }
-
-    /* Typography */
-    h1, h2{
-      font-family: "Noto Serif JP", serif;
-      letter-spacing: .05em;
-    }
-    h1{
-      font-size: clamp(34px, 4.2vw, 56px);
-      line-height: 1.2;
-      margin: 0 0 14px;
-    }
-    h2{
-      font-size: clamp(24px, 2.6vw, 36px);
-      margin: 0 0 22px;
-    }
-    p{color:var(--muted)}
-
-    /* HERO: editorial grid */
-    .hero{padding: 36px 0 10px}
-    .hero-content{
-      display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 42px;
-      align-items: center;
-    }
-    .hero-image{
-      width: 100%;
-      aspect-ratio: 16/11;
-      object-fit: cover;
-      border-radius: var(--radius2);
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(15,23,42,.08);
-    }
-    .hero-text span{
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .hero-buttons{gap: 12px}
-
-    /* Buttons */
-    .btn{
-      border-radius: 14px;
-      padding: 12px 16px;
-      transition: .18s ease;
-    }
-    .btn:hover{transform: translateY(-1px)}
-    .btn-primary{
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      color: #fff;
-      box-shadow: 0 14px 40px rgba(37,99,235,.18);
-    }
-    .btn-secondary{
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(15,23,42,.12);
-    }
-
-    /* About blocks: panel feel */
-    .about-section .philosophy-box,
-    .about-section .mission,
-    .about-section .choice-theory,
-    .about-section .story{
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(15,23,42,.08);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow2);
-      padding: 18px;
-      margin-top: 16px;
-    }
-
-    /* Mission icons */
-    .mission-icon{
-      border-radius: 16px;
-      box-shadow: 0 10px 26px rgba(15,23,42,.10);
-    }
-
-    /* Business cards: gallery-like */
-    .business-cards{
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-top: 24px;
-    }
-    .business-cards .card{
-      border-radius: var(--radius2);
-      overflow: hidden;
-      border: 1px solid rgba(15,23,42,.08);
-      background: rgba(255,255,255,.76);
-      box-shadow: var(--shadow2);
-      transition: .22s ease;
-    }
-    .business-cards .card:hover{
-      transform: translateY(-6px);
-      box-shadow: var(--shadow);
-      border-color: rgba(37,99,235,.18);
-    }
-    .business-cards .card img{
-      width: 100%;
-      aspect-ratio: 16/10;
-      object-fit: cover;
-    }
-    .business-cards .card h3{
-      margin: 14px 14px 8px;
-      font-size: 18px;
-      letter-spacing: .03em;
-      color: var(--text);
-      font-family: "Noto Serif JP", serif;
-    }
-    .business-cards .card p{
-      margin: 0 14px 12px;
-      font-size: 13px;
-      line-height: 1.8;
-    }
-    .btn-link{
-      display: inline-flex;
-      margin: 0 14px 16px;
-      font-weight: 600;
-      color: rgba(37,99,235,.95);
-    }
-
-    /* CTA polish */
-    .cta-section .container{
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(15,23,42,.08);
-      border-radius: var(--radius2);
-      box-shadow: var(--shadow);
-      padding: 26px;
-    }
-
-    /* Responsive */
-    @media (max-width: 980px){
-      .hero-content{grid-template-columns: 1fr; gap: 22px}
-      .business-cards{grid-template-columns: 1fr}
-      .section{padding: 54px 0}
-    }
-  </style>
 </head>
+
 <body>
 
-  <!-- ヘッダー -->
-  <header class="header">
-    <div class="header-container container">
+ <!-- ✅ ローディング：ロゴ線画 + グワんグワん -->
+<div id="loader" class="loader loader--crazy">
+  <div class="loader-bg">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <div class="loader-inner">
+    <!-- 線画ロゴ（簡易：S） -->
+    <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
+      <path class="logo-path"
+        d="M155 55
+           C130 30, 70 35, 70 75
+           C70 110, 120 105, 120 135
+           C120 170, 70 175, 60 150"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="logo-path logo-path-2"
+        d="M160 150
+           C150 185, 100 195, 75 175"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <p class="loader-text">Stellize</p>
+    <p class="loader-sub">Loading...</p>
+  </div>
+</div>
+
+  <!-- ヘッダー（✅ id付与 + class 追加） -->
+  <header class="header header--floating" id="siteHeader">
+    <div class="header-container">
       <a href="index.html" class="logo">Stellize</a>
       <nav class="nav">
         <a href="index.html">トップ</a>
@@ -214,19 +56,15 @@
     </div>
   </header>
 
-  <!-- ヒーロー -->
-  <section class="hero">
+  <!-- ヒーロー（✅ parallax対象に class付与） -->
+  <section class="hero parallax-section">
     <div class="container">
       <div class="hero-content">
-        <img
-          src="assets/images/bh3ieUsE.jpeg"
-          alt="就労支援施設でクリエイティブに取り組む様子"
-          class="hero-image"
-        >
+        <img src="assets/images/bh3ieUsE.jpeg" alt="就労支援施設でSNSを楽しむ様子" class="hero-image parallax-img">
         <div class="hero-text">
-          <h1>価値を咲かせ、<span>共に生きる。</span></h1>
-          <p>社会に貢献したい。自分らしく働きたい。その想いを実現する舞台を、Stellizeはつくります。</p>
-          <div class="hero-buttons">
+          <h1 class="reveal">価値を咲かせ、<span>共に生きる。</span></h1>
+          <p class="reveal delay-1">社会に貢献したい。自分らしく働きたい。その想いを実現する舞台を、Stellizeはつくります。</p>
+          <div class="hero-buttons reveal delay-2">
             <a href="#business" class="btn btn-primary">事業を見る</a>
             <a href="#contact" class="btn btn-secondary">お問い合わせ</a>
           </div>
@@ -235,64 +73,73 @@
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section id="about" class="section about-section">
+  <!-- ABOUT（✅ parallax対象に class付与） -->
+  <section id="about" class="section about-section parallax-section">
     <div class="container">
       <div class="about-content">
         <div class="about-text">
-          <p class="label">About Stellize</p>
-          <h2>Stellizeが大切にしていること</h2>
+          <p class="label reveal">About Stellize</p>
+          <h2 class="reveal">Stellizeが大切にしていること</h2>
 
-          <div class="philosophy-box">
+          <div class="philosophy-box reveal">
             <p class="philosophy-label">経営理念</p>
             <h3>価値が咲かせ、共に生きる</h3>
             <p class="philosophy-description">すべての人が、自分の価値に気づき、社会で輝ける場所を。</p>
           </div>
 
-          <div class="mission">
+          <div class="mission reveal">
             <h4>Stellizeのミッション</h4>
             <p class="mission-lead">「良い商品を必要な人に届ける」価値を通じて<br>社会貢献できる舞台をつくる</p>
             <div class="mission-items">
-              <div class="mission-item">
-                <img src="assets/images/BajCkJcT.jpeg" alt="届ける" class="mission-icon" style="width:72px;height:72px;object-fit:cover;">
+              <div class="mission-item hover-float">
+                <img src="assets/images/mission2.jpeg" alt="届ける" class="mission-icon">
                 <h5>届ける</h5>
                 <p>価値ある商品やサービスを、<br>必要とする人々に届ける。</p>
               </div>
-              <div class="mission-item">
-                <img src="assets/images/8JUBsEDM.jpeg" alt="舞台作り" class="mission-icon" style="width:72px;height:72px;object-fit:cover;">
+              <div class="mission-item hover-float">
+                <img src="assets/images/mission1.jpeg" alt="舞台作り" class="mission-icon">
                 <h5>舞台作り</h5>
                 <p>誰もが才能と強みを活かし、<br>社会に貢献できる機会を創出する。</p>
               </div>
             </div>
           </div>
 
-          <div class="choice-theory">
-            <h4>選択理論心理学を活用したクリエイティブ講座</h4>
+          <div class="choice-theory reveal">
+            <h4>選択理論心理学を活用したSNS講座</h4>
             <p class="choice-theory-lead">Stellizeのアプローチは、選択理論心理学に基づいています。</p>
 
-            <div class="choice-theory-box">
+            <div class="choice-theory-box hover-float">
               <h5>選択理論心理学とは？</h5>
-              <p>
-                選択理論心理学は、アメリカの精神科医ウィリアム・グラッサー博士が提唱した心理学です。
-                <strong>「人間のすべての行動は、自分が選択している」</strong>という考え方を軸に、
-                外部からのコントロールではなく、<strong>内発的な動機</strong>を大切にします。
-              </p>
+              <p>選択理論心理学は、アメリカの精神科医ウィリアム・グラッサー博士が提唱した心理学です。<strong>「人間のすべての行動は、自分が選択している」</strong>という考え方を軸に、外部からのコントロールではなく、<strong>内発的な動機</strong>を大切にします。</p>
             </div>
+
+            <div class="choice-theory-points">
+              <div class="point-item hover-float">
+                <h5>💡 主体性を育む</h5>
+                <p>「やらされる」ではなく、「やりたい」を引き出すことで、自分から行動する力を養います。</p>
+              </div>
+              <div class="point-item hover-float">
+                <h5>🌱 内発的動機を大切に</h5>
+                <p>外からの圧力ではなく、自分の内側から湧き上がる「やってみたい」という気持ちを尊重します。</p>
+              </div>
+              <div class="point-item hover-float">
+                <h5>🎯 就労移行の一助に</h5>
+                <p>SNSを通じて「できた」を積み重ね、自己効力感を高めることで、就労移行への自信につなげます。</p>
+              </div>
+            </div>
+
+            <p class="choice-theory-summary">この心理学をベースにしたSNS講座だからこそ、利用者一人ひとりが「自分らしく発信する力」を身につけ、社会での活躍につながる確かな一歩を踏み出せます。</p>
           </div>
 
-          <div class="story">
+          <div class="story reveal">
             <h4>なぜ、この事業を？</h4>
-            <div class="founder-info">
+            <div class="founder-info hover-float">
               <img src="assets/images/r90D74yJ.jpeg" alt="Stellize代表 菊野玲" class="founder-image">
               <p class="founder-name">Stellize代表　菊野玲</p>
             </div>
-
             <p class="story-text">フリーランス時代、仕事ができなくなった私を救ってくれたのは、クライアントからの温かい一言でした。</p>
             <p class="story-highlight">「誰かの役に立てている」という実感が、人生を前に進めてくれる。</p>
-            <p class="story-text">
-              就労支援の現場でも同じです。力がないのではなく、「力を発揮できる場」がないだけ。<br>
-              <strong>その舞台をつくることが、Stellizeの使命です。</strong>
-            </p>
+            <p class="story-text">就労支援の現場でも同じです。力がないのではなく、「力を発揮できる場」がないだけ。<strong>その舞台をつくることが、Stellizeの使命です。</strong></p>
           </div>
 
         </div>
@@ -300,29 +147,29 @@
     </div>
   </section>
 
-  <!-- 事業紹介 -->
-  <section id="business" class="section business-section">
+  <!-- 事業紹介（✅ card に hover-float / reveal 付与） -->
+  <section id="business" class="section business-section parallax-section">
     <div class="container">
-      <p class="label">Our Business</p>
-      <h2>事業紹介</h2>
+      <p class="label reveal">Our Business</p>
+      <h2 class="reveal">事業紹介</h2>
 
       <div class="business-cards">
-        <div class="card">
+        <div class="card hover-float reveal">
           <img src="assets/images/IbVAB4wc.jpeg" alt="就労支援向けクリエイティブ講座">
           <h3>就労支援向けクリエイティブ講座</h3>
-          <p>施設職員・利用者向けの「SNS・デザイン・イラスト」をまとめたクリエイティブ講座。学んだスキルが工賃向上、通所率向上、自己効力感アップにつながります。オンライン・対面で選択可能。</p>
+          <p>施設職員向けのクリエイティブ研修。学んだスキルが利用者の工賃向上、通所率向上につながります。オンライン・対面で選択可能。</p>
           <a href="course.html" class="btn-link">詳しくはこちら →</a>
         </div>
 
-        <div class="card">
-          <img src="assets/images/j1qhUtUg.jpeg" alt="Webマーケティング制作 G-Pac">
-          <h3>Webマーケティング制作「G-Pac」</h3>
+        <div class="card hover-float reveal delay-1">
+          <img src="assets/images/j1qhUtUg.jpeg" alt="Webマーケティング制作 G-PaC">
+          <h3>Webマーケティング制作「G-PaC」</h3>
           <p>月額5万円で、HP・動画・SNS・チラシ・広告など全てのWebマーケティング施策が叶う。通常月間40～50万かかる施策を、段階に応じてまるっと対応。</p>
-          <a href="dpac.html" class="btn-link">詳しくはこちら →</a>
+          <a href="gpac.html" class="btn-link">詳しくはこちら →</a>
         </div>
 
-        <div class="card">
-          <img src="assets/images/8XUlyOlw.jpeg" alt="江ノ島海の家 鵠沼BASE">
+        <div class="card hover-float reveal delay-2">
+          <img src="assets/images/image.png" alt="江ノ島海の家 鵠沼BASE">
           <h3>江ノ島海の家「鵠沼BASE」</h3>
           <p>江ノ島西浜海岸のコミュニティ拠点。多様なバックグラウンドの人々が集い、新しいつながりが生まれる場所です。</p>
           <a href="base.html" class="btn-link">詳しくはこちら →</a>
@@ -334,57 +181,53 @@
   <!-- CTA -->
   <section id="contact" class="section cta-section">
     <div class="container">
-      <h2>まずはお気軽にご相談ください</h2>
-      <p>ご不明な点や、導入に関するご相談など<br>お気軽にお問い合わせください。</p>
-      <div class="cta-buttons">
+      <h2 class="reveal">まずはお気軽にご相談ください</h2>
+      <p class="reveal delay-1">ご不明な点や、導入に関するご相談など<br>お気軽にお問い合わせください。</p>
+      <div class="cta-buttons reveal delay-2">
         <a href="contact.html" class="btn btn-primary">お問い合わせフォーム</a>
       </div>
     </div>
   </section>
 
   <!-- フッター -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-col">
-          <h3>Stellize</h3>
-          <p>自分の価値に、気づく。<br>誰もが自分らしく働ける社会へ。</p>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>Stellize合同会社</h3>
+                    <p>自分の価値に、気づく。<br>誰もが自分らしく働ける社会へ。</p>
+                </div>
+                <div class="footer-col">
+                    <h4>ページ</h4>
+                    <a href="index.html">トップ</a>
+                    <a href="index.html#about">企業情報</a>
+                    <a href="index.html#business">事業紹介</a>
+                </div>
+                <div class="footer-col">
+                    <h4>サービス</h4>
+                    <a href="course.html">クリエイティブ講座</a>
+                    <a href="gpac.html">G-PaC</a>
+                    <a href="base.html">鵠沼BASE</a>
+                </div>
+                <div class="footer-col">
+                    <h4>情報</h4>
+                    <a href="blog.html">ブログ</a>
+                    <a href="faq.html">よくある質問</a>
+                    <a href="contact.html">お問い合わせフォーム</a>
+                </div>
+                <div class="footer-col">
+                    <h4>SNS</h4>
+                    <a href="#" class="coming-soon">TikTok <span>Coming Soon</span></a>
+                    <a href="#" class="coming-soon">公式LINE <span>Coming Soon</span></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Stellize. All rights reserved.</p>
+            </div>
         </div>
-
-        <div class="footer-col">
-          <h4>ページ</h4>
-          <a href="index.html">トップ</a>
-          <a href="#about">企業情報</a>
-          <a href="#business">事業紹介</a>
-        </div>
-
-        <div class="footer-col">
-          <h4>サービス</h4>
-          <a href="course.html">クリエイティブ講座</a>
-          <a href="dpac.html">G-Pac</a>
-          <a href="base.html">鵠沼BASE</a>
-        </div>
-
-        <div class="footer-col">
-          <h4>情報</h4>
-          <a href="blog.html">ブログ</a>
-          <a href="faq.html">よくある質問</a>
-          <a href="contact.html">お問い合わせフォーム</a>
-        </div>
-
-        <div class="footer-col">
-          <h4>SNS</h4>
-          <a href="#" class="coming-soon">TikTok <span>Coming Soon</span></a>
-          <a href="#" class="coming-soon">公式LINE <span>Coming Soon</span></a>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2024 Stellize. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
-
-  <script src="js/main.js"></script>
-</body>
+    </footer>
+    
+    <script src="js/main.js"></script>
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
+  </body>
 </html>

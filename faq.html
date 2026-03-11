@@ -11,6 +11,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- ローディング（すでにあるならそのままでOK） -->
+<div id="loader" class="loader loader--crazy">
+  <div class="loader-bg">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  </div>
+  <div class="loader-inner">
+    <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
+      <path class="logo-path"
+        d="M155 55 C130 30, 70 35, 70 75 C70 110, 120 105, 120 135 C120 170, 70 175, 60 150"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="logo-path logo-path-2"
+        d="M160 150 C150 185, 100 195, 75 175"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p class="loader-text">Stellize</p>
+    <p class="loader-sub">Loading...</p>
+  </div>
+</div>
+
+<!-- ✅ ページ遷移アニメ（他ページも派手にする核心） -->
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
+
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -351,46 +373,46 @@
             </div>
         </div>
     </section>
-    
-    <!-- フッター -->
+     <!-- フッター -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Stellize</h3>
-                    <p style="margin-top: 1rem; line-height: 1.8; font-size: 0.95rem;">
-                        就労支援施設向けSNS講座<br>
-                        自分の「できる」を見つける場所
-                    </p>
+                <div class="footer-col">
+                    <h3>Stellize合同会社</h3>
+                    <p>自分の価値に、気づく。<br>誰もが自分らしく働ける社会へ。</p>
                 </div>
-                
-                <div class="footer-section">
-                    <h3>サイトマップ</h3>
-                    <ul>
-                        <li><a href="index.html">トップ</a></li>
-                        <li><a href="about.html">Stellizeについて</a></li>
-                        <li><a href="business.html">事業内容</a></li>
-                        <li><a href="course.html">SNS講座</a></li>
-                    </ul>
+                <div class="footer-col">
+                    <h4>ページ</h4>
+                    <a href="index.html">トップ</a>
+                    <a href="index.html#about">企業情報</a>
+                    <a href="index.html#business">事業紹介</a>
                 </div>
-                
-                <div class="footer-section">
-                    <h3>情報</h3>
-                    <ul>
-                        <li><a href="cases.html">導入事例</a></li>
-                        <li><a href="faq.html">よくある質問</a></li>
-                        <li><a href="contact.html">お問い合わせ</a></li>
-                    </ul>
+                <div class="footer-col">
+                    <h4>サービス</h4>
+                    <a href="course.html">クリエイティブ講座</a>
+                    <a href="gpac.html">G-PaC</a>
+                    <a href="base.html">鵠沼BASE</a>
+                </div>
+                <div class="footer-col">
+                    <h4>情報</h4>
+                    <a href="blog.html">ブログ</a>
+                    <a href="faq.html">よくある質問</a>
+                    <a href="contact.html">お問い合わせフォーム</a>
+                </div>
+                <div class="footer-col">
+                    <h4>SNS</h4>
+                    <a href="#" class="coming-soon">TikTok <span>Coming Soon</span></a>
+                    <a href="#" class="coming-soon">公式LINE <span>Coming Soon</span></a>
                 </div>
             </div>
-            
             <div class="footer-bottom">
-                <p>&copy; 2024 Stellize. All rights reserved.</p>
+                <p>&copy; 2026 Stellize. All rights reserved.</p>
             </div>
         </div>
     </footer>
     
-    <!-- JavaScript -->
     <script src="js/main.js"></script>
-</body>
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
+  </body>
 </html>
+

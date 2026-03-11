@@ -12,6 +12,28 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+    <!-- ローディング（すでにあるならそのままでOK） -->
+<div id="loader" class="loader loader--crazy">
+  <div class="loader-bg">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  </div>
+  <div class="loader-inner">
+    <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
+      <path class="logo-path"
+        d="M155 55 C130 30, 70 35, 70 75 C70 110, 120 105, 120 135 C120 170, 70 175, 60 150"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="logo-path logo-path-2"
+        d="M160 150 C150 185, 100 195, 75 175"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p class="loader-text">Stellize</p>
+    <p class="loader-sub">Loading...</p>
+  </div>
+</div>
+
+<!-- ✅ ページ遷移アニメ（他ページも派手にする核心） -->
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
     
     <!-- ヘッダー -->
     <header class="header">
@@ -44,7 +66,7 @@
             <p class="text-center">江ノ島西浜海岸で季節限定で営業している海の家です。地元や子供達が安心して楽しめる海を守り、多世代が集うコミュニティ拠点を目指しています。</p>
             
             <div class="base-hero-image">
-                <img src="https://www.genspark.ai/api/files/s/AhD0qcs7" alt="鵠沼BASE外観">
+                <img src="assets/images/AhD0qcs7.jpeg" alt="鵠沼BASE外観">
             </div>
         </div>
     </section>
@@ -55,9 +77,9 @@
             <h2>鵠沼BASEの様子</h2>
             
             <div class="base-image-grid">
-                <img src="https://www.genspark.ai/api/files/s/E1sTPcml" alt="鵠沼BASEで楽しむ様子">
-                <img src="https://www.genspark.ai/api/files/s/oxA0CDVi" alt="鵠沼BASE制作風景">
-                <img src="https://www.genspark.ai/api/files/s/AhD0qcs7" alt="鵠沼BASE夕暮れ">
+                <img src="assets/images/image.png" alt="鵠沼BASEで楽しむ様子">
+                <img src="assets/images/image2.png" alt="鵠沼BASE制作風景">
+                <img src="assets/images/image3.png" alt="鵠沼BASE夕暮れ">
             </div>
         </div>
     </section>
@@ -124,7 +146,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-col">
-                    <h3>Stellize</h3>
+                    <h3>Stellize合同会社</h3>
                     <p>自分の価値に、気づく。<br>誰もが自分らしく働ける社会へ。</p>
                 </div>
                 <div class="footer-col">
@@ -135,8 +157,8 @@
                 </div>
                 <div class="footer-col">
                     <h4>サービス</h4>
-                    <a href="course.html">SNS講座</a>
-                    <a href="dpac.html">D-PaC</a>
+                    <a href="course.html">クリエイティブ講座</a>
+                    <a href="gpac.html">G-PaC</a>
                     <a href="base.html">鵠沼BASE</a>
                 </div>
                 <div class="footer-col">
@@ -152,11 +174,12 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Stellize. All rights reserved.</p>
+                <p>&copy; 2026 Stellize. All rights reserved.</p>
             </div>
         </div>
     </footer>
     
     <script src="js/main.js"></script>
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
 </body>
 </html>

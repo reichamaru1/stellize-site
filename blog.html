@@ -12,6 +12,28 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+    <!-- ローディング（すでにあるならそのままでOK） -->
+<div id="loader" class="loader loader--crazy">
+  <div class="loader-bg">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  </div>
+  <div class="loader-inner">
+    <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
+      <path class="logo-path"
+        d="M155 55 C130 30, 70 35, 70 75 C70 110, 120 105, 120 135 C120 170, 70 175, 60 150"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="logo-path logo-path-2"
+        d="M160 150 C150 185, 100 195, 75 175"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p class="loader-text">Stellize</p>
+    <p class="loader-sub">Loading...</p>
+  </div>
+</div>
+
+<!-- ✅ ページ遷移アニメ（他ページも派手にする核心） -->
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
     
     <!-- ヘッダー -->
     <header class="header">
@@ -44,7 +66,7 @@
                 <!-- サンプル記事1 -->
                 <article class="blog-card">
                     <div class="blog-image">
-                        <img src="https://www.genspark.ai/api/files/s/IbVAB4wc" alt="SNS運用のコツ">
+                        <img src="assets/images/IbVAB4wc.jpeg" alt="SNS運用のコツ">
                     </div>
                     <div class="blog-content">
                         <p class="blog-date">2024.01.15</p>
@@ -57,7 +79,7 @@
                 <!-- サンプル記事2 -->
                 <article class="blog-card">
                     <div class="blog-image">
-                        <img src="https://www.genspark.ai/api/files/s/Mr3LwmnI" alt="選択理論心理学">
+                        <img src="assets/images/Mr3LwmnI.jpeg" alt="選択理論心理学">
                     </div>
                     <div class="blog-content">
                         <p class="blog-date">2024.01.10</p>
@@ -70,7 +92,7 @@
                 <!-- サンプル記事3 -->
                 <article class="blog-card">
                     <div class="blog-image">
-                        <img src="https://www.genspark.ai/api/files/s/j1qhUtUg" alt="Webマーケティング">
+                        <img src="assets/images/j1qhUtUg.jpeg" alt="Webマーケティング">
                     </div>
                     <div class="blog-content">
                         <p class="blog-date">2024.01.05</p>
@@ -123,12 +145,12 @@
         </div>
     </section>
     
-    <!-- フッター -->
+     <!-- フッター -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-col">
-                    <h3>Stellize</h3>
+                    <h3>Stellize合同会社</h3>
                     <p>自分の価値に、気づく。<br>誰もが自分らしく働ける社会へ。</p>
                 </div>
                 <div class="footer-col">
@@ -139,8 +161,8 @@
                 </div>
                 <div class="footer-col">
                     <h4>サービス</h4>
-                    <a href="course.html">SNS講座</a>
-                    <a href="dpac.html">D-PaC</a>
+                    <a href="course.html">クリエイティブ講座</a>
+                    <a href="gpac.html">G-PaC</a>
                     <a href="base.html">鵠沼BASE</a>
                 </div>
                 <div class="footer-col">
@@ -156,11 +178,14 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Stellize. All rights reserved.</p>
+                <p>&copy; 2026 Stellize. All rights reserved.</p>
             </div>
         </div>
     </footer>
     
     <script src="js/main.js"></script>
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
 </body>
 </html>
+
+    

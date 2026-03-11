@@ -14,39 +14,27 @@
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Fallback（style.cssに変数が無くても最低限動く保険） -->
-  <style>
-    :root{
-      --color-accent: #2563eb;
-      --color-sub: #64748b;
-      --color-sub2: #0f172a;
-      --text-secondary: #475569;
-      --radius: 16px;
-    }
+ <!-- ローディング（すでにあるならそのままでOK） -->
+<div id="loader" class="loader loader--crazy">
+  <div class="loader-bg">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  </div>
+  <div class="loader-inner">
+    <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
+      <path class="logo-path"
+        d="M155 55 C130 30, 70 35, 70 75 C70 110, 120 105, 120 135 C120 170, 70 175, 60 150"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="logo-path logo-path-2"
+        d="M160 150 C150 185, 100 195, 75 175"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p class="loader-text">Stellize</p>
+    <p class="loader-sub">Loading...</p>
+  </div>
+</div>
 
-    /* 最低限の見た目＆レイアウト保険（style.cssが未完成でも破綻しにくく） */
-    body{
-      font-family: "Noto Sans JP", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Zen Maru Gothic", sans-serif;
-    }
-
-    /* ハンバーガー用の最低限（style.cssに無ければ効く） */
-    .hamburger{cursor:pointer; user-select:none;}
-    .nav-menu{list-style:none; margin:0; padding:0; display:flex; gap:14px; align-items:center;}
-    .nav-menu a{text-decoration:none;}
-
-    /* モバイル時に開閉する保険（style.cssに同等があれば上書きされてもOK） */
-    @media (max-width: 960px){
-      .nav-menu{display:none; flex-direction:column; gap:10px; padding:14px; background:#fff; border-radius: var(--radius);}
-      .header.is-open .nav-menu{display:flex;}
-    }
-
-    /* fade-inがstyle.cssに無ければ効く */
-    .fade-in{opacity:0; transform:translateY(10px); transition: .6s ease;}
-    .fade-in.is-in{opacity:1; transform:translateY(0);}
-  </style>
-</head>
-
-<body>
+<!-- ✅ ページ遷移アニメ（他ページも派手にする核心） -->
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
 
   <!-- ヘッダー -->
   <header class="header" id="header">
@@ -58,7 +46,7 @@
           <li><a href="index.html">トップ</a></li>
           <li><a href="about.html">Stellizeについて</a></li>
           <li><a href="business.html" aria-current="page">事業内容</a></li>
-          <li><a href="course.html">SNS講座</a></li>
+          <li><a href="course.html">クリエイティブ講座</a></li>
           <li><a href="cases.html">導入事例</a></li>
           <li><a href="faq.html">よくある質問</a></li>
           <li><a href="contact.html">お問い合わせ</a></li>
@@ -79,7 +67,7 @@
       <div class="hero-content">
         <p class="en-title" style="color: var(--color-sub); font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 1rem;">BUSINESS</p>
         <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 2.75rem);">事業内容</h1>
-        <p class="hero-subtitle">就労支援施設のための、包括的なSNS講座サービス</p>
+        <p class="hero-subtitle">就労支援施設のための、包括的なクリエイティブ講座サービス</p>
       </div>
     </div>
   </section>
@@ -95,9 +83,9 @@
       <div class="grid grid-2">
         <div class="card fade-in">
           <div class="card-icon" style="background-color: var(--color-accent); color: white; font-size: 1.75rem;">📚</div>
-          <h3 class="card-title">SNS講座プログラム</h3>
+          <h3 class="card-title">クリエイティブ講座プログラム</h3>
           <p class="card-text" style="margin-bottom: 1.5rem;">
-            選択理論心理学をベースにした、体系的なSNS運用講座。1講座1テーマで、無理なく学べる構成です。
+            選択理論心理学をベースにした、体系的なクリエイティブ講座。1講座1テーマで、無理なく学べる構成です。
           </p>
           <ul style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
             <li>基礎から実践まで段階的に学習</li>
@@ -261,7 +249,7 @@
         </p>
         <div>
           <a href="contact.html" class="btn btn-primary" style="margin-right: 1rem;">お問い合わせ</a>
-          <a href="course.html" class="btn btn-secondary">SNS講座の詳細</a>
+          <a href="course.html" class="btn btn-secondary">クリエイティブ講座の詳細</a>
         </div>
       </div>
     </div>
@@ -285,7 +273,7 @@
             <li><a href="index.html">トップ</a></li>
             <li><a href="about.html">Stellizeについて</a></li>
             <li><a href="business.html">事業内容</a></li>
-            <li><a href="course.html">SNS講座</a></li>
+            <li><a href="course.html">クリエイティブ講座</a></li>
           </ul>
         </div>
 
@@ -300,10 +288,11 @@
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; 2024 Stellize. All rights reserved.</p>
+        <p>&copy; 2026 Stellize. All rights reserved.</p>
       </div>
     </div>
   </footer>
+  
 
   <!-- JavaScript -->
   <script src="js/main.js"></script>
@@ -338,5 +327,49 @@
       }
     })();
   </script>
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
 </body>
+</html>
+
+ <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>Stellize合同会社</h3>
+                    <p>自分の価値に、気づく。<br>誰もが自分らしく働ける社会へ。</p>
+                </div>
+                <div class="footer-col">
+                    <h4>ページ</h4>
+                    <a href="index.html">トップ</a>
+                    <a href="index.html#about">企業情報</a>
+                    <a href="index.html#business">事業紹介</a>
+                </div>
+                <div class="footer-col">
+                    <h4>サービス</h4>
+                    <a href="course.html">クリエイティブ講座</a>
+                    <a href="gpac.html">G-PaC</a>
+                    <a href="base.html">鵠沼BASE</a>
+                </div>
+                <div class="footer-col">
+                    <h4>情報</h4>
+                    <a href="blog.html">ブログ</a>
+                    <a href="faq.html">よくある質問</a>
+                    <a href="contact.html">お問い合わせフォーム</a>
+                </div>
+                <div class="footer-col">
+                    <h4>SNS</h4>
+                    <a href="#" class="coming-soon">TikTok <span>Coming Soon</span></a>
+                    <a href="#" class="coming-soon">公式LINE <span>Coming Soon</span></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Stellize. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="js/main.js"></script>
+<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
+  </body>
 </html>
