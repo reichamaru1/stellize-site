@@ -25,9 +25,9 @@ window.addEventListener("scroll", onScrollHeader, { passive: true });
 onScrollHeader();
 
 // ================================
-// ③ reveal（IntersectionObserver）
+// ③ reveal / fade-in（IntersectionObserver）
 // ================================
-const reveals = document.querySelectorAll(".reveal");
+const reveals = document.querySelectorAll(".reveal, .fade-in");
 
 const io = new IntersectionObserver(
   (entries) => {
@@ -42,6 +42,30 @@ const io = new IntersectionObserver(
 );
 
 reveals.forEach((el) => io.observe(el));
+
+// ================================
+// FAQアコーディオン（faq.html / ホーム抜粋で共用）
+// ================================
+document.querySelectorAll(".accordion-header").forEach((header) => {
+  const item = header.closest(".accordion-item");
+  if (!item) return;
+  header.setAttribute("role", "button");
+  header.setAttribute("tabindex", "0");
+  header.setAttribute("aria-expanded", "false");
+
+  const toggle = () => {
+    const isOpen = item.classList.toggle("active");
+    header.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  };
+
+  header.addEventListener("click", toggle);
+  header.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggle();
+    }
+  });
+});
 
 // ================================
 // ④ パララックス（軽量版：画像だけ控えめ）

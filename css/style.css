@@ -15,6 +15,16 @@
     --text-primary: #3A3A3A;
     --text-secondary: #6B6B6B;
     --text-light: #999999;
+
+    /* サブページ（faq/contact/business/cases）が参照する別名・共通トークン */
+    --bg-section: #F5F1EB;
+    --color-sub: var(--color-secondary);
+    --color-sub2: #4A5D54;
+    --muted: var(--text-secondary);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --shadow-sm: 0 6px 25px rgba(110, 90, 100, 0.08);
+    --shadow-md: 0 12px 40px rgba(110, 90, 100, 0.12);
 }
 
 html {
@@ -1208,6 +1218,97 @@ body {
     font-size: 0.95rem;
     line-height: 1.9;
     color: var(--text-secondary);
+}
+
+/* サブページ共通コンポーネント（faq/contact/business/casesが使用） */
+.section-title {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.section-title .subtitle {
+    color: var(--text-secondary);
+    margin-top: -30px;
+    margin-bottom: 30px;
+}
+
+.section-bg {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.grid {
+    display: grid;
+    gap: 30px;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.grid > .card {
+    padding: 2rem;
+}
+
+.card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.card-text {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+}
+
+.btn-outline:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* fade-in（reveal と同系のスクロール出現。main.jsが .is-in を付与） */
+.fade-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-in.is-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fade-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
 }
 
 /* レスポンシブ */

@@ -23,28 +23,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- ローディング（すでにあるならそのままでOK） -->
-<div id="loader" class="loader loader--crazy">
-  <div class="loader-bg">
-    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
-  </div>
-  <div class="loader-inner">
-    <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
-      <path class="logo-path"
-        d="M155 55 C130 30, 70 35, 70 75 C70 110, 120 105, 120 135 C120 170, 70 175, 60 150"
-        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <path class="logo-path logo-path-2"
-        d="M160 150 C150 185, 100 195, 75 175"
-        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <p class="loader-text">Stellize</p>
-    <p class="loader-sub">Loading...</p>
-  </div>
-</div>
-
-<!-- ページ遷移アニメ（他ページも派手にする核心） -->
-<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
-
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -134,7 +112,29 @@
     </style>
 </head>
 <body>
-    
+
+    <!-- ローディング -->
+    <div id="loader" class="loader loader--crazy">
+      <div class="loader-bg">
+        <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+      </div>
+      <div class="loader-inner">
+        <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
+          <path class="logo-path"
+            d="M155 55 C130 30, 70 35, 70 75 C70 110, 120 105, 120 135 C120 170, 70 175, 60 150"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="logo-path logo-path-2"
+            d="M160 150 C150 185, 100 195, 75 175"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="loader-text">Stellize</p>
+        <p class="loader-sub">Loading...</p>
+      </div>
+    </div>
+
+    <!-- ページ遷移アニメ -->
+    <div id="pageTransition" class="page-transition" aria-hidden="true"></div>
+
     <!-- ヘッダー -->
     <header class="header">
         <div class="header-container">
@@ -428,7 +428,6 @@
     </footer>
     
     <script src="js/main.js"></script>
-<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
   </body>
 </html>
 

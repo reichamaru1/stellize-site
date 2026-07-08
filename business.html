@@ -25,6 +25,8 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
  <!-- ローディング（すでにあるならそのままでOK） -->
 <div id="loader" class="loader loader--crazy">
@@ -49,27 +51,17 @@
 <div id="pageTransition" class="page-transition" aria-hidden="true"></div>
 
   <!-- ヘッダー -->
-  <header class="header" id="header">
+  <header class="header">
     <div class="header-container">
       <a href="index.html" class="logo">Stellize</a>
-
-      <nav aria-label="グローバルナビゲーション">
-        <ul class="nav-menu" id="navMenu">
-          <li><a href="index.html">トップ</a></li>
-          <li><a href="about.html">Stellizeについて</a></li>
-          <li><a href="business.html" aria-current="page">事業内容</a></li>
-          <li><a href="course.html">クリエイティブ講座</a></li>
-          <li><a href="cases.html">導入事例</a></li>
-          <li><a href="faq.html">よくある質問</a></li>
-          <li><a href="contact.html">お問い合わせ</a></li>
-        </ul>
+      <nav class="nav">
+        <a href="index.html">トップ</a>
+        <a href="index.html#about">企業情報</a>
+        <a href="index.html#business">事業紹介</a>
+        <a href="blog.html">ブログ</a>
+        <a href="faq.html">よくある質問</a>
+        <a href="contact.html" class="btn-contact">お問い合わせ</a>
       </nav>
-
-      <button class="hamburger" id="hamburger" type="button" aria-label="メニューを開閉" aria-controls="navMenu" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
     </div>
   </header>
 
@@ -267,82 +259,6 @@
   </section>
 
   <!-- フッター -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>Stellize</h3>
-          <p style="margin-top: 1rem; line-height: 1.8; font-size: 0.95rem;">
-            就労支援施設向けSNS講座<br>
-            自分の「できる」を見つける場所
-          </p>
-        </div>
-
-        <div class="footer-section">
-          <h3>サイトマップ</h3>
-          <ul>
-            <li><a href="index.html">トップ</a></li>
-            <li><a href="about.html">Stellizeについて</a></li>
-            <li><a href="business.html">事業内容</a></li>
-            <li><a href="course.html">クリエイティブ講座</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-section">
-          <h3>情報</h3>
-          <ul>
-            <li><a href="cases.html">導入事例</a></li>
-            <li><a href="faq.html">よくある質問</a></li>
-            <li><a href="contact.html">お問い合わせ</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2026 Stellize. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
-  
-
-  <!-- JavaScript -->
-  <script src="js/main.js"></script>
-
-  <!-- main.jsが無くても最低限動く保険 -->
-  <script>
-    (function(){
-      const header = document.getElementById('header');
-      const btn = document.getElementById('hamburger');
-      const menu = document.getElementById('navMenu');
-      if(!header || !btn || !menu) return;
-
-      btn.addEventListener('click', () => {
-        const isOpen = header.classList.toggle('is-open');
-        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      });
-
-      // fade-in（IntersectionObserver）
-      const targets = document.querySelectorAll('.fade-in');
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) {
-              e.target.classList.add('is-in');
-              io.unobserve(e.target);
-            }
-          });
-        }, { threshold: 0.12 });
-        targets.forEach(t => io.observe(t));
-      } else {
-        targets.forEach(t => t.classList.add('is-in'));
-      }
-    })();
-  </script>
-<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
-</body>
-</html>
-
- <!-- フッター -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -383,8 +299,7 @@
             </div>
         </div>
     </footer>
-    
+
     <script src="js/main.js"></script>
-<div id="pageTransition" class="page-transition" aria-hidden="true"></div>
-  </body>
+</body>
 </html>
