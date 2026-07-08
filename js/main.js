@@ -1,15 +1,36 @@
 // ================================
-// ローディング：描画→余韻→フェードアウト
+// 動き抑制設定（各演出の無効化判定に共用）
 // ================================
-// Google Fonts 待ちで固まらないよう最大3.5秒でフォールバック
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ================================
+// ローディング：初回訪問のみ表示（sessionStorageでスキップ）
+// 表示時間は最大1.1秒に収める
+// ================================
 function hideLoader() {
   const loader = document.getElementById("loader");
   if (!loader) return;
   loader.classList.add("is-hidden");
 }
 
-window.addEventListener("load", () => setTimeout(hideLoader, 1900));
-setTimeout(hideLoader, 3500);
+(() => {
+  const VISITED_KEY = "stellize_visited";
+  let visited = false;
+  try {
+    visited = sessionStorage.getItem(VISITED_KEY) === "1";
+    sessionStorage.setItem(VISITED_KEY, "1");
+  } catch (e) { /* プライベートモード等でsessionStorage不可なら毎回表示 */ }
+
+  if (visited || REDUCED_MOTION) {
+    // 2回目以降・動き抑制ユーザーは即座に非表示
+    hideLoader();
+    return;
+  }
+
+  // 初回：最大1.1秒で必ず閉じる（load完了が早ければ余韻0.4秒で閉じる）
+  window.addEventListener("load", () => setTimeout(hideLoader, 400));
+  setTimeout(hideLoader, 1100);
+})();
 // ================================
 // ② ナビ：スクロールで透過 → 白背景
 // ================================
@@ -25,9 +46,9 @@ window.addEventListener("scroll", onScrollHeader, { passive: true });
 onScrollHeader();
 
 // ================================
-// ③ reveal / fade-in（IntersectionObserver）
+// ③ reveal / fade-in / stagger（IntersectionObserver）
 // ================================
-const reveals = document.querySelectorAll(".reveal, .fade-in");
+const reveals = document.querySelectorAll(".reveal, .fade-in, .stagger");
 
 const io = new IntersectionObserver(
   (entries) => {
@@ -68,14 +89,21 @@ document.querySelectorAll(".accordion-header").forEach((header) => {
 });
 
 // ================================
-// ④ パララックス（軽量版：画像だけ控えめ）
+// ④ パララックス（rAFで間引き。reduced-motion/モバイルでは無効化）
+// iOS Safari等ではスクロール連動transformがガクつくため、
+// タッチ主体のデバイス・狭幅では動かさない
 // ================================
 const parallaxImgs = document.querySelectorAll(".parallax-img");
+const isTouchLike = window.matchMedia("(pointer: coarse), (max-width: 768px)");
 
 let ticking = false;
 
 const parallax = () => {
-  const y = window.scrollY;
+  if (REDUCED_MOTION || isTouchLike.matches) {
+    parallaxImgs.forEach((img) => { img.style.transform = ""; });
+    ticking = false;
+    return;
+  }
 
   parallaxImgs.forEach((img) => {
     // 画像位置に応じて少しだけ動かす（やりすぎ注意）
@@ -93,8 +121,11 @@ const onScrollParallax = () => {
   window.requestAnimationFrame(parallax);
 };
 
-window.addEventListener("scroll", onScrollParallax, { passive: true });
-parallax();
+if (parallaxImgs.length && !REDUCED_MOTION) {
+  window.addEventListener("scroll", onScrollParallax, { passive: true });
+  window.addEventListener("resize", onScrollParallax, { passive: true });
+  parallax();
+}
 // ================================
 // Page Transition (safe)
 // ================================
