@@ -21,6 +21,34 @@ html {
     scroll-behavior: smooth;
 }
 
+/* ラインアイコン（assets/icons.svg のシンボルを <use> で参照） */
+.icon {
+    width: 1.15em;
+    height: 1.15em;
+    vertical-align: -0.18em;
+    margin-right: 0.4em;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.problem-card h3 .icon {
+    color: #C62828;
+}
+
+.card-icon .icon {
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0;
+    color: inherit;
+    vertical-align: middle;
+}
+
+.pricing-features .icon {
+    width: 1em;
+    height: 1em;
+    color: var(--color-secondary);
+}
+
 body {
     font-family: 'Noto Sans JP', sans-serif;
     background-color: var(--bg-primary);
