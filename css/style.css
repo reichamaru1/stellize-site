@@ -279,7 +279,7 @@ body {
     margin: 50px 0;
 }
 
-.story h4 {
+.story h3 {
     font-family: 'Noto Serif JP', serif;
     font-size: 1.5rem;
     color: var(--text-primary);
@@ -312,7 +312,7 @@ body {
     margin-top: 50px;
 }
 
-.mission h4 {
+.mission h3 {
     font-family: 'Noto Serif JP', serif;
     font-size: 1.5rem;
     color: var(--text-primary);
@@ -340,7 +340,7 @@ body {
     border-left: 4px solid var(--color-primary);
 }
 
-.mission-item h5 {
+.mission-item h4 {
     font-size: 1.1rem;
     color: var(--color-primary);
     margin-bottom: 10px;
@@ -653,7 +653,7 @@ body {
     border-radius: 20px;
 }
 
-.choice-theory h4 {
+.choice-theory h3 {
     font-family: 'Noto Serif JP', serif;
     font-size: 1.8rem;
     color: var(--text-primary);
@@ -677,7 +677,7 @@ body {
     margin-bottom: 35px;
 }
 
-.choice-theory-box h5 {
+.choice-theory-box h4 {
     font-family: 'Noto Serif JP', serif;
     font-size: 1.3rem;
     color: var(--color-primary);
@@ -705,7 +705,7 @@ body {
     box-shadow: 0 6px 25px rgba(110, 90, 100, 0.08);
 }
 
-.point-item h5 {
+.point-item h4 {
     font-size: 1.1rem;
     color: var(--text-primary);
     margin-bottom: 12px;
