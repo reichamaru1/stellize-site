@@ -85,6 +85,33 @@
     </div>
   </section>
 
+  <!-- こんな事業所におすすめ（フェーズ2-11） -->
+  <!-- TODO: 4項目のコピーは仮テキスト。正式コピー提供後に差し替え -->
+  <section id="target" class="section target-section">
+    <div class="container">
+      <p class="label reveal">For Facilities</p>
+      <h2 class="reveal">こんな事業所におすすめです</h2>
+      <div class="target-grid stagger">
+        <div class="target-item">
+          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>利用者の工賃を上げる打ち手を探している</h3>
+          <p>SNSを活用した商品・サービスの発信で、売上と工賃の向上を目指せます。</p>
+        </div>
+        <div class="target-item">
+          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>新しい訓練プログラムを取り入れたい</h3>
+          <p>今の時代に求められるクリエイティブスキルを、基礎から学べる講座です。</p>
+        </div>
+        <div class="target-item">
+          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>利用者の主体性・自己肯定感を育てたい</h3>
+          <p>選択理論心理学に基づく設計で、「やりたい」から始まる行動を支えます。</p>
+        </div>
+        <div class="target-item">
+          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>発信やWeb活用を任せられる人がいない</h3>
+          <p>講座から実務伴走まで、施設の状況に合わせて外部パートナーとして支えます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ABOUT（parallax対象に class付与） -->
   <section id="about" class="section about-section parallax-section">
     <div class="container">
@@ -171,6 +198,26 @@
     </div>
   </section>
 
+  <!-- 実績数字（フェーズ2-11-2：値はmain.jsのSTELLIZE_STATSで一元管理。
+       事業資料の完成後、実データに差し替えるとCountUpアニメーションで表示される -->
+  <section id="results" class="section stats-section">
+    <div class="container">
+      <p class="label reveal">Our Results</p>
+      <h2 class="reveal">数字で見るStellize</h2>
+      <div class="stats-grid stagger" id="statsGrid"></div>
+      <p class="note text-center reveal">※ 実績数値は現在集計中です。準備が整い次第、順次公開します。</p>
+    </div>
+  </section>
+
+  <!-- 受講者・導入施設の声（フェーズ2-11-2：main.jsのSTELLIZE_VOICESで一元管理） -->
+  <section id="voices" class="section voices-section">
+    <div class="container">
+      <p class="label reveal">Voices</p>
+      <h2 class="reveal">受講者・導入施設の声</h2>
+      <div class="voices-grid stagger" id="voicesGrid"></div>
+    </div>
+  </section>
+
   <!-- 事業紹介（card に hover-float / reveal 付与） -->
   <section id="business" class="section business-section parallax-section">
     <div class="container">
@@ -179,6 +226,8 @@
 
       <div class="business-cards stagger">
         <div class="card hover-float">
+          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
+          <p class="card-badge" hidden>導入実績 準備中</p>
           <img src="assets/images/IbVAB4wc.jpeg" alt="就労支援向けクリエイティブ講座" width="1200" height="896" loading="lazy" decoding="async">
           <h3>就労支援向けクリエイティブ講座</h3>
           <p>施設職員向けのクリエイティブ研修。学んだスキルが利用者の工賃向上、通所率向上につながります。オンライン・対面で選択可能。</p>
@@ -186,6 +235,8 @@
         </div>
 
         <div class="card hover-float">
+          <!-- 実績確定後: hiddenを外して「◯社支援」等を記載 -->
+          <p class="card-badge" hidden>支援実績 準備中</p>
           <img src="assets/images/j1qhUtUg.jpeg" alt="Webマーケティング制作 G-PaC" width="1200" height="896" loading="lazy" decoding="async">
           <h3>Webマーケティング制作「G-PaC」</h3>
           <p>月額5万円で、HP・動画・SNS・チラシ・広告まで、Webマーケティング施策をまるごと実現。通常月間40〜50万円かかる施策を、事業の段階に応じて柔軟に対応します。</p>

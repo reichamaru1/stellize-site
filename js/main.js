@@ -65,6 +65,96 @@ const io = new IntersectionObserver(
 reveals.forEach((el) => io.observe(el));
 
 // ================================
+// 実績数字・受講者の声（フェーズ2-11-2）
+// データと表示を分離：事業資料の完成後、下の定数を実データに
+// 差し替えるだけで本実装になる。
+// - STELLIZE_STATS: value を数値にすると CountUp 表示、null なら「準備中」
+// - STELLIZE_VOICES: photo に画像パスを入れると写真表示、null ならイニシャル円
+// ================================
+const STELLIZE_STATS = [
+  { label: "導入事業所数", value: null, suffix: "施設" },
+  { label: "平均工賃向上率", value: null, suffix: "%" },
+  { label: "受講者数", value: null, suffix: "名" },
+  { label: "受講継続率", value: null, suffix: "%" },
+];
+
+const STELLIZE_VOICES = [
+  { name: "準備中", org: "受講者の声", photo: null, comment: "受講者様の声は現在準備中です。事業資料の完成にあわせて掲載します。" },
+  { name: "準備中", org: "導入施設の声", photo: null, comment: "導入施設様の声は現在準備中です。事業資料の完成にあわせて掲載します。" },
+  { name: "準備中", org: "職員の声", photo: null, comment: "施設職員様の声は現在準備中です。事業資料の完成にあわせて掲載します。" },
+];
+
+// 実績数字のレンダリング + スクロール到達時CountUp
+(() => {
+  const grid = document.getElementById("statsGrid");
+  if (!grid) return;
+
+  STELLIZE_STATS.forEach((stat) => {
+    const item = document.createElement("div");
+    item.className = "stat-item";
+    const valueHtml = stat.value == null
+      ? '<span class="stat-num stat-num--pending">準備中</span>'
+      : `<span class="stat-num" data-count="${stat.value}">0</span><span class="stat-suffix">${stat.suffix}</span>`;
+    item.innerHTML = `<p class="stat-value">${valueHtml}</p><p class="stat-label">${stat.label}</p>`;
+    grid.appendChild(item);
+  });
+
+  const nums = grid.querySelectorAll(".stat-num[data-count]");
+  if (!nums.length) return;
+
+  const countUp = (el) => {
+    const target = Number(el.dataset.count);
+    if (REDUCED_MOTION || !Number.isFinite(target)) {
+      el.textContent = String(target);
+      return;
+    }
+    const DURATION = 1200;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / DURATION, 1);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      el.textContent = String(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  const statsIo = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        countUp(e.target);
+        statsIo.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  nums.forEach((n) => statsIo.observe(n));
+})();
+
+// 受講者・導入施設の声のレンダリング
+(() => {
+  const grid = document.getElementById("voicesGrid");
+  if (!grid) return;
+
+  STELLIZE_VOICES.forEach((voice) => {
+    const card = document.createElement("div");
+    card.className = "voice-card";
+    const photoHtml = voice.photo
+      ? `<img class="voice-photo" src="${voice.photo}" alt="${voice.name}" loading="lazy" decoding="async" width="60" height="60">`
+      : `<div class="voice-photo voice-photo--placeholder" aria-hidden="true">${(voice.name || "S").charAt(0)}</div>`;
+    card.innerHTML = `
+      <div class="voice-head">
+        ${photoHtml}
+        <div>
+          <p class="voice-name">${voice.name}</p>
+          <p class="voice-org">${voice.org}</p>
+        </div>
+      </div>
+      <p class="voice-comment">${voice.comment}</p>`;
+    grid.appendChild(card);
+  });
+})();
+
+// ================================
 // FAQアコーディオン（faq.html / ホーム抜粋で共用）
 // ================================
 document.querySelectorAll(".accordion-header").forEach((header) => {
