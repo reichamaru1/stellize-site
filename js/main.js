@@ -4,6 +4,61 @@
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ================================
+// 軽量イベント計測（フェーズ4-19）
+// GA4が設定済みならgtagへ、未設定でも将来差し替えやすいよう一元化。
+// data-cta 属性を持つCTAのクリックを送信する。
+// ================================
+function trackEvent(name, params) {
+  try {
+    if (typeof window.gtag === "function" &&
+        window.STELLIZE_GA_ID && window.STELLIZE_GA_ID !== "G-XXXXXXXXXX") {
+      window.gtag("event", name, params || {});
+    }
+  } catch (e) { /* 計測失敗はUXを妨げない */ }
+}
+window.trackEvent = trackEvent;
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-cta]");
+  if (!el) return;
+  trackEvent("cta_click", { cta_type: el.dataset.cta, location: "home" });
+});
+
+// ③ 紹介：URLコピー（SNSシェアではなくコピー/メール転送前提）
+(() => {
+  const btn = document.getElementById("shareCopyBtn");
+  if (!btn) return;
+  const label = btn.textContent.trim();
+  const url = btn.dataset.shareUrl || window.location.href;
+
+  const showCopied = () => {
+    btn.textContent = "コピーしました";
+    btn.classList.add("is-copied");
+    window.setTimeout(() => {
+      btn.textContent = label;
+      btn.classList.remove("is-copied");
+    }, 2000);
+  };
+
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      showCopied();
+    } catch (err) {
+      // クリップボードAPI不可時のフォールバック（execCommand）
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); showCopied(); } catch (e2) {}
+      ta.remove();
+    }
+  });
+})();
+
+// ================================
 // ローディング：初回訪問のみ表示（sessionStorageでスキップ）
 // 表示時間は最大1.1秒に収める
 // ================================

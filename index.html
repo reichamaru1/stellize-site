@@ -20,7 +20,20 @@
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20260711">
+  <link rel="stylesheet" href="css/style.css?v=20260712">
+
+  <!-- Googleアナリティクス（GA4）土台。TODO: G-XXXXXXXXXX を実測定IDに差し替えると計測開始。
+       測定ID未設定の間はイベント送信をスキップする（下のgtag実装側で判定） -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.STELLIZE_GA_ID = "G-XXXXXXXXXX"; // TODO: 実測定IDに差し替え
+    if (window.STELLIZE_GA_ID && window.STELLIZE_GA_ID !== "G-XXXXXXXXXX") {
+      gtag('js', new Date());
+      gtag('config', window.STELLIZE_GA_ID);
+    }
+  </script>
 
   <!-- FAQPage構造化データ（ホーム抜粋の4問と同期。faq.htmlの全文はfaq.html側の掲載内容が正） -->
   <script type="application/ld+json">
@@ -127,6 +140,42 @@
     </div>
   </section>
 
+  <!-- 課題提起（フェーズ4a）
+       TODO: 最終文言は要確認。報酬改定の趣旨に沿った仮コピー -->
+  <section id="issue" class="section issue-section">
+    <div class="container">
+      <div class="issue-inner">
+        <p class="issue-lead reveal">令和6年度の報酬改定で、工賃は<span class="mark">"頑張り"から"基本報酬を左右する経営指標"</span>になりました。</p>
+        <p class="issue-body reveal delay-1">平均工賃月額によって基本報酬が変わる仕組みのなか、生産活動収支の改善は事業所経営そのものの課題です。それでも「何から手をつければいいか分からない」——そんな声を、私たちは数多く聞いてきました。</p>
+        <span class="issue-q reveal delay-2">生産活動収支の改善、進んでいますか？</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 数字の可視化（フェーズ4b：導入で変わる数字＝試算イメージ）
+       TODO: 試算モデル・数値は提供後に反映。現在はプレースホルダー -->
+  <section id="impact" class="section impact-section">
+    <div class="container">
+      <p class="label reveal">Impact</p>
+      <h2 class="reveal">導入で変わる数字</h2>
+      <div class="impact-grid stagger">
+        <div class="impact-card">
+          <p class="impact-label">平均工賃月額</p>
+          <div class="impact-row"><span class="impact-pending">準備中</span></div>
+        </div>
+        <div class="impact-card">
+          <p class="impact-label">生産活動収支</p>
+          <div class="impact-row"><span class="impact-pending">準備中</span></div>
+        </div>
+        <div class="impact-card">
+          <p class="impact-label">発信にかかる職員工数</p>
+          <div class="impact-row"><span class="impact-pending">準備中</span></div>
+        </div>
+      </div>
+      <p class="note text-center reveal">※ 試算モデルは現在準備中です。事業資料の完成にあわせて具体的な数値イメージを掲載します。</p>
+    </div>
+  </section>
+
   <!-- こんな事業所におすすめ（フェーズ2-11） -->
   <!-- TODO: 4項目のコピーは仮テキスト。正式コピー提供後に差し替え -->
   <section id="target" class="section target-section">
@@ -174,8 +223,8 @@
     <div class="container">
       <div class="about-content">
         <div class="about-text">
-          <p class="label reveal">About Stellize</p>
-          <h2 class="reveal">Stellizeが大切にしていること</h2>
+          <p class="label reveal">Why Stellize</p>
+          <h2 class="reveal">なぜ、Stellizeなのか</h2>
 
           <div class="philosophy-box reveal">
             <p class="philosophy-label">経営理念</p>
@@ -312,6 +361,14 @@
     </div>
   </section>
 
+  <!-- 情緒的クロージング（フェーズ4e）
+       TODO: 最終文言は要確認。「この数字が実現したら利用者の生活はこう変わる」趣旨の仮コピー -->
+  <section id="closing" class="section closing-section">
+    <div class="container">
+      <p class="closing-text reveal">工賃が上がるということは、利用者さんが好きなものを買えたり、行きたい場所へ行けたりするということ。<br>数字の向こうにある「その人の毎日」を、私たちは一緒につくりたいと思っています。</p>
+    </div>
+  </section>
+
   <!-- ホームFAQ抜粋（フェーズ3-14：詳細はfaq.htmlへ誘導） -->
   <section id="faq" class="section bg-light">
     <div class="container">
@@ -402,12 +459,44 @@
   </section>
 
   <!-- CTA -->
+  <!-- CTA 3階層（フェーズ4-17）
+       ①資料DL ②無料相談 ③紹介。資料PDF・Calendly URLは確定後に差し替え -->
   <section id="contact" class="section cta-section">
     <div class="container">
-      <h2 class="reveal">まずはお気軽にご相談ください</h2>
-      <p class="reveal delay-1">ご不明な点や、導入に関するご相談など<br>お気軽にお問い合わせください。</p>
-      <div class="cta-buttons reveal delay-2">
-        <a href="contact.html" class="btn btn-primary">お問い合わせフォームへ</a>
+      <h2 class="reveal">次の一歩を、選んでください</h2>
+      <p class="reveal delay-1">まずは知りたい方も、相談したい方も。<br>あなたのペースに合わせた入り口をご用意しました。</p>
+
+      <div class="cta-tiers reveal delay-2">
+        <!-- ① 資料ダウンロード -->
+        <div class="cta-tier">
+          <span class="tier-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-document"/></svg></span>
+          <h3>まず資料を見る</h3>
+          <p>講座・研修の内容や進め方をまとめた資料をお送りします。メールアドレスのご入力だけで完了します。</p>
+          <!-- TODO: 資料DL用のフォーム/導線。現状はcontact.htmlへ種別付きで遷移（UTM付与） -->
+          <a href="contact.html?type=document&utm_source=hp&utm_medium=cta&utm_campaign=document"
+             class="btn btn-secondary" data-cta="document">資料をダウンロード</a>
+        </div>
+
+        <!-- ② 無料相談（主導線） -->
+        <div class="cta-tier cta-tier--primary">
+          <span class="tier-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-users"/></svg></span>
+          <h3>無料相談を予約する</h3>
+          <p>施設の状況をお聞きし、最適なプランをご提案します。オンラインで気軽にご相談いただけます。</p>
+          <!-- TODO: Calendly等の日程調整ツール確定後にhrefを差し替え -->
+          <a href="contact.html?type=consult&utm_source=hp&utm_medium=cta&utm_campaign=consult"
+             class="btn btn-primary" data-cta="consult">無料相談を予約する</a>
+        </div>
+
+        <!-- ③ 紹介 -->
+        <div class="cta-tier">
+          <span class="tier-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-sparkle"/></svg></span>
+          <h3>同業の方に共有する</h3>
+          <p>お知り合いの施設様にも役立ちそうなら、ぜひご共有ください。URLをコピーして、メール等でお渡しいただけます。</p>
+          <button type="button" class="tier-btn" id="shareCopyBtn"
+                  data-cta="share" data-share-url="https://stellize.example.com/">
+            URLをコピー
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -457,7 +546,7 @@
         </div>
     </footer>
     
-    <script src="js/main.js?v=20260711"></script>
+    <script src="js/main.js?v=20260712"></script>
 <div id="pageTransition" class="page-transition" aria-hidden="true"></div>
   </body>
 </html>
