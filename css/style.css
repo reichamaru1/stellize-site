@@ -1726,6 +1726,29 @@ body {
     }
 }
 
+/* 導入ストーリー漫画の掲載スロット（画像が入るまでsection自体はhidden） */
+.manga-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.manga-grid img {
+    width: 100%;
+    height: auto;
+    border: 2px solid var(--color-primary);
+    border-radius: 10px;
+    background: white;
+}
+
+@media (max-width: 620px) {
+    .manga-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* サブページ共通コンポーネント（faq/contact/business/casesが使用） */
 .section-title {
     text-align: center;

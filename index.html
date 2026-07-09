@@ -154,6 +154,21 @@
     </div>
   </section>
 
+  <!-- 導入ストーリー漫画（掲載スロット）
+       漫画（施設向け導入ストーリー）が用意できたら:
+       1. section の hidden 属性を外す
+       2. .manga-grid 内に <img> を4枚入れる（alt にセリフ全文を記載）
+       それまでは非表示のまま何もレンダリングされない -->
+  <section id="story-manga" class="section" hidden>
+    <div class="container">
+      <p class="label reveal">Story</p>
+      <h2 class="reveal">ある事業所の導入ストーリー</h2>
+      <div class="manga-grid stagger">
+        <!-- <img src="assets/images/manga-1.webp" alt="..." width="1080" height="760" loading="lazy" decoding="async"> ×4 -->
+      </div>
+    </div>
+  </section>
+
   <!-- ABOUT（parallax対象に class付与） -->
   <section id="about" class="section about-section parallax-section">
     <div class="container">
