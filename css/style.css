@@ -31,6 +31,31 @@ html {
     scroll-behavior: smooth;
 }
 
+/* 写真のトーン統一：全コンテンツ画像に共通の色調補正をかけ、
+   画像ごとのタッチのばらつき（AI生成由来）を抑えてサイト全体の
+   世界観（ベージュ×ラベンダー）に寄せる */
+.hero-image,
+.photo-break img,
+.card img,
+.blog-image img,
+.step-card img,
+.founder-image,
+.voice-photo {
+    filter: saturate(0.85) contrast(1.04) brightness(1.02) sepia(0.10);
+}
+
+/* カードhover時の画像ズームとフィルタを両立 */
+.card.hover-float:hover img {
+    filter: saturate(0.92) contrast(1.05) brightness(1.03) sepia(0.06);
+}
+
+/* ミッションアイコン：白背景JPEGを乗算ブレンドで下地に馴染ませる */
+.mission-icon {
+    mix-blend-mode: multiply;
+    border-radius: 12px;
+    filter: saturate(0.85) contrast(1.02) sepia(0.08);
+}
+
 /* ラインアイコン（assets/icons.svg のシンボルを <use> で参照） */
 .icon {
     width: 1.15em;
