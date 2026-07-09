@@ -21,6 +21,48 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=20260709">
+
+  <!-- FAQPage構造化データ（ホーム抜粋の4問と同期。faq.htmlの全文はfaq.html側の掲載内容が正） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "施設での導入を検討していますが、どうすればいいですか?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "まずはお問い合わせフォームよりご連絡ください。施設の状況やご要望をお伺いし、最適なプランをご提案いたします。説明会や体験講座も実施していますので、お気軽にご相談ください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "導入までにどのくらいの期間がかかりますか?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "お問い合わせから導入まで、通常1〜2ヶ月程度です。説明会、体験講座、スタッフ研修などを経て、準備が整ってから講座を開始します。急ぎの場合はご相談ください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "費用について教えてください",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "施設の規模や受講者数、サポート内容によって異なります。詳しくはお問い合わせの際にご説明いたします。予算に応じた柔軟なプラン設計も可能ですので、ご相談ください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "SNSを使ったことがなくても大丈夫ですか?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい、大丈夫です。基礎から丁寧にお教えしますので、初めての方でも安心して始められます。アカウントの作り方から、投稿の仕方まで、一つずつステップを踏んで学んでいきますので、ご安心ください。"
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
@@ -242,6 +284,95 @@
           <p>月額5万円で、HP・動画・SNS・チラシ・広告まで、Webマーケティング施策をまるごと実現。通常月間40〜50万円かかる施策を、事業の段階に応じて柔軟に対応します。</p>
           <a href="gpac.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ホームFAQ抜粋（フェーズ3-14：詳細はfaq.htmlへ誘導） -->
+  <section id="faq" class="section bg-light">
+    <div class="container">
+      <p class="label reveal">FAQ</p>
+      <h2 class="reveal">よくある質問</h2>
+      <div class="faq-excerpt-list reveal">
+        <div class="accordion-item">
+          <div class="accordion-header">
+            <p class="accordion-question">施設での導入を検討していますが、どうすればいいですか?</p>
+            <div class="accordion-icon" aria-hidden="true">+</div>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-body">
+              <p>まずはお問い合わせフォームよりご連絡ください。施設の状況やご要望をお伺いし、最適なプランをご提案いたします。説明会や体験講座も実施していますので、お気軽にご相談ください。</p>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header">
+            <p class="accordion-question">導入までにどのくらいの期間がかかりますか?</p>
+            <div class="accordion-icon" aria-hidden="true">+</div>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-body">
+              <p>お問い合わせから導入まで、通常1〜2ヶ月程度です。説明会、体験講座、スタッフ研修などを経て、準備が整ってから講座を開始します。急ぎの場合はご相談ください。</p>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header">
+            <p class="accordion-question">費用について教えてください</p>
+            <div class="accordion-icon" aria-hidden="true">+</div>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-body">
+              <p>施設の規模や受講者数、サポート内容によって異なります。詳しくはお問い合わせの際にご説明いたします。予算に応じた柔軟なプラン設計も可能ですので、ご相談ください。</p>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header">
+            <p class="accordion-question">SNSを使ったことがなくても大丈夫ですか?</p>
+            <div class="accordion-icon" aria-hidden="true">+</div>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-body">
+              <p>はい、大丈夫です。基礎から丁寧にお教えしますので、初めての方でも安心して始められます。アカウントの作り方から、投稿の仕方まで、一つずつステップを踏んで学んでいきますので、ご安心ください。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="faq-more reveal"><a href="faq.html" class="btn-link">すべての質問を見る <span class="arrow" aria-hidden="true">→</span></a></p>
+    </div>
+  </section>
+
+  <!-- 会社概要（フェーズ3-12：所在地・設立はコンテンツ提供待ち） -->
+  <section id="company" class="section company-section">
+    <div class="container">
+      <p class="label reveal">Company</p>
+      <h2 class="reveal">会社概要</h2>
+      <div class="company-table reveal">
+        <dl>
+          <div class="company-row">
+            <dt>社名</dt>
+            <dd>Stellize合同会社</dd>
+          </div>
+          <div class="company-row">
+            <dt>代表者</dt>
+            <dd>菊野 玲</dd>
+          </div>
+          <div class="company-row">
+            <dt>所在地</dt>
+            <!-- TODO: 所在地はコンテンツ提供後に差し替え -->
+            <dd class="pending">準備中</dd>
+          </div>
+          <div class="company-row">
+            <dt>設立</dt>
+            <!-- TODO: 設立年月はコンテンツ提供後に差し替え -->
+            <dd class="pending">準備中</dd>
+          </div>
+          <div class="company-row">
+            <dt>事業内容</dt>
+            <dd>就労継続支援B型事業所向けクリエイティブ講座の提供<br>Webマーケティング制作「G-PaC」</dd>
+          </div>
+        </dl>
       </div>
     </div>
   </section>
