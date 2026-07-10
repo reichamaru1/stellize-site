@@ -34,14 +34,9 @@ html {
 /* 写真のトーン統一：全コンテンツ画像に共通の色調補正をかけ、
    画像ごとのタッチのばらつき（AI生成由来）を抑えてサイト全体の
    世界観（ベージュ×ラベンダー）に寄せる */
-.hero-image,
-.photo-break img,
-.card img,
-.blog-image img,
-.step-card img,
 .founder-image,
 .voice-photo {
-    filter: saturate(0.85) contrast(1.04) brightness(1.02) sepia(0.10);
+    filter: saturate(0.9) contrast(1.03) brightness(1.02) sepia(0.06);
 }
 
 /* カードhover時の画像ズームとフィルタを両立 */
