@@ -819,6 +819,13 @@ body {
     letter-spacing: 0.1em;
 }
 
+/* ストーリー末尾の署名として使う場合（代表写真を置かない構成） */
+.story-body .founder-name {
+    font-size: 1.1rem;
+    text-align: right;
+    margin-top: 30px;
+}
+
 .mission-lead {
     font-size: 1.15rem;
     font-weight: 500;

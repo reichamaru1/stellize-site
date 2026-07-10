@@ -123,11 +123,10 @@
     </div>
   </header>
 
-  <!-- ヒーロー（parallax対象に class付与） -->
-  <section class="hero parallax-section">
+  <!-- ヒーロー -->
+  <section class="hero">
     <div class="container">
       <div class="hero-content">
-        <img src="assets/images/bh3ieUsE.jpeg" alt="就労支援施設でSNSを楽しむ様子" class="hero-image parallax-img" width="1376" height="768">
         <div class="hero-text">
           <h1 class="reveal">価値を咲かせ、<span>共に生きる。</span></h1>
           <p class="reveal delay-1">社会に貢献したい。自分らしく働きたい。その想いを実現する舞台を、Stellizeはつくります。</p>
@@ -140,64 +139,35 @@
     </div>
   </section>
 
-  <!-- 課題提起（フェーズ4a）
-       TODO: 最終文言は要確認。報酬改定の趣旨に沿った仮コピー -->
-  <section id="issue" class="section issue-section">
+  <!-- 事業紹介（ヒーロー直後に配置） -->
+  <section id="business" class="section business-section">
     <div class="container">
-      <div class="issue-inner">
-        <p class="issue-lead reveal">令和6年度の報酬改定で、工賃は<span class="mark">"頑張り"から"基本報酬を左右する経営指標"</span>になりました。</p>
-        <p class="issue-body reveal delay-1">平均工賃月額によって基本報酬が変わる仕組みのなか、生産活動収支の改善は事業所経営そのものの課題です。それでも「何から手をつければいいか分からない」——そんな声を、私たちは数多く聞いてきました。</p>
-        <span class="issue-q reveal delay-2">生産活動収支の改善、進んでいますか？</span>
-      </div>
-    </div>
-  </section>
+      <p class="label reveal">Our Business</p>
+      <h2 class="reveal">事業紹介</h2>
 
-  <!-- 数字の可視化（フェーズ4b：導入で変わる数字＝試算イメージ）
-       TODO: 試算モデル・数値は提供後に反映。現在はプレースホルダー -->
-  <section id="impact" class="section impact-section">
-    <div class="container">
-      <p class="label reveal">Impact</p>
-      <h2 class="reveal">導入で変わる数字</h2>
-      <div class="impact-grid stagger">
-        <div class="impact-card">
-          <p class="impact-label">平均工賃月額</p>
-          <div class="impact-row"><span class="impact-pending">準備中</span></div>
+      <div class="business-cards stagger">
+        <div class="card hover-float">
+          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
+          <p class="card-badge" hidden>導入実績 準備中</p>
+          <h3>就労支援向けクリエイティブ講座</h3>
+          <p>施設職員向けのクリエイティブ研修。学んだスキルが利用者の工賃向上、通所率向上につながります。オンライン・対面で選択可能。</p>
+          <a href="course.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
         </div>
-        <div class="impact-card">
-          <p class="impact-label">生産活動収支</p>
-          <div class="impact-row"><span class="impact-pending">準備中</span></div>
-        </div>
-        <div class="impact-card">
-          <p class="impact-label">発信にかかる職員工数</p>
-          <div class="impact-row"><span class="impact-pending">準備中</span></div>
-        </div>
-      </div>
-      <p class="note text-center reveal">※ 試算モデルは現在準備中です。事業資料の完成にあわせて具体的な数値イメージを掲載します。</p>
-    </div>
-  </section>
 
-  <!-- こんな事業所におすすめ（フェーズ2-11） -->
-  <!-- TODO: 4項目のコピーは仮テキスト。正式コピー提供後に差し替え -->
-  <section id="target" class="section target-section">
-    <div class="container">
-      <p class="label reveal">For Facilities</p>
-      <h2 class="reveal">こんな事業所におすすめです</h2>
-      <div class="target-grid stagger">
-        <div class="target-item">
-          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>利用者の工賃を上げる打ち手を探している</h3>
-          <p>SNSを活用した商品・サービスの発信で、売上と工賃の向上を目指せます。</p>
+        <div class="card hover-float">
+          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
+          <p class="card-badge" hidden>導入実績 準備中</p>
+          <h3>SNS・生産活動研修</h3>
+          <p>施設の生産活動をSNSで発信し、"売れる"活動へ。利用者が主役になって発信し、工賃向上とやりがいの醸成につなげる実践型研修です。</p>
+          <a href="training.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
         </div>
-        <div class="target-item">
-          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>新しい訓練プログラムを取り入れたい</h3>
-          <p>今の時代に求められるクリエイティブスキルを、基礎から学べる講座です。</p>
-        </div>
-        <div class="target-item">
-          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>利用者の主体性・自己肯定感を育てたい</h3>
-          <p>選択理論心理学に基づく設計で、「やりたい」から始まる行動を支えます。</p>
-        </div>
-        <div class="target-item">
-          <h3><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>発信やWeb活用を任せられる人がいない</h3>
-          <p>講座から実務伴走まで、施設の状況に合わせて外部パートナーとして支えます。</p>
+
+        <div class="card hover-float">
+          <!-- 実績確定後: hiddenを外して「◯社支援」等を記載 -->
+          <p class="card-badge" hidden>支援実績 準備中</p>
+          <h3>Webマーケティング制作「G-PaC」</h3>
+          <p>月額5万円で、HP・動画・SNS・チラシ・広告まで、Webマーケティング施策をまるごと実現。通常月間40〜50万円かかる施策を、事業の段階に応じて柔軟に対応します。</p>
+          <a href="gpac.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
         </div>
       </div>
     </div>
@@ -237,21 +207,15 @@
             <p class="mission-lead">「良い商品を、必要としている人に届ける」<br>——その価値を通じて社会貢献できる舞台をつくる</p>
             <div class="mission-items stagger">
               <div class="mission-item hover-float">
-                <img src="assets/images/mission2.jpeg" alt="届ける" class="mission-icon" width="1024" height="1024" loading="lazy" decoding="async">
                 <h4>届ける</h4>
                 <p>価値ある商品やサービスを、<br>必要とする人々に届ける。</p>
               </div>
               <div class="mission-item hover-float">
-                <img src="assets/images/mission1.jpeg" alt="舞台作り" class="mission-icon" width="1024" height="1024" loading="lazy" decoding="async">
                 <h4>舞台作り</h4>
                 <p>誰もが才能と強みを活かし、<br>社会に貢献できる機会を創出する。</p>
               </div>
             </div>
           </div>
-
-          <figure class="photo-break reveal">
-            <img src="assets/images/8XUlyOlw.jpeg" alt="講座でSNS発信を学ぶ様子" loading="lazy" decoding="async" width="1200" height="896">
-          </figure>
 
           <div class="choice-theory reveal">
             <h3>選択理論心理学を活用したSNS講座</h3>
@@ -280,22 +244,14 @@
             <p class="choice-theory-summary">この心理学をベースにしたSNS講座だからこそ、利用者一人ひとりが「自分らしく発信する力」を身につけ、社会での活躍につながる確かな一歩を踏み出せます。</p>
           </div>
 
-          <figure class="photo-break reveal">
-            <img src="assets/images/yRf0iGJe.jpeg" alt="スマートフォンで発信を楽しむ様子" loading="lazy" decoding="async" width="1200" height="896">
-          </figure>
-
           <div class="story reveal">
             <h3>なぜ、この事業を？</h3>
-            <div class="story-grid">
-              <div class="founder-info hover-float">
-                <img src="assets/images/r90D74yJ.jpeg" alt="Stellize代表 菊野玲" class="founder-image" loading="lazy" decoding="async" width="684" height="1024">
-                <p class="founder-name">Stellize代表　菊野玲</p>
-              </div>
-              <div class="story-body">
-                <p class="story-text">フリーランス時代、仕事ができなくなった私を救ってくれたのは、クライアントからの温かい一言でした。</p>
-                <p class="story-highlight">「誰かの役に立てている」という実感が、人生を前に進めてくれる。</p>
-                <p class="story-text">就労支援の現場でも同じです。力がないのではなく、「力を発揮できる場」がないだけ。<strong>その舞台をつくることが、Stellizeの使命です。</strong></p>
-              </div>
+            <div class="story-body">
+              <p class="story-text">フリーランス時代、仕事ができなくなった私を救ってくれたのは、クライアントからの温かい一言でした。</p>
+              <p class="story-highlight">「誰かの役に立てている」という実感が、人生を前に進めてくれる。</p>
+              <p class="story-text">就労支援の現場でも同じです。力がないのではなく、「力を発揮できる場」がないだけ。</p>
+              <p class="story-text">Stellizeが本当になくしたいのは、<strong>「ドロップアウト」</strong>です。学校でも、仕事でも、社会でも——一度つまずいただけで居場所を失ってしまう人がいます。もう一度自分の価値に気づき、活躍できる舞台をつくること。それが私たちの原点であり、企業理念です。</p>
+              <p class="founder-name">Stellize代表　菊野玲</p>
             </div>
           </div>
 
@@ -321,43 +277,6 @@
       <p class="label reveal">Voices</p>
       <h2 class="reveal">受講者・導入施設の声</h2>
       <div class="voices-grid stagger" id="voicesGrid"></div>
-    </div>
-  </section>
-
-  <!-- 事業紹介（card に hover-float / reveal 付与） -->
-  <section id="business" class="section business-section parallax-section">
-    <div class="container">
-      <p class="label reveal">Our Business</p>
-      <h2 class="reveal">事業紹介</h2>
-
-      <div class="business-cards stagger">
-        <div class="card hover-float">
-          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
-          <p class="card-badge" hidden>導入実績 準備中</p>
-          <img src="assets/images/IbVAB4wc.jpeg" alt="就労支援向けクリエイティブ講座" width="1200" height="896" loading="lazy" decoding="async">
-          <h3>就労支援向けクリエイティブ講座</h3>
-          <p>施設職員向けのクリエイティブ研修。学んだスキルが利用者の工賃向上、通所率向上につながります。オンライン・対面で選択可能。</p>
-          <a href="course.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-
-        <div class="card hover-float">
-          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
-          <p class="card-badge" hidden>導入実績 準備中</p>
-          <img src="assets/images/7JZwlWma.jpeg" alt="SNS・生産活動研修" width="1200" height="896" loading="lazy" decoding="async">
-          <h3>SNS・生産活動研修</h3>
-          <p>施設の生産活動をSNSで発信し、"売れる"活動へ。利用者が主役になって発信し、工賃向上とやりがいの醸成につなげる実践型研修です。</p>
-          <a href="training.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-
-        <div class="card hover-float">
-          <!-- 実績確定後: hiddenを外して「◯社支援」等を記載 -->
-          <p class="card-badge" hidden>支援実績 準備中</p>
-          <img src="assets/images/j1qhUtUg.jpeg" alt="Webマーケティング制作 G-PaC" width="1200" height="896" loading="lazy" decoding="async">
-          <h3>Webマーケティング制作「G-PaC」</h3>
-          <p>月額5万円で、HP・動画・SNS・チラシ・広告まで、Webマーケティング施策をまるごと実現。通常月間40〜50万円かかる施策を、事業の段階に応じて柔軟に対応します。</p>
-          <a href="gpac.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-      </div>
     </div>
   </section>
 
