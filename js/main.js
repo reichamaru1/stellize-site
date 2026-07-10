@@ -102,22 +102,40 @@ onScrollHeader();
 
 // ================================
 // ③ reveal / fade-in / stagger（IntersectionObserver）
+// 安全策：Observerが発火しない環境でも、画面内の要素は必ず表示する。
+// ヒーロー等のファーストビューが opacity:0 のまま消えるのを防ぐ。
 // ================================
 const reveals = document.querySelectorAll(".reveal, .fade-in, .stagger");
+const revealNow = (el) => el.classList.add("is-in");
 
-const io = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((e) => {
-      if (e.isIntersecting) {
-        e.target.classList.add("is-in");
-        io.unobserve(e.target);
-      }
+if (REDUCED_MOTION || !("IntersectionObserver" in window)) {
+  // 動き抑制・非対応環境では即座に全表示
+  reveals.forEach(revealNow);
+} else {
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          revealNow(e.target);
+          io.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0, rootMargin: "0px 0px -8% 0px" }
+  );
+  reveals.forEach((el) => io.observe(el));
+
+  // フォールバック：ロード直後と1.2秒後に、ビューポート内の要素を確実に表示。
+  // （Observerの初回発火が漏れてもファーストビューが消えないようにする）
+  const revealInView = () => {
+    reveals.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) revealNow(el);
     });
-  },
-  { threshold: 0.12 }
-);
-
-reveals.forEach((el) => io.observe(el));
+  };
+  window.addEventListener("load", revealInView);
+  setTimeout(revealInView, 1200);
+}
 
 // ================================
 // 実績数字・受講者の声（フェーズ2-11-2）
