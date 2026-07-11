@@ -167,6 +167,15 @@
             <div style="max-width: 800px; margin: 0 auto;">
                 <div class="card" style="padding: 3rem 2rem;">
                     <form id="contactForm">
+                        <!-- 流入元トラッキング（CTAのutm_*をJSで自動補完。バックエンド連携時にそのまま送信できるようhidden化） -->
+                        <input type="hidden" id="utm_source" name="utm_source" value="">
+                        <input type="hidden" id="utm_medium" name="utm_medium" value="">
+                        <input type="hidden" id="utm_campaign" name="utm_campaign" value="">
+                        <!-- ボット対策のハニーポット（人間には見えない。埋まっていたらGAS側で破棄） -->
+                        <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                            <label for="website">このフィールドは空のままにしてください</label>
+                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                        </div>
                         <!-- お名前 -->
                         <div class="form-group fade-in">
                             <label for="name" class="form-label required">お名前</label>
@@ -225,6 +234,7 @@
                             <select id="inquiry-type" name="inquiry-type" class="form-select" required>
                                 <option value="">選択してください</option>
                                 <option value="施設導入について">施設への導入について</option>
+                                <option value="企業研修について">企業研修について</option>
                                 <option value="講座内容について">講座内容について</option>
                                 <option value="費用について">費用について</option>
                                 <option value="説明会について">説明会・体験講座について</option>
@@ -395,25 +405,36 @@
       (function () {
         var params = new URLSearchParams(window.location.search);
 
-        // ① CTAの ?type= を種別セレクトに反映
+        // ① CTAの ?type= / ?target= を種別セレクトに反映
         var type = params.get("type");
+        var targetParam = params.get("target"); // "facility" | "corporate"
         var typeSelect = document.getElementById("inquiry-type");
-        if (type && typeSelect) {
-          var map = { document: "資料請求", consult: "施設導入について" };
-          var target = map[type];
-          if (target) {
+        if (typeSelect) {
+          var selected = "";
+          if (type === "document") {
+            selected = "資料請求";
+          } else if (type === "consult") {
+            // target=corporate なら企業研修、それ以外（facility/未指定）は施設導入をデフォルトに
+            selected = targetParam === "corporate" ? "企業研修について" : "施設導入について";
+          }
+          if (selected) {
+            // 資料請求の選択肢が無ければ先頭に追加
+            if (selected === "資料請求" && !Array.prototype.some.call(typeSelect.options, function (o) { return o.value === "資料請求"; })) {
+              var opt = document.createElement("option");
+              opt.value = "資料請求"; opt.textContent = "資料請求";
+              typeSelect.insertBefore(opt, typeSelect.options[1] || null);
+            }
             for (var i = 0; i < typeSelect.options.length; i++) {
-              if (typeSelect.options[i].value === target) { typeSelect.selectedIndex = i; break; }
+              if (typeSelect.options[i].value === selected) { typeSelect.selectedIndex = i; break; }
             }
           }
-          // 資料請求の選択肢が無ければ先頭に追加
-          if (type === "document" && typeSelect.value !== "資料請求") {
-            var opt = document.createElement("option");
-            opt.value = "資料請求"; opt.textContent = "資料請求";
-            typeSelect.insertBefore(opt, typeSelect.options[1] || null);
-            typeSelect.value = "資料請求";
-          }
         }
+
+        // ①-2 utm_* をhiddenフィールドへ反映（CRM連携・計測用）
+        ["utm_source", "utm_medium", "utm_campaign"].forEach(function (key) {
+          var field = document.getElementById(key);
+          if (field) field.value = params.get(key) || "";
+        });
 
         // ② 「知人の紹介」選択時のみ、ご紹介者様のお名前を表示
         var referral = document.getElementById("referral-source");
@@ -427,16 +448,111 @@
           syncReferrer();
         }
 
-        // ③ 送信完了イベント計測（trackEventはmain.jsで定義済み）
+        // ③ フォーム送信（Google Apps Script連携）
+        // GASデプロイ後、ウェブアプリのURL（https://script.google.com/macros/s/～/exec）を
+        // 下のFORM_ENDPOINTに貼ると本稼働する。空のままの間は、メール作成画面を開く
+        // フォールバックで動作する（フォームが「壊れている」状態にはならない）。
+        // 設置手順: gas/SETUP.md 参照
+        var FORM_ENDPOINT = ""; // TODO: GASのウェブアプリURLを貼る（gas/SETUP.md 手順3で取得）
+
+        var FALLBACK_EMAIL = "rei.stella1127@gmail.com";
         var form = document.getElementById("contactForm");
+
+        function buildMailtoBody() {
+          var v = function (id) { var el = document.getElementById(id); return el ? el.value : ""; };
+          return [
+            "お名前: " + v("name"),
+            "施設名・団体名: " + v("organization"),
+            "メール: " + v("email"),
+            "電話: " + v("phone"),
+            "種別: " + v("inquiry-type"),
+            "どちらで知ったか: " + v("referral-source"),
+            "ご紹介者名: " + v("referrer-name"),
+            "",
+            v("message")
+          ].join("\n");
+        }
+
+        function showSuccess() {
+          var card = form.closest(".card") || form.parentElement;
+          card.innerHTML =
+            '<div style="text-align:center; padding: 2rem 1rem;">' +
+            '<div style="width:64px;height:64px;margin:0 auto 20px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;">' +
+            '<svg viewBox="0 0 24 24" style="width:32px;height:32px;"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            "</div>" +
+            '<h2 style="font-family:\'Noto Serif JP\',serif;margin-bottom:14px;">送信が完了しました</h2>' +
+            '<p style="color:var(--text-secondary);line-height:2;">お問い合わせありがとうございます。<br>' +
+            "ご入力のメールアドレスに受付確認をお送りしました。<br>" +
+            "担当者より<strong>3営業日以内</strong>にご連絡いたします。</p>" +
+            '<p style="margin-top:24px;"><a href="index.html" class="btn btn-secondary">トップページへ戻る</a></p>' +
+            "</div>";
+          card.scrollIntoView({ block: "center" });
+        }
+
+        function showError(msg) {
+          var box = document.getElementById("formError");
+          if (!box) {
+            box = document.createElement("div");
+            box.id = "formError";
+            box.setAttribute("role", "alert");
+            box.style.cssText = "background:#FFF0F0;border-left:4px solid #E57373;border-radius:8px;padding:14px 18px;margin-bottom:20px;color:#C62828;line-height:1.8;font-size:.95rem;";
+            form.insertBefore(box, form.firstChild);
+          }
+          box.innerHTML = msg;
+          box.scrollIntoView({ block: "center" });
+        }
+
         if (form) {
-          form.addEventListener("submit", function () {
-            if (typeof window.trackEvent === "function") {
-              window.trackEvent("contact_submit", {
-                inquiry_type: typeSelect ? typeSelect.value : "",
-                referral_source: referral ? referral.value : ""
-              });
+          form.addEventListener("submit", function (ev) {
+            ev.preventDefault();
+
+            var track = function () {
+              if (typeof window.trackEvent === "function") {
+                window.trackEvent("contact_submit", {
+                  inquiry_type: typeSelect ? typeSelect.value : "",
+                  referral_source: referral ? referral.value : "",
+                  utm_source: params.get("utm_source") || "",
+                  utm_medium: params.get("utm_medium") || "",
+                  utm_campaign: params.get("utm_campaign") || ""
+                });
+              }
+            };
+
+            // エンドポイント未設定の間は、メール作成画面を開くフォールバック
+            if (!FORM_ENDPOINT) {
+              var subject = encodeURIComponent("【HP】お問い合わせ");
+              var body = encodeURIComponent(buildMailtoBody());
+              window.location.href = "mailto:" + FALLBACK_EMAIL + "?subject=" + subject + "&body=" + body;
+              showError("フォームは現在準備中のため、メールソフトが開きます。<br>そのまま送信してください（内容は自動で入力されています）。");
+              return;
             }
+
+            var btn = form.querySelector('button[type="submit"]');
+            var originalLabel = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "送信中…";
+
+            var data = new URLSearchParams(new FormData(form));
+            data.append("page_url", window.location.href);
+
+            fetch(FORM_ENDPOINT, { method: "POST", body: data })
+              .then(function (res) { return res.json(); })
+              .then(function (json) {
+                if (json && json.ok) {
+                  track();
+                  showSuccess();
+                } else {
+                  throw new Error((json && json.error) || "unknown");
+                }
+              })
+              .catch(function () {
+                btn.disabled = false;
+                btn.textContent = originalLabel;
+                showError(
+                  "送信に失敗しました。お手数ですが、時間をおいて再度お試しいただくか、" +
+                  '<a href="mailto:' + FALLBACK_EMAIL + '" style="color:#C62828;font-weight:600;">' + FALLBACK_EMAIL + "</a> まで直接ご連絡ください。"
+                );
+              });
           });
         }
       })();

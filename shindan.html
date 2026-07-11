@@ -3,335 +3,643 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
-<title>生産活動拡大 課題診断｜B型事業所オーナー・サビ管向け</title>
-<meta name="description" content="就労継続支援B型事業所のオーナー・サービス管理責任者向け。12の質問で、生産活動拡大を妨げている課題のタイプを診断します。">
+<title>生産活動拡大 課題診断｜就労支援事業所の運営者向け</title>
+<meta name="description" content="就労支援事業所（B型・A型・移行支援など）のオーナー・サービス管理責任者向け。15の質問で、生産活動拡大を妨げている課題のタイプを5軸で診断します。">
+
+<!-- ▼ SNSシェア用（OGP / Twitterカード）。
+     og:url と og:image は「本番ドメインを含む絶対URL」でないとSNSに反映されません。
+     公開ドメインが決まったら、下の https://example.com の部分を実際のURLに差し替えてください。 -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="生産活動拡大 課題診断｜就労支援事業所の運営者向け">
+<meta property="og:description" content="15の質問で、あなたの施設の「強み」と「本当の課題」を5軸で診断。無料・登録不要・約3分。">
+<meta property="og:site_name" content="Stellize">
+<meta property="og:url" content="https://example.com/shindan.html">
+<meta property="og:image" content="https://example.com/assets/images/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="生産活動拡大 課題診断｜就労支援事業所の運営者向け">
+<meta name="twitter:description" content="15の質問で、あなたの施設の「強み」と「本当の課題」を5軸で診断。無料・登録不要・約3分。">
+<meta name="twitter:image" content="https://example.com/assets/images/hero.jpg">
+
+<!-- コーポレートサイトと同じフォント（読み込めない環境でも代替フォントで表示されます） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script>
 /* ============================================================
  * ★★★ 設定エリア（ここを編集してください） ★★★
  * ============================================================ */
 
-// 無料説明会の申込みフォームURL（仮URL。本番のフォームURLに差し替えてください）
-const CONTACT_URL = "https://example.com/contact";
+// 無料説明会・相談の申込み先URL。
+// 初期値はコーポレートサイトのお問い合わせページ（診断からの流入をUTMで計測）。
+// 別のフォームを使う場合はここを差し替えてください。
+const CONTACT_URL = "contact.html?type=consult&target=facility&utm_source=shindan&utm_medium=result_cta&utm_campaign=diagnosis";
 
-// 公式LINEのURL（仮URL。本番のLINE URLに差し替えてください）
-const LINE_URL = "https://lin.ee/xxxxxxx";
+// 公式LINEのURL。まだ用意できていない場合は空文字 "" のままでOK
+//（その場合、結果画面のLINEボタンは自動的に非表示になります）。
+// LINE公式アカウントのURL（例：https://lin.ee/xxxxxxx）が決まったら貼り付けてください。
+const LINE_URL = "";
 
-// 事業者名（結果画面のフッター等に表示されます）
+// 事業者名（シェアカード・結果画面に表示されます）
 const BRAND_NAME = "Stellize";
 
 /* ============================================================
- * ★★★ 設問データ（質問文を差し替える場合はここ） ★★★
- * axis: "staff"（スタッフ・指導スキル） / "product"（商品・販路） / "user"（利用者の意欲・工賃還元）
- * 課題が存在するほどスコアが高くなる「課題ベース」の文章にしてください
+ * ★★★ 5つの診断軸（表示順もこの順） ★★★
+ * key      : 内部ID（変更不可）
+ * label    : 正式名称（スコア一覧などに表示）
+ * short    : レーダーチャートの頂点ラベル（短く）
+ * theme    : 軸の切り替わり演出で表示する説明
+ * strength : この軸のスコアが低い（＝課題が少ない）ときに「強み」として見せる文章
  * ============================================================ */
-const QUESTIONS = [
-  // --- スタッフ・指導スキル軸（4問） ---
-  { axis: "staff",   text: "スタッフによって、利用者さんへの作業の教え方にばらつきがある" },
-  { axis: "staff",   text: "デザインやものづくりのスキルが、特定のスタッフの経験に頼っている" },
-  { axis: "staff",   text: "新しい作業や商品づくりを始めたくても、教えられる人がいない" },
-  { axis: "staff",   text: "指導の手順やコツが、マニュアルや「型」として残っていない" },
-
-  // --- 商品・販路軸（4問） ---
-  { axis: "product", text: "自施設の商品が、正直「売れるデザイン・魅力」になっていないと感じる" },
-  { axis: "product", text: "販売先が限られていて、新しい販路をなかなか開拓できていない" },
-  { axis: "product", text: "SNSやネットでの発信が、ほとんどできていない・続いていない" },
-  { axis: "product", text: "商品の価格が安く、作業量のわりに収益につながっていない" },
-
-  // --- 利用者の意欲・工賃還元軸（4問） ---
-  { axis: "user",    text: "利用者さんの作業へのモチベーションが上がりにくいと感じる" },
-  { axis: "user",    text: "頑張りがどう工賃に反映されるのか、利用者さんに伝わりにくい" },
-  { axis: "user",    text: "利用者さんが「できた」「褒められた」と実感できる場面が少ない" },
-  { axis: "user",    text: "工賃が思うように上げられず、利用者さんやご家族に申し訳なさを感じる" }
+const AXES = [
+  { key: "teach",   label: "指導・スキル継承",     short: "指導・継承",  theme: "スタッフの指導力と、スキルの受け継がれ方について",     strength: "指導やスキルの受け渡しが、現場にしっかり根づいています" },
+  { key: "product", label: "商品力・デザイン性",   short: "商品力",      theme: "商品そのものの魅力と、商品開発について",             strength: "商品づくりに、確かな魅力と手ごたえがあります" },
+  { key: "sales",   label: "販路・マーケティング", short: "販路・発信",  theme: "売り先の広さと、外への発信力について",               strength: "販路や発信の面で、外とのつながりを持てています" },
+  { key: "wage",    label: "利用者の意欲・工賃還元", short: "意欲・工賃", theme: "利用者さんのモチベーションと工賃の仕組みについて",   strength: "利用者さんの意欲と、工賃への納得感が育っています" },
+  { key: "org",     label: "組織体制・仕組み化",   short: "組織・仕組み", theme: "人が変わっても回る、業務の仕組みについて",           strength: "業務が仕組みで回る、安定した土台があります" }
 ];
 
 /* ============================================================
- * ★★★ 診断結果の文言（結果コメントを差し替える場合はここ） ★★★
+ * ★★★ 設問データ（5軸×3問＝15問。質問文の差し替えはここ） ★★★
+ * 課題が存在するほどスコアが高くなる「課題ベース」の文章にすること
  * ============================================================ */
-const AXES = {
-  staff:   { label: "スタッフ・指導スキル",     color: "#2a9d8f" },
-  product: { label: "商品・販路",               color: "#1d3557" },
-  user:    { label: "利用者の意欲・工賃還元",   color: "#e9a13b" }
-};
+const QUESTIONS = [
+  // --- 指導・スキル継承軸（3問） ---
+  { axis: "teach",   text: "スタッフによって、利用者さんへの作業の教え方にばらつきがある" },
+  { axis: "teach",   text: "デザインやものづくりのスキルが、特定のスタッフに依存している" },
+  { axis: "teach",   text: "指導の手順やコツが、マニュアルや「型」として残っていない" },
 
-const RESULT_TYPES = {
-  staff: {
-    name: "タイプA：指導力底上げ型",
-    catch: "現場の頑張りを、「教える型」がまだ支えきれていないようです",
-    comment: "日々の現場は一人ひとりのスタッフの努力で回っている一方で、教え方や指導のノウハウが体系化されておらず、個人の経験値に頼った属人的な指導になっている傾向が見えています。このままだと、新しい商品づくりや作業の幅を広げようとしたときに、「教えられる人がいない」ことがボトルネックになりやすい状態かもしれません。",
-    directions: [
-      "指導手順を「型」として言語化・マニュアル化し、誰が教えても同じ品質になる仕組みをつくる",
-      "外部講師によるクリエイティブ研修を導入し、スタッフ自身が「教えられるスキル」を身につける",
-      "新人スタッフでも再現できる、スモールステップの作業分解を取り入れる"
+  // --- 商品力・デザイン性軸（3問） ---
+  { axis: "product", text: "自施設の商品が、正直「売れるデザイン・魅力」になっていないと感じる" },
+  { axis: "product", text: "新しい商品の開発が、ここ1年ほとんど進んでいない" },
+  { axis: "product", text: "商品が今の時代のトレンドやニーズに合っているか、自信が持てない" },
+
+  // --- 販路・マーケティング軸（3問） ---
+  { axis: "sales",   text: "販売先が限られていて、新しい販路をなかなか開拓できていない" },
+  { axis: "sales",   text: "SNSやネットでの発信が、ほとんどできていない・続いていない" },
+  { axis: "sales",   text: "新しい顧客や取引先を増やすための動きが、後回しになりがちだ" },
+
+  // --- 利用者の意欲・工賃還元軸（3問） ---
+  { axis: "wage",    text: "利用者さんの作業へのモチベーションが上がりにくいと感じる" },
+  { axis: "wage",    text: "頑張りがどう工賃に反映されるのか、利用者さんに伝わりにくい" },
+  { axis: "wage",    text: "利用者さんが「できた」と達成感を得られる場面が少ない" },
+
+  // --- 組織体制・仕組み化軸（3問） ---
+  { axis: "org",     text: "業務の進め方が特定の人の頭の中にあり、共有されていない" },
+  { axis: "org",     text: "作業記録や振り返り・改善のサイクルが、仕組みとして回っていない" },
+  { axis: "org",     text: "スタッフの入れ替わりがあると、現場が回らなくなる不安がある" }
+];
+
+/* ============================================================
+ * ★★★ タイプ診断（上位2軸の組み合わせ10タイプ＋安定成長型） ★★★
+ * キーは「軸key+軸key」（AXESの表示順で先の軸が前）
+ * name    : タイプ名
+ * catch   : シェアカードに載る一言診断
+ * comment : 診断コメント（3〜4文）
+ * actions : 改善の優先アクション（2つ）
+ * ============================================================ */
+const TYPES = {
+  "teach+product": {
+    name: "職人育成待ち型",
+    catch: "「教える型」が整えば、商品はもっと良くなる施設です",
+    comment: "商品を良くしたい気持ちはあるのに、教え方やクリエイティブのノウハウが特定のスタッフの経験に頼っている傾向が見えています。そのため、新しい商品づくりに挑戦しようとしても「教えられる人がいない」ことが壁になりやすい状態かもしれません。裏を返せば、指導が体系化されれば、商品の質と幅はそれに連動して伸びていく余地が大きい施設です。",
+    actions: [
+      "指導手順を「型」として言語化し、誰が教えても同じ品質になる仕組みをつくる",
+      "外部講師によるクリエイティブ研修で、スタッフ自身の「教えられるスキル」を底上げする"
     ]
   },
-  product: {
-    name: "タイプB：商品力・販路開拓型",
-    catch: "「つくる力」はあるのに、「売る力」がまだ追いついていないようです",
-    comment: "日々の作業自体はしっかり回っている一方で、商品の魅力・デザイン性や販路の広さが、利用者さんの工賃向上に直結していない傾向が見えています。「良いものをつくっているのに、正当な価格で売れる場所がない」——そんなもどかしさを感じているかもしれません。",
-    directions: [
-      "商品のデザイン性・パッケージを見直し、「福祉だから買う」ではなく「欲しいから買う」商品へ",
-      "InstagramなどのSNSを活用した発信で、施設のファンを少しずつ増やす",
-      "外部のデザイナー・企業との連携で、新しい販路や委託販売先を開拓する"
+  "teach+sales": {
+    name: "隠れた実力型",
+    catch: "良いものを作る力が、まだ外に伝わっていないようです",
+    comment: "現場には確かな作業力があるのに、指導ノウハウの属人化と発信不足によって、その実力が外の世界に伝わっていない傾向が見えています。「知る人ぞ知る施設」で止まってしまうのは、正直もったいない状態です。ノウハウの言語化と発信の習慣化は、どちらも小さく始められる改善です。",
+    actions: [
+      "作業や指導のノウハウを言語化・マニュアル化し、施設の「強み」として見える形にする",
+      "週1回からで良いので、SNSでの発信を習慣として仕組みに組み込む"
     ]
   },
-  user: {
-    name: "タイプC：意欲・工賃改善型",
-    catch: "利用者さんの「やりがい」の設計に、伸びしろがあるようです",
-    comment: "利用者さんのモチベーションや、工賃還元の仕組み・見える化に課題がある傾向が見えています。作業そのものよりも、「頑張りがどう報われるか」が伝わりにくいことで、意欲が育ちにくくなっているのかもしれません。ここが変わると、現場の空気は大きく変わります。",
-    directions: [
-      "小さな成功体験を積み重ねられるよう、作業をスモールステップで設計する",
-      "頑張りと工賃のつながりを「見える化」し、利用者さん本人に伝わる形にする",
-      "作品が売れた・褒められたなど、達成感を得られる場面を意図的につくる"
+  "teach+wage": {
+    name: "現場疲弊型",
+    catch: "スタッフの頑張りで持ちこたえている状態かもしれません",
+    comment: "指導の負担が特定のスタッフに集中し、同時に利用者さんの達成感や工賃還元の設計も追いついていない傾向が見えています。現場が「人の頑張り」で持ちこたえている状態は、スタッフと利用者さんの双方が消耗しやすい構造です。指導の型化と達成感の設計は、実は同じ「スモールステップ化」という一つの工夫から始められます。",
+    actions: [
+      "作業をスモールステップに分解し、指導の負担分散と利用者さんの達成感づくりを同時に進める",
+      "頑張りと工賃のつながりを「見える化」し、利用者さん本人に伝わる形にする"
     ]
   },
-  mixed: {
-    name: "タイプD：複合課題型",
-    catch: "課題は一点ではなく、複数の要因が絡み合っているようです",
-    comment: "特定の一つの課題というより、指導・商品・利用者の意欲といった複数の要因が絡み合って、生産活動の拡大を難しくしている状態が見えています。裏を返せば、どこか一つが動き出すと、他の課題にも良い連鎖が起きやすい状態でもあります。",
-    directions: [
-      "全部を一度に変えようとせず、優先順位をつけた段階的な改善から始める",
-      "まずは「教える型づくり」か「商品の見直し」など、効果が波及しやすい一点を選ぶ",
-      "外部の視点を入れて、自施設では気づきにくい優先順位を整理する"
+  "teach+org": {
+    name: "属人化リスク型",
+    catch: "「あの人がいないと回らない」が最大のリスクのようです",
+    comment: "スキルも業務の進め方も特定の人に紐づいていて、その人が休んだり抜けたりすると現場が止まるリスクを抱えている傾向が見えています。日々は問題なく回っているように見えるぶん、気づきにくい課題です。マニュアル化・記録の仕組み化は地味ですが、生産活動を拡大する土台として最も効果が波及しやすい投資です。",
+    actions: [
+      "業務フローと指導手順をマニュアル・記録として残し、「人」から「仕組み」に移す",
+      "新人スタッフでも再現できる、教え方の「型」を一つの作業から作り始める"
+    ]
+  },
+  "product+sales": {
+    name: "磨けば光る型",
+    catch: "「つくる力」はある。あとは磨き方と売り方です",
+    comment: "日々の作業はしっかり回っている一方で、商品の魅力・デザイン性と販路の広さが、利用者さんの工賃向上に直結していない傾向が見えています。「良いものをつくっているのに、正当な価格で売れる場所がない」——そんなもどかしさを感じているかもしれません。デザインと売り方は、外部の視点を入れることで一気に変わりやすい領域です。",
+    actions: [
+      "商品のデザイン・パッケージを見直し、「福祉だから買う」ではなく「欲しいから買う」商品へ",
+      "委託販売・イベント出店・SNSなど、新しい販路への接点を月1つずつ増やす"
+    ]
+  },
+  "product+wage": {
+    name: "表現力先行型",
+    catch: "つくる意欲を、成果の実感につなげたい状態です",
+    comment: "ものづくりへの意欲や現場の熱はあるのに、商品の魅力が売上や工賃という「目に見える成果」に結びつかず、利用者さんの達成感も育ちにくくなっている傾向が見えています。「頑張ってつくったものが売れて、工賃が上がる」という循環が一度回り始めると、現場の空気は大きく変わります。まずはその最初の一周をつくることが優先です。",
+    actions: [
+      "「磨けば売れる」商品を一つ選んで集中的にリニューアルし、成功体験の起点をつくる",
+      "売れた実感（売上・お客様の声）を利用者さんに返す仕組みをつくる"
+    ]
+  },
+  "product+org": {
+    name: "個人技依存型",
+    catch: "商品づくりが「センスのある誰か」頼みになっているようです",
+    comment: "商品開発が特定の人のセンスや裁量に依存していて、組織としての仕組み・再現性が育っていない傾向が見えています。その人が忙しいと商品開発が止まり、抜けるとゼロに戻る——そんな構造的な脆さを抱えているかもしれません。デザインの「型」やテンプレートを整備すると、個人技を組織の力に変えていけます。",
+    actions: [
+      "商品開発の流れ（企画→試作→改善）をプロセスとして言語化し、複数人で回せる形にする",
+      "デザインの型・テンプレートを整備し、センスに頼らず一定品質を出せる仕組みをつくる"
+    ]
+  },
+  "sales+wage": {
+    name: "もったいない型",
+    catch: "良いものと意欲の芽が、売り先の狭さで埋もれています",
+    comment: "商品や現場の力に比べて販路が狭く、売上が伸びないぶん工賃にも還元されず、利用者さんの意欲にもつながりにくい——そんな循環の詰まりが見えています。課題の起点は「売る場所と伝える手段の少なさ」にある可能性が高く、ここが開くと工賃も意欲も連動して動き出す構造です。正直、一番「もったいない」状態かもしれません。",
+    actions: [
+      "委託販売・マルシェ・ECなど、新しい販路を月1つのペースで試す",
+      "売上と工賃のつながりを見える化し、「売れたら還ってくる」実感を利用者さんに届ける"
+    ]
+  },
+  "sales+org": {
+    name: "発信不足型",
+    catch: "外との接点づくりが、日々の業務に埋もれているようです",
+    comment: "日々の運営に追われるなかで、発信や販路開拓といった「外向きの動き」と、それを支える体制づくりが後回しになっている傾向が見えています。発信は「担当者の気合い」で続けるものではなく、当番・頻度・ひな形を決めた「仕組み」にすると急に続くようになります。外との接点が増えると、施設の選択肢は目に見えて広がります。",
+    actions: [
+      "SNS発信を当番制・週1回・ひな形ありの「仕組み」にして、気合いに頼らず続ける",
+      "月1回、新しい取引先・出店先・コラボ先との接点をつくる時間を業務に組み込む"
+    ]
+  },
+  "wage+org": {
+    name: "仕組み待ち型",
+    catch: "利用者さんの意欲は、「仕組みの設計」を待っています",
+    comment: "利用者さんのモチベーションと、それを支える組織の仕組みの両方に伸びしろがある傾向が見えています。意欲は性格や気分の問題ではなく、「達成感を得られる作業設計」と「頑張りが還る工賃の見える化」という仕組みで育てられるものです。記録と振り返りのサイクルが回り始めると、小さな変化に気づけるようになり、支援の質そのものが上がっていきます。",
+    actions: [
+      "小さな成功体験を積み重ねられるよう、作業をスモールステップで設計し直す",
+      "作業記録と振り返りのサイクルを仕組み化し、頑張りと工賃のつながりを見える化する"
+    ]
+  },
+  /* 全軸のスコアが低い場合の特別タイプ */
+  "stable": {
+    name: "安定成長型（伸びしろ探し中）",
+    catch: "大きな崩れはなし。次の一手を探すフェーズです",
+    comment: "5つの軸のいずれにも、突出した課題は見えませんでした。日々の運営が安定して回っている、土台のしっかりした施設だと言えそうです。だからこそ次のテーマは「どこから伸ばすか」。相対的にスコアが高かった軸が、次の成長の起点になる可能性があります。",
+    actions: [
+      "今回のスコアが相対的に高かった軸から、小さな改善を一つ始めてみる",
+      "外部の視点を入れて、自施設では気づきにくい「伸びしろ」を棚卸しする"
     ]
   }
 };
 
-// 複合課題型と判定する軸間スコア差のしきい値
-const MIXED_THRESHOLD = 0.3;
-
-// 緊急度のしきい値（全体平均点）
-const URGENCY = [
-  { min: 3.8, label: "高", note: "できるだけ早めに手を打ちたい状態です", color: "#d0603c" },
-  { min: 2.8, label: "中", note: "今のうちに改善の一歩を踏み出したい状態です", color: "#e9a13b" },
-  { min: 0,   label: "低", note: "大きな崩れはなく、さらに伸ばせる状態です", color: "#2a9d8f" }
-];
+// 「安定成長型」と判定する基準：全軸の平均スコアがこの値未満
+const STABLE_THRESHOLD = 3.0;
 
 /* ============================================================
  * ここから下はロジック・画面（通常は編集不要）
  * ============================================================ */
 </script>
 <style>
+  /* コーポレートサイト（css/style.css）と同じデザイントークン */
   :root {
-    --navy: #1d3557;
-    --teal: #2a9d8f;
-    --teal-light: #e6f4f2;
-    --orange: #e9a13b;
-    --orange-dark: #d0894a;
-    --bg: #f7f5f0;
-    --card: #ffffff;
-    --text: #2b3a4a;
-    --text-sub: #6b7a8a;
+    --bg-primary: #FAF7F2;
+    --bg-section: #F5F1EB;
+    --bg-white: #FFFFFF;
+    --color-primary: #AE9FC4;   /* ラベンダー */
+    --color-primary-deep: #7C6DA8;
+    --color-primary-soft: #D4CBDE;
+    --color-secondary: #5C7C6F; /* セージグリーン */
+    --color-accent: #E8BFC8;    /* ソフトピンク */
+    --purple-1: #7C6DA8;        /* フッターと同じ深紫グラデーション */
+    --purple-2: #574B7A;
+    --text-primary: #3A3A3A;
+    --text-secondary: #6B6B6B;
+    --text-light: #999999;
     --line: #06c755;
-    --radius: 16px;
-    --shadow: 0 4px 20px rgba(29, 53, 87, 0.10);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --shadow-sm: 0 6px 25px rgba(110, 90, 100, 0.08);
+    --shadow-md: 0 12px 40px rgba(110, 90, 100, 0.12);
+    --serif: 'Noto Serif JP', "Hiragino Mincho ProN", "Yu Mincho", serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: 'Noto Sans JP', "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background:
+      radial-gradient(800px 500px at 90% -5%, rgba(232, 191, 200, 0.18), transparent 60%),
+      radial-gradient(700px 450px at -5% 30%, rgba(174, 159, 196, 0.14), transparent 60%),
+      var(--bg-primary);
+    background-attachment: fixed;
+    color: var(--text-primary);
     line-height: 1.8;
     min-height: 100vh;
   }
-  .container { max-width: 560px; margin: 0 auto; padding: 0 20px 60px; }
+  .container { max-width: 560px; margin: 0 auto; padding: 0 20px 64px; position: relative; z-index: 1; }
+
+  /* ---------- 背景の装飾（ゆらめく色のにじみ＋星） ---------- */
+  .bg-deco { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.55;
+    animation: blobDrift 22s ease-in-out infinite alternate;
+  }
+  .blob-1 {
+    width: 380px; height: 380px; top: -120px; right: -100px;
+    background: radial-gradient(circle at 40% 40%, rgba(232, 191, 200, 0.55), rgba(232, 191, 200, 0) 70%);
+  }
+  .blob-2 {
+    width: 420px; height: 420px; top: 34%; left: -180px;
+    background: radial-gradient(circle at 60% 40%, rgba(174, 159, 196, 0.5), rgba(174, 159, 196, 0) 70%);
+    animation-delay: -7s; animation-duration: 26s;
+  }
+  .blob-3 {
+    width: 340px; height: 340px; bottom: -120px; right: -60px;
+    background: radial-gradient(circle at 50% 50%, rgba(92, 124, 111, 0.32), rgba(92, 124, 111, 0) 70%);
+    animation-delay: -14s; animation-duration: 30s;
+  }
+  @keyframes blobDrift {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(40px, 30px) scale(1.08); }
+  }
+  .deco-star {
+    position: absolute;
+    color: rgba(174, 159, 196, 0.5);
+    animation: twinkle 4.5s ease-in-out infinite;
+  }
+  .star-1 { top: 12%; left: 12%; font-size: 15px; }
+  .star-2 { top: 22%; right: 10%; font-size: 11px; color: rgba(232, 191, 200, 0.65); animation-delay: -1.2s; }
+  .star-3 { top: 55%; right: 16%; font-size: 13px; animation-delay: -2.4s; }
+  .star-4 { top: 68%; left: 9%;  font-size: 10px; color: rgba(232, 191, 200, 0.6); animation-delay: -3.1s; }
+  .star-5 { top: 86%; right: 34%; font-size: 12px; color: rgba(92, 124, 111, 0.4); animation-delay: -1.8s; }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.9); }
+    50%      { opacity: 0.9;  transform: scale(1.15); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .blob, .deco-star { animation: none; }
+  }
 
   /* ---------- 画面切り替え ---------- */
   .screen { display: none; }
-  .screen.active { display: block; animation: fadeIn 0.35s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .screen.active { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ---------- 進捗バー ---------- */
-  #progressWrap {
-    position: sticky; top: 0; z-index: 10;
-    background: var(--bg);
-    padding: 14px 20px 10px;
-    max-width: 560px; margin: 0 auto;
-    display: none;
+  /* ---------- カード共通（サイトの白カード基調） ---------- */
+  .glass {
+    background: var(--bg-white);
+    border: 1px solid rgba(174, 159, 196, 0.18);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
   }
-  #progressWrap.visible { display: block; }
-  .progress-label { font-size: 12px; color: var(--text-sub); margin-bottom: 6px; text-align: right; }
-  .progress-track { height: 8px; background: #e3ded4; border-radius: 99px; overflow: hidden; }
-  .progress-fill {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, var(--teal), var(--navy));
+
+  /* ---------- ステップインジケーター ---------- */
+  #stepper {
+    position: sticky; top: 0; z-index: 10;
+    display: none;
+    padding: 16px 20px 12px;
+    max-width: 560px; margin: 0 auto;
+    background: linear-gradient(180deg, rgba(250, 247, 242, 0.97), rgba(250, 247, 242, 0.85) 80%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  #stepper.visible { display: block; }
+  .step-dots { display: flex; justify-content: center; gap: 18px; margin-bottom: 9px; }
+  .step-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(174, 159, 196, 0.28);
+    transition: all 0.35s ease;
+  }
+  .step-dot.done { background: var(--color-primary-soft); }
+  .step-dot.current {
+    background: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(174, 159, 196, 0.25), 0 0 12px rgba(174, 159, 196, 0.6);
+    transform: scale(1.18);
+  }
+  .step-theme { text-align: center; font-size: 11.5px; color: var(--text-secondary); letter-spacing: 0.04em; margin-bottom: 8px; }
+  .step-theme .theme-name { color: var(--color-primary-deep); font-weight: 700; }
+  .mini-bars { display: flex; justify-content: center; gap: 6px; }
+  .mini-bar {
+    width: 34px; height: 4px; border-radius: 99px;
+    background: rgba(174, 159, 196, 0.22);
+    overflow: hidden; position: relative;
+  }
+  .mini-bar .fill {
+    position: absolute; inset: 0; width: 0%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
     border-radius: 99px;
-    transition: width 0.4s ease;
+    transition: width 0.3s ease;
   }
 
   /* ---------- スタート画面 ---------- */
-  .hero { padding: 52px 0 30px; text-align: center; }
+  .hero { padding: 56px 0 26px; text-align: center; }
   .hero-badge {
     display: inline-block;
-    background: var(--teal-light); color: var(--teal);
-    font-size: 12px; font-weight: 700;
-    padding: 5px 16px; border-radius: 99px;
-    margin-bottom: 18px; letter-spacing: 0.05em;
+    background: var(--bg-white);
+    border: 1px solid rgba(174, 159, 196, 0.45);
+    color: var(--color-primary-deep);
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em;
+    padding: 6px 18px; border-radius: 50px;
+    margin-bottom: 20px;
   }
   .hero h1 {
-    font-size: 25px; line-height: 1.5; color: var(--navy);
-    font-weight: 800; margin-bottom: 14px;
+    font-family: var(--serif);
+    font-size: clamp(21px, 6vw, 28px); line-height: 1.6; font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
   }
-  .hero h1 .accent { color: var(--teal); }
-  .hero p.lead { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; }
-  .hero-points {
-    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: 22px 24px; margin: 26px 0; text-align: left;
+  .hero h1 .accent {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: var(--color-primary);
+    font-weight: 600;
   }
-  .hero-points li {
-    list-style: none; font-size: 14px; padding: 7px 0 7px 30px; position: relative;
-  }
+  .hero p.lead { font-size: 14px; color: var(--text-secondary); }
+  .hero-points { padding: 24px 26px; margin: 28px 0; text-align: left; }
+  .hero-points li { list-style: none; font-size: 14px; padding: 7px 0 7px 30px; position: relative; }
   .hero-points li::before {
-    content: "✓"; position: absolute; left: 4px; top: 7px;
-    color: var(--teal); font-weight: 800;
+    content: "✿"; position: absolute; left: 4px; top: 7px;
+    color: var(--color-accent); font-size: 13px;
   }
-  .note-small { font-size: 12px; color: var(--text-sub); text-align: center; margin-top: 12px; }
+  .note-small { font-size: 11.5px; color: var(--text-light); text-align: center; margin-top: 14px; }
 
-  /* ---------- ボタン共通 ---------- */
+  /* ---------- ボタン共通（サイトの .btn-primary と同じ質感） ---------- */
   .btn {
     display: block; width: 100%;
     border: none; cursor: pointer; text-decoration: none; text-align: center;
-    font-family: inherit; font-weight: 700;
-    border-radius: 99px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    font-family: inherit; font-weight: 600;
+    border-radius: 50px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   .btn:active { transform: scale(0.98); }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
-    color: #fff; font-size: 17px; padding: 17px 20px;
-    box-shadow: 0 6px 18px rgba(233, 161, 59, 0.4);
+  .btn-gold {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-soft));
+    color: #fff; font-size: 16.5px; padding: 17px 20px;
+    box-shadow: 0 8px 25px rgba(174, 159, 196, 0.3);
   }
-  .btn-navy {
-    background: var(--navy); color: #fff; font-size: 16px; padding: 16px 20px;
-    box-shadow: 0 4px 14px rgba(29, 53, 87, 0.3);
+  .btn-gold:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(174, 159, 196, 0.4);
   }
   .btn-line {
-    background: #fff; color: var(--line); font-size: 15px; padding: 14px 20px;
+    background: var(--bg-white); color: #05a648;
+    font-size: 15px; padding: 14px 20px;
     border: 2px solid var(--line);
   }
+  .btn-line:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(6, 199, 85, 0.18); }
 
-  /* ---------- 設問カード ---------- */
-  .quiz-area { padding-top: 14px; }
-  .q-axis-tag {
-    display: inline-block; font-size: 11px; font-weight: 700;
-    color: var(--teal); background: var(--teal-light);
-    padding: 3px 12px; border-radius: 99px; margin-bottom: 12px;
+  /* ---------- テーマ切り替え演出（インタースティシャル） ---------- */
+  .interstitial { text-align: center; padding: 110px 0 40px; }
+  .inter-num {
+    font-size: 12px; letter-spacing: 0.25em; color: var(--color-primary);
+    font-weight: 700; margin-bottom: 14px;
   }
-  .q-card {
-    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: 28px 24px;
+  .inter-name { font-family: var(--serif); font-size: 24px; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .inter-desc { font-size: 13.5px; color: var(--text-secondary); }
+  .inter-line {
+    width: 44px; height: 2px; margin: 22px auto 0;
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
   }
-  .q-number { font-size: 13px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; }
-  .q-text { font-size: 18px; font-weight: 700; line-height: 1.7; color: var(--navy); margin-bottom: 22px; min-height: 3.4em; }
-  .q-options { display: flex; flex-direction: column; gap: 10px; }
-  .q-option {
-    display: flex; align-items: center; gap: 12px;
-    width: 100%; padding: 13px 16px;
-    background: #fbfaf7; border: 2px solid #e8e3d8; border-radius: 12px;
-    font-family: inherit; font-size: 15px; color: var(--text); text-align: left;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+
+  /* ---------- 設問画面（カードなし・中央揃え・円形スケール） ---------- */
+  .quiz-area { padding-top: 34px; text-align: center; }
+  .q-number {
+    font-family: var(--serif);
+    font-size: 12px; color: var(--text-secondary); font-weight: 500;
+    letter-spacing: 0.3em; margin-bottom: 26px;
   }
-  .q-option:active { transform: scale(0.98); }
-  .q-option .num {
+  .q-text {
+    font-family: var(--serif);
+    font-size: 19px; font-weight: 600; line-height: 1.9; letter-spacing: 0.05em;
+    color: var(--text-primary);
+    margin: 0 auto 44px; max-width: 30em; min-height: 3.8em;
+  }
+  .scale-caption {
+    display: flex; justify-content: space-between; align-items: baseline;
+    max-width: 340px; margin: 0 auto 18px;
+    font-size: 12px; font-weight: 700;
+  }
+  .scale-caption .cap-no  { color: var(--color-secondary); }
+  .scale-caption .cap-yes { color: var(--color-primary-deep); }
+  .q-options {
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 340px; margin: 0 auto;
+  }
+  /* 円形の選択肢：左（当てはまらない＝グリーン）→右（当てはまる＝ラベンダー） */
+  .q-circle {
+    border: none; padding: 0; cursor: pointer; border-radius: 50%;
     flex-shrink: 0;
-    width: 30px; height: 30px; border-radius: 50%;
-    background: var(--teal-light); color: var(--teal);
-    font-weight: 800; font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    box-shadow: inset 0 0 0 1.5px rgba(58, 58, 58, 0.06);
   }
-  .q-option.selected { border-color: var(--teal); background: var(--teal-light); }
+  .q-circle:hover { transform: scale(1.12); }
+  .q-circle:active { transform: scale(0.95); }
+  .q-circle.selected {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 3px var(--bg-primary), 0 0 0 5.5px currentColor, 0 6px 16px rgba(110, 90, 100, 0.2);
+  }
+  .q-circle.c1 { width: 54px; height: 54px; background: #8FAF9E; color: #8FAF9E; }
+  .q-circle.c2 { width: 43px; height: 43px; background: #C3D5C9; color: #C3D5C9; }
+  .q-circle.c3 { width: 34px; height: 34px; background: #DAD5CB; color: #DAD5CB; }
+  .q-circle.c4 { width: 43px; height: 43px; background: #D0C6DE; color: #D0C6DE; }
+  .q-circle.c5 { width: 54px; height: 54px; background: #AE9FC4; color: #AE9FC4; }
+  .q-back-wrap { margin-top: 52px; }
   .q-back {
-    margin-top: 16px; background: none; border: none; cursor: pointer;
-    font-family: inherit; font-size: 13px; color: var(--text-sub);
-    text-decoration: underline; padding: 6px;
+    background: none; border: none; cursor: pointer;
+    font-family: var(--serif); font-size: 13px; letter-spacing: 0.12em;
+    color: var(--text-secondary); padding: 6px 10px;
   }
+  .q-back:hover { color: var(--text-primary); }
 
   /* ---------- 結果画面 ---------- */
-  .result-head { text-align: center; padding: 44px 0 8px; }
-  .result-head .small { font-size: 13px; color: var(--text-sub); margin-bottom: 10px; }
-  .result-type {
-    font-size: 24px; font-weight: 800; color: var(--navy); line-height: 1.5; margin-bottom: 10px;
-  }
-  .result-catch { font-size: 15px; color: var(--teal); font-weight: 700; }
-  .r-card {
-    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: 26px 24px; margin-top: 22px;
-  }
-  .r-card h2 {
-    font-size: 15px; color: var(--navy); font-weight: 800;
+  .result-area { padding-top: 30px; }
+  .r-section { margin-top: 22px; padding: 26px 24px; animation: riseIn 0.6s ease both; }
+  .r-section:nth-of-type(2) { animation-delay: 0.1s; }
+  .r-section:nth-of-type(3) { animation-delay: 0.2s; }
+  .r-section:nth-of-type(4) { animation-delay: 0.3s; }
+  .r-section:nth-of-type(5) { animation-delay: 0.4s; }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .r-section h2 {
+    font-family: var(--serif);
+    font-size: 15px; font-weight: 600; letter-spacing: 0.08em;
+    color: var(--text-primary);
     padding-bottom: 10px; margin-bottom: 16px;
-    border-bottom: 2px solid var(--teal-light);
+    border-bottom: 2px solid rgba(174, 159, 196, 0.3);
   }
-  .r-card p { font-size: 14.5px; }
+  .r-section p { font-size: 14.5px; color: var(--text-primary); }
 
-  .urgency-row { display: flex; align-items: center; gap: 14px; }
-  .urgency-badge {
-    flex-shrink: 0;
-    width: 64px; height: 64px; border-radius: 50%;
-    color: #fff; font-weight: 800;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  /* シェア用診断結果カード（正方形・フッターと同じ深紫グラデーション） */
+  .share-card {
+    aspect-ratio: 1 / 1;
+    border-radius: 20px;
+    background:
+      radial-gradient(380px 250px at 82% -5%, rgba(232, 191, 200, 0.28), transparent 65%),
+      radial-gradient(340px 230px at 2% 100%, rgba(212, 203, 222, 0.22), transparent 60%),
+      linear-gradient(160deg, var(--purple-1) 0%, var(--purple-2) 100%);
+    border: 1px solid rgba(232, 191, 200, 0.4);
+    box-shadow: var(--shadow-md);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between;
+    padding: 20px 18px 16px;
+    text-align: center;
+    color: #fff;
+    animation: riseIn 0.6s ease both;
   }
-  .urgency-badge .u-label { font-size: 22px; line-height: 1.1; }
-  .urgency-badge .u-cap { font-size: 10px; font-weight: 700; }
-  .urgency-note { font-size: 14px; font-weight: 700; color: var(--text); }
-
-  /* 棒グラフ（CSSのみ） */
-  .bar-row { margin-bottom: 18px; }
-  .bar-row:last-child { margin-bottom: 0; }
-  .bar-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
-  .bar-label .score { color: var(--text-sub); }
-  .bar-track { height: 14px; background: #efece4; border-radius: 99px; overflow: hidden; }
-  .bar-fill {
-    height: 100%; width: 0%; border-radius: 99px;
-    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .bar-row.top .bar-label { color: var(--navy); }
-  .bar-top-tag {
-    display: inline-block; font-size: 10px; color: #fff; background: var(--orange);
-    border-radius: 99px; padding: 1px 8px; margin-left: 6px; vertical-align: 1px;
-  }
-
-  .direction-list { list-style: none; }
-  .direction-list li {
-    position: relative; padding: 8px 0 8px 30px; font-size: 14.5px;
-  }
-  .direction-list li::before {
-    content: ""; position: absolute; left: 6px; top: 17px;
-    width: 8px; height: 8px; border-radius: 50%; background: var(--orange);
-  }
-
-  /* ---------- CTA ---------- */
-  .cta-block {
-    background: linear-gradient(160deg, var(--navy), #27476e);
-    border-radius: var(--radius);
-    padding: 32px 24px; margin-top: 28px; text-align: center;
+  .share-brand {
+    font-family: var(--serif);
+    font-size: 13px; letter-spacing: 0.3em; font-weight: 600;
     color: #fff;
   }
-  .cta-block h2 { font-size: 19px; font-weight: 800; margin-bottom: 12px; }
-  .cta-block p { font-size: 14px; opacity: 0.92; margin-bottom: 22px; text-align: left; }
-  .cta-block .btn-primary { margin-bottom: 12px; }
-  .cta-block .cta-brand { font-size: 12px; opacity: 0.7; margin-top: 18px; margin-bottom: 0; text-align: center; }
+  .share-sub { font-size: 10px; color: rgba(255, 255, 255, 0.75); letter-spacing: 0.14em; margin-top: 2px; }
+  .share-chart { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; width: 100%; padding: 6px 0; }
+  .share-chart svg { height: 100%; width: auto; max-width: 100%; }
+  .share-typename {
+    font-family: var(--serif);
+    font-size: 24px; font-weight: 600; line-height: 1.3; letter-spacing: 0.04em;
+    background: linear-gradient(120deg, #fff 40%, var(--color-accent));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: #fff;
+  }
+  .share-typelabel { font-size: 10px; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.24em; margin-bottom: 2px; }
+  .share-catch { font-size: 12.5px; color: rgba(255, 255, 255, 0.92); margin-top: 6px; line-height: 1.6; }
+
+  /* 強みセクション（ポジティブ基調・グリーン寄り） */
+  .strength-section {
+    background: linear-gradient(135deg, #F0F4F1 0%, #FBF9F5 100%);
+    border: 1px solid rgba(92, 124, 111, 0.28);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  .strength-section h2 {
+    color: var(--color-secondary);
+    border-bottom: 2px solid rgba(92, 124, 111, 0.25);
+  }
+  .strength-mark { color: var(--color-secondary); margin-right: 2px; }
+  .strength-lead {
+    font-size: 16px; font-weight: 700; line-height: 1.8;
+    color: var(--color-sub2);
+  }
+  .strength-quote {
+    margin-top: 14px; padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.7);
+    border-left: 3px solid var(--color-secondary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: 13.5px;
+  }
+  .strength-quote .s-mark { color: var(--color-secondary); font-weight: 700; }
+
+  /* 引用ブロック */
+  .quote-box {
+    margin-top: 16px; padding: 14px 16px;
+    background: linear-gradient(135deg, #F8F5FF 0%, #FFF9FB 100%);
+    border-left: 3px solid var(--color-primary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: 13.5px;
+  }
+  .quote-box .q-mark { color: var(--color-primary-deep); font-weight: 700; }
+
+  /* 5軸スコア一覧 */
+  .score-row { margin-bottom: 16px; }
+  .score-row:last-child { margin-bottom: 0; }
+  .score-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .score-head .val { color: var(--color-primary-deep); font-size: 14px; }
+  .score-head .val small { color: var(--text-light); font-weight: 400; font-size: 11px; }
+  .top-tag {
+    display: inline-block; font-size: 9.5px; color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-radius: 99px; padding: 1px 8px; margin-left: 7px; vertical-align: 1.5px;
+    font-weight: 700;
+  }
+  .score-track { height: 8px; background: var(--bg-section); border-radius: 99px; overflow: hidden; }
+  .score-fill {
+    height: 100%; width: 0%; border-radius: 99px;
+    background: #D9D2C7;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .score-row.top .score-fill { background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); }
+
+  /* 優先アクション */
+  .action-list { list-style: none; counter-reset: act; }
+  .action-list li {
+    position: relative; padding: 10px 0 10px 44px; font-size: 14.5px;
+    counter-increment: act;
+  }
+  .action-list li::before {
+    content: counter(act, decimal-leading-zero);
+    position: absolute; left: 0; top: 10px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #F0EBF6;
+    border: 1px solid rgba(174, 159, 196, 0.5);
+    color: var(--color-primary-deep); font-weight: 700; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* CTA（サイトのセクション背景と同じ淡いラベンダー〜ピンク） */
+  .cta-block {
+    margin-top: 26px; padding: 32px 24px; text-align: center;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #F8F5FF 0%, #FFF9FB 100%);
+    border: 1px solid rgba(174, 159, 196, 0.3);
+    box-shadow: var(--shadow-sm);
+    animation: riseIn 0.6s ease 0.5s both;
+  }
+  .cta-block h2 {
+    font-family: var(--serif);
+    font-size: 19px; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 12px;
+  }
+  .cta-block p { font-size: 14px; color: var(--text-secondary); margin-bottom: 22px; text-align: left; }
+  .cta-block .btn-gold { margin-bottom: 12px; }
+  .cta-block .cta-brand {
+    font-family: var(--serif);
+    font-size: 11.5px; color: var(--text-light); letter-spacing: 0.2em;
+    margin-top: 18px; margin-bottom: 0; text-align: center;
+  }
 
   .retry-wrap { text-align: center; margin-top: 26px; }
   .retry-btn {
     background: none; border: none; cursor: pointer; font-family: inherit;
-    font-size: 13px; color: var(--text-sub); text-decoration: underline; padding: 8px;
+    font-size: 13px; color: var(--text-light); text-decoration: underline; padding: 8px;
   }
 
+  /* レーダーチャートの文字（深紫カードの上に載るため白系） */
+  .radar-label { font-size: 11px; font-weight: 700; fill: #FFFFFF; }
+  .radar-tick { font-size: 8px; fill: rgba(255, 255, 255, 0.65); }
+
   @media (min-width: 480px) {
-    .hero h1 { font-size: 28px; }
     .q-text { font-size: 19px; }
+    .share-typename { font-size: 27px; }
+    .share-catch { font-size: 13.5px; }
   }
 </style>
 </head>
 <body>
 
-<!-- 進捗バー -->
-<div id="progressWrap">
-  <div class="progress-label"><span id="progressText"></span></div>
-  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+<!-- 背景の装飾（ゆらめく色のにじみ＋星のきらめき） -->
+<div class="bg-deco" aria-hidden="true">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="blob blob-3"></span>
+  <span class="deco-star star-1">✦</span>
+  <span class="deco-star star-2">✧</span>
+  <span class="deco-star star-3">✦</span>
+  <span class="deco-star star-4">✧</span>
+  <span class="deco-star star-5">✦</span>
+</div>
+
+<!-- ステップインジケーター（5軸ドット＋軸内3問ミニバー） -->
+<div id="stepper">
+  <div class="step-dots" id="stepDots"></div>
+  <p class="step-theme">テーマ <span id="stepNum"></span>/5：<span class="theme-name" id="stepName"></span></p>
+  <div class="mini-bars" id="miniBars"></div>
 </div>
 
 <div class="container">
@@ -339,82 +647,107 @@ const URGENCY = [
   <!-- ========== スタート画面 ========== -->
   <section class="screen active" id="screen-start">
     <div class="hero">
-      <span class="hero-badge">B型事業所 オーナー・サビ管向け</span>
+      <span class="hero-badge">就労支援事業所 オーナー・サビ管向け</span>
       <h1>生産活動の拡大を妨げている<br><span class="accent">「本当の課題」</span>を診断</h1>
-      <p class="lead">12の質問に答えるだけ。約2分で完了します。</p>
+      <p class="lead">5つの視点・15の質問。約3分で完了します。</p>
     </div>
-    <div class="hero-points">
+    <div class="hero-points glass">
       <ul>
-        <li>スタッフの指導力／商品・販路／利用者の意欲の3つの視点で分析</li>
-        <li>あなたの施設の「最重要課題タイプ」と改善の方向性がわかる</li>
+        <li>指導・商品力・販路・利用者の意欲・組織体制の5軸で分析</li>
+        <li>あなたの施設の「課題タイプ」をレーダーチャートで可視化</li>
         <li>登録不要・無料。その場で結果が表示されます</li>
       </ul>
     </div>
-    <button class="btn btn-navy" onclick="startQuiz()">診断をはじめる（無料・約2分）</button>
+    <button class="btn btn-gold" onclick="startQuiz()">診断をはじめる（無料・約3分）</button>
     <p class="note-small">※回答内容が外部に送信されることはありません</p>
+  </section>
+
+  <!-- ========== テーマ切り替え演出 ========== -->
+  <section class="screen" id="screen-inter">
+    <div class="interstitial">
+      <p class="inter-num" id="interNum"></p>
+      <p class="inter-name" id="interName"></p>
+      <p class="inter-desc" id="interDesc"></p>
+      <div class="inter-line"></div>
+    </div>
   </section>
 
   <!-- ========== 設問画面 ========== -->
   <section class="screen" id="screen-quiz">
     <div class="quiz-area">
-      <div class="q-card">
-        <span class="q-axis-tag" id="qAxisTag"></span>
-        <p class="q-number" id="qNumber"></p>
-        <p class="q-text" id="qText"></p>
-        <div class="q-options" id="qOptions"></div>
+      <p class="q-number" id="qNumber"></p>
+      <p class="q-text" id="qText"></p>
+      <div class="scale-caption">
+        <span class="cap-no">当てはまらない</span>
+        <span class="cap-yes">当てはまる</span>
       </div>
-      <button class="q-back" id="qBack" onclick="goBack()">← 前の質問に戻る</button>
+      <div class="q-options" id="qOptions"></div>
+      <div class="q-back-wrap">
+        <button class="q-back" id="qBack" onclick="goBack()">← ひとつ前にもどる</button>
+      </div>
     </div>
   </section>
 
   <!-- ========== 結果画面 ========== -->
   <section class="screen" id="screen-result">
-    <div class="result-head">
-      <p class="small">あなたの施設の診断結果</p>
-      <p class="result-type" id="rType"></p>
-      <p class="result-catch" id="rCatch"></p>
-    </div>
+    <div class="result-area">
 
-    <div class="r-card">
-      <h2>診断コメント</h2>
-      <p id="rComment"></p>
-    </div>
-
-    <div class="r-card">
-      <h2>改善の緊急度</h2>
-      <div class="urgency-row">
-        <div class="urgency-badge" id="rUrgencyBadge">
-          <span class="u-cap">緊急度</span>
-          <span class="u-label" id="rUrgencyLabel"></span>
+      <!-- シェア用診断結果カード（正方形・スクショ想定） -->
+      <div class="share-card" id="shareCard">
+        <div>
+          <p class="share-brand" id="shareBrand"></p>
+          <p class="share-sub">生産活動拡大 課題診断</p>
         </div>
-        <p class="urgency-note" id="rUrgencyNote"></p>
+        <div class="share-chart" id="radarWrap"></div>
+        <div>
+          <p class="share-typelabel">YOUR TYPE</p>
+          <p class="share-typename" id="rType"></p>
+          <p class="share-catch" id="rCatch"></p>
+        </div>
       </div>
-    </div>
 
-    <div class="r-card">
-      <h2>3つの軸のスコア（5点満点）</h2>
-      <div id="rBars"></div>
-    </div>
+      <!-- あなたの施設の強み（課題が少ない軸を「逆に」ポジティブに提示） -->
+      <div class="r-section strength-section">
+        <h2><span class="strength-mark">✦</span> まず、あなたの施設の強み</h2>
+        <p class="strength-lead" id="rStrengthLead"></p>
+        <div class="strength-quote" id="rStrengthQuote"></div>
+      </div>
 
-    <div class="r-card">
-      <h2>改善の方向性</h2>
-      <ul class="direction-list" id="rDirections"></ul>
-    </div>
+      <!-- 診断コメント＋回答の引用 -->
+      <div class="r-section glass">
+        <h2>そのうえで、伸ばせる余地</h2>
+        <p id="rComment"></p>
+        <div class="quote-box" id="rQuote"></div>
+      </div>
 
-    <!-- CTA -->
-    <div class="cta-block">
-      <h2>もっと詳しく知りたい方へ</h2>
-      <p>
-        診断で見えた課題は、正しい手順を踏めば少しずつ変えていけるものです。
-        現場で実践できるクリエイティブ講座の内容を、無料説明会でお話ししています。まずは話を聞くだけでも大丈夫です。
-      </p>
-      <a class="btn btn-primary" id="ctaContact" href="#" target="_blank" rel="noopener">無料説明会に申し込む</a>
-      <a class="btn btn-line" id="ctaLine" href="#" target="_blank" rel="noopener">LINEで気軽に質問する</a>
-      <p class="cta-brand" id="ctaBrand"></p>
-    </div>
+      <!-- 5軸スコア -->
+      <div class="r-section glass">
+        <h2>5つの軸のスコア（5点満点）</h2>
+        <div id="rScores"></div>
+      </div>
 
-    <div class="retry-wrap">
-      <button class="retry-btn" onclick="resetQuiz()">もう一度診断する</button>
+      <!-- 優先アクション -->
+      <div class="r-section glass">
+        <h2>改善の優先アクション</h2>
+        <ul class="action-list" id="rActions"></ul>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-block">
+        <h2>もっと詳しく知りたい方へ</h2>
+        <p>
+          診断で見えた課題は、正しい手順を踏めば少しずつ変えていけるものです。
+          現場で実践できるクリエイティブ講座の内容を、無料説明会でお話ししています。まずは話を聞くだけでも大丈夫です。
+        </p>
+        <a class="btn btn-gold" id="ctaContact" href="#" target="_blank" rel="noopener">無料説明会に申し込む</a>
+        <a class="btn btn-line" id="ctaLine" href="#" target="_blank" rel="noopener">LINEで気軽に質問する</a>
+        <p class="cta-brand" id="ctaBrand"></p>
+      </div>
+
+      <div class="retry-wrap">
+        <button class="retry-btn" onclick="resetQuiz()">もう一度診断する</button>
+      </div>
+
     </div>
   </section>
 
@@ -424,23 +757,83 @@ const URGENCY = [
 /* ---------- 状態 ---------- */
 let currentIndex = 0;
 const answers = new Array(QUESTIONS.length).fill(null);
+const QUESTIONS_PER_AXIS = 3;
 
 const $ = (id) => document.getElementById(id);
+const axisIndexOf = (key) => AXES.findIndex(a => a.key === key);
 
 /* ---------- 画面切り替え ---------- */
 function showScreen(name) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   $("screen-" + name).classList.add("active");
-  $("progressWrap").classList.toggle("visible", name === "quiz");
-  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  $("stepper").classList.toggle("visible", name === "quiz" || name === "inter");
+  window.scrollTo(0, 0);
+}
+
+/* ---------- ステップインジケーター ---------- */
+function buildStepper() {
+  const dots = $("stepDots");
+  dots.innerHTML = "";
+  AXES.forEach(() => {
+    const d = document.createElement("span");
+    d.className = "step-dot";
+    dots.appendChild(d);
+  });
+  const bars = $("miniBars");
+  bars.innerHTML = "";
+  for (let i = 0; i < QUESTIONS_PER_AXIS; i++) {
+    const b = document.createElement("span");
+    b.className = "mini-bar";
+    b.innerHTML = '<span class="fill"></span>';
+    bars.appendChild(b);
+  }
+}
+
+function updateStepper() {
+  const axisIdx = axisIndexOf(QUESTIONS[currentIndex].axis);
+  const inAxisIdx = currentIndex % QUESTIONS_PER_AXIS;
+  document.querySelectorAll(".step-dot").forEach((d, i) => {
+    d.classList.toggle("done", i < axisIdx);
+    d.classList.toggle("current", i === axisIdx);
+  });
+  $("stepNum").textContent = axisIdx + 1;
+  $("stepName").textContent = AXES[axisIdx].label;
+  document.querySelectorAll(".mini-bar .fill").forEach((f, i) => {
+    f.style.width = i < inAxisIdx ? "100%" : (i === inAxisIdx ? "50%" : "0%");
+  });
 }
 
 /* ---------- 診断開始 ---------- */
 function startQuiz() {
   currentIndex = 0;
   answers.fill(null);
-  showScreen("quiz");
-  renderQuestion();
+  buildStepper();
+  enterQuestion(true);
+}
+
+/* ---------- テーマ切り替え演出 ---------- */
+let interTimer = null;
+function showInterstitial(axisIdx, then) {
+  const axis = AXES[axisIdx];
+  $("interNum").textContent = "THEME " + (axisIdx + 1) + " / " + AXES.length;
+  $("interName").textContent = axis.label;
+  $("interDesc").textContent = axis.theme;
+  showScreen("inter");
+  updateStepper();
+  clearTimeout(interTimer);
+  interTimer = setTimeout(then, 1300);
+}
+
+/* 設問へ入る。軸の先頭ならインタースティシャルを挟む */
+function enterQuestion(withInter) {
+  const axisIdx = axisIndexOf(QUESTIONS[currentIndex].axis);
+  const isAxisHead = currentIndex % QUESTIONS_PER_AXIS === 0;
+  if (withInter && isAxisHead) {
+    showInterstitial(axisIdx, () => { showScreen("quiz"); renderQuestion(); });
+  } else {
+    showScreen("quiz");
+    renderQuestion();
+  }
 }
 
 /* ---------- 設問描画 ---------- */
@@ -454,8 +847,7 @@ const SCALE_LABELS = [
 
 function renderQuestion() {
   const q = QUESTIONS[currentIndex];
-  $("qAxisTag").textContent = AXES[q.axis].label;
-  $("qNumber").textContent = "Q" + (currentIndex + 1) + " / " + QUESTIONS.length;
+  $("qNumber").textContent = "QUESTION " + (currentIndex + 1) + " / " + QUESTIONS.length;
   $("qText").textContent = q.text;
   $("qBack").style.visibility = currentIndex === 0 ? "hidden" : "visible";
 
@@ -464,16 +856,13 @@ function renderQuestion() {
   for (let v = 1; v <= 5; v++) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "q-option" + (answers[currentIndex] === v ? " selected" : "");
-    btn.innerHTML = '<span class="num">' + v + "</span><span>" + SCALE_LABELS[v - 1] + "</span>";
+    btn.className = "q-circle c" + v + (answers[currentIndex] === v ? " selected" : "");
+    btn.setAttribute("aria-label", SCALE_LABELS[v - 1]);
+    btn.title = SCALE_LABELS[v - 1];
     btn.onclick = () => selectAnswer(v, btn);
     wrap.appendChild(btn);
   }
-
-  // 進捗バー更新
-  const pct = (currentIndex / QUESTIONS.length) * 100;
-  $("progressFill").style.width = pct + "%";
-  $("progressText").textContent = "12問中 " + (currentIndex + 1) + " 問目";
+  updateStepper();
 }
 
 let advancing = false;
@@ -481,14 +870,13 @@ function selectAnswer(value, btn) {
   if (advancing) return;
   advancing = true;
   answers[currentIndex] = value;
-  // 選択の視覚フィードバック後に自動遷移
-  btn.parentElement.querySelectorAll(".q-option").forEach(b => b.classList.remove("selected"));
+  btn.parentElement.querySelectorAll(".q-circle").forEach(b => b.classList.remove("selected"));
   btn.classList.add("selected");
   setTimeout(() => {
     advancing = false;
     if (currentIndex < QUESTIONS.length - 1) {
       currentIndex++;
-      renderQuestion();
+      enterQuestion(true);
     } else {
       showResult();
     }
@@ -498,97 +886,242 @@ function selectAnswer(value, btn) {
 function goBack() {
   if (currentIndex > 0) {
     currentIndex--;
-    renderQuestion();
+    enterQuestion(false);
   }
 }
 
 /* ---------- スコアリング ---------- */
 function calcScores() {
-  const sums = { staff: 0, product: 0, user: 0 };
-  const counts = { staff: 0, product: 0, user: 0 };
+  const byAxis = {};
+  AXES.forEach(a => { byAxis[a.key] = { sum: 0, count: 0 }; });
   QUESTIONS.forEach((q, i) => {
-    sums[q.axis] += answers[i];
-    counts[q.axis]++;
+    byAxis[q.axis].sum += answers[i];
+    byAxis[q.axis].count++;
   });
   const avgs = {};
-  for (const key in sums) avgs[key] = sums[key] / counts[key];
-  const overall = answers.reduce((a, b) => a + b, 0) / answers.length;
-  return { avgs, overall };
+  AXES.forEach(a => { avgs[a.key] = byAxis[a.key].sum / byAxis[a.key].count; });
+  return avgs;
 }
 
+/* 上位2軸（同点はAXESの表示順が先の方を優先）→ タイプ判定 */
 function decideType(avgs) {
-  const entries = Object.entries(avgs).sort((a, b) => b[1] - a[1]);
-  const [topKey, topScore] = entries[0];
-  const secondScore = entries[1][1];
-  const thirdScore = entries[2][1];
-  // 3軸すべてが僅差なら複合課題型
-  if (topScore - thirdScore < MIXED_THRESHOLD && topScore - secondScore < MIXED_THRESHOLD) {
-    return { typeKey: "mixed", topKey };
+  const ranked = AXES
+    .map((a, i) => ({ key: a.key, order: i, score: avgs[a.key] }))
+    .sort((x, y) => (y.score - x.score) || (x.order - y.order));
+
+  // 全軸が基準未満なら安定成長型
+  if (ranked[0].score < STABLE_THRESHOLD) {
+    return { typeKey: "stable", topKeys: [ranked[0].key, ranked[1].key] };
   }
-  return { typeKey: topKey, topKey };
+  const pair = [ranked[0], ranked[1]].sort((x, y) => x.order - y.order);
+  return { typeKey: pair[0].key + "+" + pair[1].key, topKeys: [ranked[0].key, ranked[1].key] };
+}
+
+/* 最も強く当てはまった個別設問（同点は先の設問を優先）＝課題の具体例 */
+function findStrongestQuestion() {
+  let best = 0;
+  for (let i = 1; i < answers.length; i++) {
+    if (answers[i] > answers[best]) best = i;
+  }
+  return { index: best, text: QUESTIONS[best].text, value: answers[best] };
+}
+
+/* 課題スコアが最も低い軸＝強みの軸（同点は表示順が先を優先） */
+function findStrengthAxisKey(avgs) {
+  let bestKey = AXES[0].key, bestScore = avgs[AXES[0].key];
+  for (const a of AXES) {
+    if (avgs[a.key] < bestScore) { bestScore = avgs[a.key]; bestKey = a.key; }
+  }
+  return bestKey;
+}
+
+/* 最も当てはまらなかった個別設問（＝「〇〇がない」の否定→逆に強み。同点は先を優先） */
+function findWeakestAnsweredQuestion() {
+  let best = 0;
+  for (let i = 1; i < answers.length; i++) {
+    if (answers[i] < answers[best]) best = i;
+  }
+  return { index: best, text: QUESTIONS[best].text, value: answers[best] };
+}
+
+/* ---------- レーダーチャート（SVG自前描画） ---------- */
+const RADAR = { cx: 180, cy: 148, r: 100, size: [360, 296] };
+
+function radarPoint(axisIdx, ratio) {
+  const angle = -Math.PI / 2 + axisIdx * (2 * Math.PI / AXES.length);
+  return [
+    RADAR.cx + Math.cos(angle) * RADAR.r * ratio,
+    RADAR.cy + Math.sin(angle) * RADAR.r * ratio
+  ];
+}
+
+function polygonPoints(ratios) {
+  return ratios.map((t, i) => radarPoint(i, t).map(v => v.toFixed(2)).join(",")).join(" ");
+}
+
+/* できている度（課題スコアの逆）を 0.2〜1.0 の比率で返す。
+   課題が大きい軸ほど中心に「へこむ」＝小さくなり、そこが課題のサインになる。 */
+function achievementRatio(avg) {
+  return (6 - avg) / 5; // avg 5→0.2（へこみ）, avg 1→1.0（外側いっぱい）
+}
+
+function buildRadar(avgs, problemKeys, isStable) {
+  const N = AXES.length;
+  const problem = new Set(isStable ? [] : (problemKeys || []));
+  let s = '<svg viewBox="0 0 ' + RADAR.size[0] + ' ' + RADAR.size[1] + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="5軸のできている度レーダーチャート">';
+
+  // 同心五角形グリッド（3重）
+  [1, 2 / 3, 1 / 3].forEach((t, gi) => {
+    s += '<polygon points="' + polygonPoints(Array(N).fill(t)) + '" fill="none" stroke="rgba(255,255,255,' +
+      (gi === 0 ? 0.35 : 0.16) + ')" stroke-width="1"/>';
+  });
+
+  // 中心から各頂点へのスポーク
+  for (let i = 0; i < N; i++) {
+    const [x, y] = radarPoint(i, 1);
+    s += '<line x1="' + RADAR.cx + '" y1="' + RADAR.cy + '" x2="' + x.toFixed(2) + '" y2="' + y.toFixed(2) +
+      '" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>';
+  }
+
+  // できている度の五角形（外側に広いほど良い。アニメーションでJSから points を更新）
+  s += '<polygon id="radarScore" points="' + polygonPoints(Array(N).fill(0.001)) + '"' +
+    ' fill="rgba(232,191,200,0.42)" stroke="#F1D3DA" stroke-width="2" stroke-linejoin="round"/>';
+
+  // 頂点マーカー（課題の軸＝へこみは、目立つアクセントで強調）
+  for (let i = 0; i < N; i++) {
+    const isP = problem.has(AXES[i].key);
+    s += '<circle id="radarDot' + i + '" cx="' + RADAR.cx + '" cy="' + RADAR.cy + '" r="' +
+      (isP ? 5.2 : 3) + '" fill="' + (isP ? '#E8BFC8' : '#FFFFFF') +
+      '" stroke="' + (isP ? '#FFFFFF' : 'rgba(255,255,255,0.5)') + '" stroke-width="' + (isP ? 2 : 1) + '"/>';
+  }
+
+  // 軸ラベル（課題の軸は太字＋アクセント色で目立たせる）
+  for (let i = 0; i < N; i++) {
+    const isP = problem.has(AXES[i].key);
+    const [x, y] = radarPoint(i, 1.19);
+    const anchor = Math.abs(x - RADAR.cx) < 12 ? "middle" : (x < RADAR.cx ? "end" : "start");
+    const dy = y < RADAR.cy - 10 ? 0 : (y > RADAR.cy + 40 ? 8 : 4);
+    const extra = isP ? ' fill="#F4D9DF" font-weight="800"' : '';
+    s += '<text class="radar-label" x="' + x.toFixed(1) + '" y="' + (y + dy).toFixed(1) +
+      '" text-anchor="' + anchor + '"' + extra + '>' + AXES[i].short + '</text>';
+  }
+
+  // 読み方の凡例（外側＝できている／へこみ＝課題）
+  s += '<text class="radar-tick" x="' + (RADAR.size[0] / 2) + '" y="' + (RADAR.size[1] - 6) +
+    '" text-anchor="middle">外側＝できている　　へこみ＝課題のサイン</text>';
+
+  s += '</svg>';
+  $("radarWrap").innerHTML = s;
+
+  // 中心から広がるアニメーション（できている度ベース）
+  const targets = AXES.map(a => achievementRatio(avgs[a.key]));
+  const poly = $("radarScore");
+  const t0 = performance.now();
+  const DURATION = 800;
+  function frame(now) {
+    const p = Math.min(1, (now - t0) / DURATION);
+    const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    const ratios = targets.map(t => Math.max(0.001, t * ease));
+    poly.setAttribute("points", polygonPoints(ratios));
+    ratios.forEach((t, i) => {
+      const [x, y] = radarPoint(i, t);
+      const dot = $("radarDot" + i);
+      dot.setAttribute("cx", x.toFixed(2));
+      dot.setAttribute("cy", y.toFixed(2));
+    });
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }
 
 /* ---------- 結果表示 ---------- */
 function showResult() {
-  const { avgs, overall } = calcScores();
-  const { typeKey, topKey } = decideType(avgs);
-  const result = RESULT_TYPES[typeKey];
+  const avgs = calcScores();
+  const { typeKey, topKeys } = decideType(avgs);
+  const type = TYPES[typeKey];
+  const strongest = findStrongestQuestion();
 
-  $("rType").textContent = result.name;
-  $("rCatch").textContent = result.catch;
-  $("rComment").textContent = result.comment;
+  // シェアカード
+  $("shareBrand").textContent = BRAND_NAME;
+  $("rType").textContent = type.name;
+  $("rCatch").textContent = type.catch;
 
-  // 緊急度
-  const urgency = URGENCY.find(u => overall >= u.min);
-  $("rUrgencyLabel").textContent = urgency.label;
-  $("rUrgencyBadge").style.background = urgency.color;
-  $("rUrgencyNote").textContent = urgency.note;
+  // まず「強み」（課題が最も少ない軸 ＝ 逆に強みがある、を引き出す）
+  const strengthKey = findStrengthAxisKey(avgs);
+  const strengthAxis = AXES.find(a => a.key === strengthKey);
+  const weakest = findWeakestAnsweredQuestion();
+  $("rStrengthLead").textContent =
+    "5つの中で、いちばん安定していたのは「" + strengthAxis.label + "」。" + strengthAxis.strength + "。";
+  let sQuote;
+  if (weakest.value <= 2) {
+    sQuote = '<span class="s-mark">「' + weakest.text + '」</span>には、あまり当てはまりませんでした。裏を返せば、ここはあなたの施設の確かな強みです。（回答: ' + weakest.value + '/5）';
+  } else if (weakest.value === 3) {
+    sQuote = '<span class="s-mark">「' + weakest.text + '」</span>は、そこまで大きな課題にはなっていません。この落ち着きが、次を伸ばす土台になります。（回答: ' + weakest.value + '/5）';
+  } else {
+    sQuote = '5つの軸の中では、<span class="s-mark">「' + strengthAxis.label + '」</span>が相対的にいちばん安定しています。まずはこの強みを起点にしていけます。';
+  }
+  $("rStrengthQuote").innerHTML = sQuote;
 
-  // 棒グラフ
-  const bars = $("rBars");
-  bars.innerHTML = "";
-  const isMixed = typeKey === "mixed";
-  Object.entries(AXES).forEach(([key, axis]) => {
-    const score = avgs[key];
+  // 診断コメント＋引用
+  $("rComment").textContent = type.comment;
+  const quoteLead = typeKey === "stable"
+    ? "その中で、比較的当てはまりが強かったのは"
+    : "特に、";
+  $("rQuote").innerHTML =
+    quoteLead + '<span class="q-mark">「' + strongest.text + '」</span>という項目に最も強く当てはまっていました（回答: ' +
+    strongest.value + '/5）。';
+
+  // 5軸スコア一覧
+  const wrap = $("rScores");
+  wrap.innerHTML = "";
+  const isStable = typeKey === "stable";
+  AXES.forEach(a => {
+    const score = avgs[a.key];
+    const isTop = !isStable && topKeys.includes(a.key);
     const row = document.createElement("div");
-    const isTop = !isMixed && key === topKey;
-    row.className = "bar-row" + (isTop ? " top" : "");
+    row.className = "score-row" + (isTop ? " top" : "");
     row.innerHTML =
-      '<div class="bar-label"><span>' + axis.label +
-      (isTop ? '<span class="bar-top-tag">最重要</span>' : "") +
-      '</span><span class="score">' + score.toFixed(1) + " / 5.0</span></div>" +
-      '<div class="bar-track"><div class="bar-fill" style="background:' + axis.color + '" data-w="' + (score / 5 * 100) + '"></div></div>';
-    bars.appendChild(row);
+      '<div class="score-head"><span>' + a.label +
+      (isTop ? '<span class="top-tag">課題大</span>' : "") +
+      '</span><span class="val">' + score.toFixed(1) + '<small> / 5.0</small></span></div>' +
+      '<div class="score-track"><div class="score-fill" data-w="' + (score / 5 * 100) + '"></div></div>';
+    wrap.appendChild(row);
   });
 
-  // 改善の方向性
-  const dl = $("rDirections");
-  dl.innerHTML = "";
-  result.directions.forEach(d => {
+  // 優先アクション
+  const al = $("rActions");
+  al.innerHTML = "";
+  type.actions.forEach(a => {
     const li = document.createElement("li");
-    li.textContent = d;
-    dl.appendChild(li);
+    li.textContent = a;
+    al.appendChild(li);
   });
 
-  // CTAリンク
+  // CTA
   $("ctaContact").href = CONTACT_URL;
-  $("ctaLine").href = LINE_URL;
+  // LINE URLが未設定（空 or 仮URL）のときはLINEボタンを自動で隠す
+  const lineReady = LINE_URL && !/x{3,}/i.test(LINE_URL);
+  const lineBtn = $("ctaLine");
+  if (lineReady) { lineBtn.href = LINE_URL; lineBtn.style.display = ""; }
+  else { lineBtn.style.display = "none"; }
   $("ctaBrand").textContent = BRAND_NAME;
 
   showScreen("result");
+  buildRadar(avgs, topKeys, isStable);
 
-  // バーのアニメーション（表示後に幅を適用）
+  // スコアバーのアニメーション
   requestAnimationFrame(() => {
     setTimeout(() => {
-      document.querySelectorAll(".bar-fill").forEach(el => {
+      document.querySelectorAll(".score-fill").forEach(el => {
         el.style.width = el.dataset.w + "%";
       });
-    }, 120);
+    }, 150);
   });
 }
 
 /* ---------- リセット ---------- */
 function resetQuiz() {
+  clearTimeout(interTimer);
   currentIndex = 0;
   answers.fill(null);
   showScreen("start");

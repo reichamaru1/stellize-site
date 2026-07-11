@@ -130,12 +130,29 @@ body {
     letter-spacing: 0.15em;
 }
 
+/* 中間幅（769px〜）でリンクが折り返してロゴに重ならないよう、flexで右寄せにする */
+.nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 8px;
+}
+
 .nav a {
     margin-left: 30px;
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s;
+    white-space: nowrap;
+}
+
+@media (max-width: 1080px) {
+    .nav a {
+        margin-left: 16px;
+        font-size: 0.92rem;
+    }
 }
 
 .nav a:hover {

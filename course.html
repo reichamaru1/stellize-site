@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="就労継続支援B型事業所向け『クリエイティブ講座』と、企業向け『ダイバーシティ研修』の2プログラム。うつからの回復経験を持つ講師が、工賃向上と多様な人材の可能性を、感性を大切にした伴走で引き出します。" />
-  <title>クリエイティブ講座＆企業研修 | Stellize｜工賃向上と多様な人材の可能性を引き出す</title>
+  <meta name="description" content="就労支援事業所の利用者さん向け『クリエイティブ講座』。「得意」や「好き」を仕事につなげ、スキルアップと自己効力感を、感性を大切にした伴走で育てます。オンライン／訪問どちらも対応。" />
+  <title>クリエイティブ講座 | Stellize｜利用者さんの「得意」を仕事につなげる</title>
 
   <!-- OGP / SNSシェア対応：og:image・og:urlは仮値。本番ドメイン確定と専用画像（1200x630）準備後に差し替え ※要差し替え -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Stellize" />
-  <meta property="og:title" content="クリエイティブ講座＆企業研修 | Stellize" />
-  <meta property="og:description" content="就労継続支援B型事業所向け『クリエイティブ講座』と、企業向け『ダイバーシティ研修』の2プログラム。工賃向上と多様な人材の可能性を引き出します。" />
+  <meta property="og:title" content="クリエイティブ講座 | Stellize" />
+  <meta property="og:description" content="就労支援事業所の利用者さん向け『クリエイティブ講座』。「得意」や「好き」を仕事につなげ、利用者さんの可能性を広げます。" />
   <meta property="og:url" content="https://stellize.example.com/course.html" />
   <meta property="og:image" content="https://stellize.example.com/assets/images/bh3ieUsE.jpeg" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="クリエイティブ講座＆企業研修 | Stellize" />
-  <meta name="twitter:description" content="就労継続支援B型事業所向け『クリエイティブ講座』と、企業向け『ダイバーシティ研修』の2プログラム。" />
+  <meta name="twitter:title" content="クリエイティブ講座 | Stellize" />
+  <meta name="twitter:description" content="就労支援事業所の利用者さん向け『クリエイティブ講座』。「得意」や「好き」を仕事につなげます。" />
   <meta name="twitter:image" content="https://stellize.example.com/assets/images/bh3ieUsE.jpeg" />
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
   <!-- 既存サイト共通スタイル（デザイントークン・ヘッダー/フッター・reveal・accordion等） -->
-  <link rel="stylesheet" href="css/style.css?v=20260719" />
+  <link rel="stylesheet" href="css/style.css?v=20260711b" />
 
   <!-- ▼このLP専用スタイル（共通トークンを流用。派手なアニメ無し・表示速度重視） -->
   <style>
@@ -38,6 +38,13 @@
       --lp-red: #C05C46;         /* 「未来」などのキーワード差し色 */
       --lp-pink: #E79AAE;        /* After・ハイライトのピンク */
       --lp-pink-l: #F7E3E8;
+      /* 「学べる内容」用のワクワク配色（パステル5色を巡回） */
+      --lp-green-l: #E6EFE1;
+      --lp-yellow-l: #FBEED2;
+      --lp-yellow-d: #B8862E;
+      --lp-blue-l: #E4ECF7;
+      --lp-blue-d: #4E6DA0;
+      --lp-peach-l: #F8E3D6;
     }
 
     /* ===== 共通パーツ ===== */
@@ -177,7 +184,8 @@
       font-size: 1.14rem; line-height: 2.05; color: var(--text-secondary);
     }
     .mission-hero-copy strong { color: var(--lp-deep); border-bottom: 2px solid var(--lp-pink); }
-    .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 18px; max-width: 1040px; margin: 0 auto; }
+    /* 4枚構成なので2×2で均等に組む（3+1の孤立段を防ぐ） */
+    .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 18px; max-width: 880px; margin: 0 auto; }
     .mission-card {
       background: #fff; border: 1px solid var(--lp-line);
       border-radius: var(--radius-md); padding: 26px 24px;
@@ -191,7 +199,12 @@
     .story-section { background: #fff; }
     .story-wrap { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; max-width: 980px; margin: 0 auto; }
     .story-photo { text-align: center; }
-    .story-photo img { width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+    /* height属性(1024)を打ち消し、顔まわりを4:5でトリミング表示 */
+    .story-photo img {
+      width: 100%; height: auto;
+      aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 18%;
+      border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+    }
     .story-photo .cap { margin-top: 12px; font-size: .9rem; color: var(--text-secondary); }
     .story-photo .cap b { display:block; color: var(--text-primary); font-size: 1.05rem; }
     .story-body p { line-height: 1.95; margin-bottom: 16px; }
@@ -202,9 +215,36 @@
     /* ===== 5. 2つのオファー ===== */
     .offer-section { background: var(--lp-beige); }
     .offer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 24px; max-width: 1040px; margin: 0 auto; }
+    .offer-grid--single { grid-template-columns: 1fr; max-width: 640px; }
     .offer-card { background: #fff; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; border: 1px solid var(--lp-line); }
     .offer-head { padding: 26px 28px 20px; color: #fff; }
-    .offer-card.is-course .offer-head { background: linear-gradient(135deg, var(--lp-deep), var(--lp-green)); }
+    /* 講座カード：ワクワク感のあるヘッダー（紙吹雪ドット＋キラキラ＋暖色ブロブ） */
+    .offer-card.is-course .offer-head {
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(circle at 88% 12%, rgba(231,154,174,.5), transparent 44%),
+        radial-gradient(circle at 6% 92%, rgba(255,233,168,.38), transparent 46%),
+        linear-gradient(135deg, var(--lp-green-d), var(--lp-green));
+    }
+    .offer-card.is-course .offer-head::after {
+      content:""; position:absolute; inset:0; pointer-events:none;
+      background-image:
+        radial-gradient(circle 3px at 18% 24%, rgba(255,255,255,.55) 98%, transparent),
+        radial-gradient(circle 2px at 68% 74%, rgba(255,233,168,.8) 98%, transparent),
+        radial-gradient(circle 2.5px at 44% 12%, rgba(231,154,174,.85) 98%, transparent),
+        radial-gradient(circle 2px at 92% 58%, rgba(255,255,255,.6) 98%, transparent),
+        radial-gradient(circle 3px at 58% 42%, rgba(255,255,255,.35) 98%, transparent),
+        radial-gradient(circle 2px at 30% 80%, rgba(255,255,255,.5) 98%, transparent);
+    }
+    .offer-card.is-course .offer-head > * { position: relative; z-index: 1; }
+    .head-spark { position:absolute; color:#FFE9A8; }
+    .head-spark.s1 { width:36px; height:36px; top:14px; right:16px; opacity:.95; }
+    .head-spark.s2 { width:20px; height:20px; bottom:14px; right:62px; opacity:.7; }
+    .offer-card.is-course .offer-head .head-hl {
+      background: linear-gradient(transparent 58%, rgba(255,233,168,.5) 58%);
+      font-weight: 600;
+    }
+    .offer-card.is-course .tag .icon { color:#FFE9A8; margin-right:.35em; }
     .offer-card.is-biz .offer-head { background: linear-gradient(135deg, #4A5266, #6B7590); }
     .offer-head .tag { display:inline-block; font-size:.76rem; letter-spacing:.1em; background: rgba(255,255,255,.2); padding:4px 12px; border-radius:50px; margin-bottom:12px; }
     .offer-head h3 { font-size: 1.32rem; line-height:1.5; margin:0 0 6px; color:#fff; }
@@ -214,6 +254,32 @@
     .offer-list { list-style:none; margin:0 0 22px; padding:0; }
     .offer-list li { position:relative; padding-left: 26px; margin-bottom:10px; line-height:1.75; font-size:.95rem; }
     .offer-list li::before { content:""; position:absolute; left:4px; top:.6em; width:8px; height:8px; border-radius:50%; background: var(--color-accent); }
+    /* 学べる内容：アイコン＋ラベルのグリッド（ワクワク感を出すパステル配色＋ホバーで弾む動き） */
+    .skill-lead {
+      text-align:center; font-size:.98rem; color: var(--lp-deep); font-weight:600;
+      margin: 0 0 16px; line-height:1.8;
+    }
+    .skill-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(96px,1fr)); gap:12px; margin:0 0 18px; }
+    .skill-item {
+      background: var(--si-bg, var(--lp-cream)); border:1px solid var(--lp-line);
+      border-radius: 18px; padding:16px 8px 14px; text-align:center;
+      transition: transform .22s ease, box-shadow .22s ease;
+    }
+    .skill-item:hover { transform: translateY(-4px) rotate(-1deg); box-shadow: var(--shadow-md); }
+    .skill-item .icon-badge {
+      width:44px; height:44px; margin:0 auto 8px; border-radius:50%;
+      background:#fff; display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 2px 6px rgba(74,64,56,.1);
+    }
+    .skill-item .icon { width:1.35em; height:1.35em; margin:0; display:block; color: var(--si-icon, var(--lp-green-d)); }
+    .skill-item span { display:block; font-size:.78rem; font-weight:700; line-height:1.45; color: var(--text-primary); }
+    .skill-item:nth-child(7n+1) { --si-bg: var(--lp-green-l); --si-icon: var(--lp-green-d); }
+    .skill-item:nth-child(7n+2) { --si-bg: var(--lp-pink-l); --si-icon: var(--lp-red); }
+    .skill-item:nth-child(7n+3) { --si-bg: var(--lp-yellow-l); --si-icon: var(--lp-yellow-d); }
+    .skill-item:nth-child(7n+4) { --si-bg: var(--lp-blue-l); --si-icon: var(--lp-blue-d); }
+    .skill-item:nth-child(7n+5) { --si-bg: var(--lp-peach-l); --si-icon: var(--lp-red); }
+    .skill-item:nth-child(7n+6) { --si-bg: var(--lp-green-l); --si-icon: var(--lp-green-d); }
+    .skill-item:nth-child(7n+7) { --si-bg: var(--lp-pink-l); --si-icon: var(--lp-red); }
     .offer-meta { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin: 0 0 20px; }
     .offer-meta div { background: var(--lp-beige); border-radius: var(--radius-sm); padding: 12px 8px; text-align:center; }
     .offer-meta dt { font-size:.72rem; color: var(--text-light); margin-bottom:4px; }
@@ -268,15 +334,41 @@
     .flow-body h3 { font-size:1.08rem; margin-bottom:6px; color: var(--lp-deep); }
     .flow-body p { margin:0; font-size:.93rem; line-height:1.8; color: var(--text-secondary); }
 
-    /* ===== 10. そもそも解説 ===== */
-    .about-b-section { background:#fff; }
-    .qa-block { max-width: 860px; margin: 0 auto; }
-    .qa-block + .qa-block { margin-top: 30px; }
-    .qa-block h3 { font-size:1.18rem; color: var(--lp-deep); margin-bottom:14px; display:flex; gap:10px; align-items:baseline; }
-    .qa-block h3 .qmark { font-family:'Noto Serif JP',serif; color: var(--color-accent); font-size:1.5rem; line-height:1; }
-    .qa-block p { line-height:2; color: var(--text-secondary); margin:0; }
-    .qa-block p + p { margin-top:12px; }
-    .qa-box { background: var(--lp-cream); border:1px solid var(--lp-line); border-radius: var(--radius-md); padding: 26px 28px; }
+    /* ===== 10. 講座で何が変わるの（実践サイクル＋3つの変化） ===== */
+    .change-section { background:#fff; }
+    .cycle { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; max-width:940px; margin:0 auto 44px; }
+    .cycle-step {
+      display:flex; align-items:center; gap:8px;
+      background: var(--lp-cream); border:1.5px solid var(--lp-line); border-radius:50px;
+      padding:10px 16px; font-size:.9rem; font-weight:600; color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .cycle-step .icon { margin:0; color: var(--lp-green-d); }
+    .cycle-step .cnum {
+      width:22px; height:22px; border-radius:50%; flex-shrink:0;
+      background: var(--lp-green); color:#fff; font-size:.7rem; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .cycle-arrow { color: var(--lp-pink); font-weight:700; font-size:1.15rem; }
+    .value-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:18px; max-width:960px; margin:0 auto 40px; }
+    .value-card { border:1.5px solid; border-radius:18px; padding:28px 24px; text-align:center; }
+    .value-card:nth-child(1) { background: var(--lp-pink-l); border-color:#EFC9D4; transform: rotate(-1deg); }
+    .value-card:nth-child(2) { background: var(--lp-yellow-l); border-color:#EBD9A8; transform: rotate(.7deg); }
+    .value-card:nth-child(3) { background: var(--lp-green-l); border-color:#CBDDC2; transform: rotate(-.5deg); }
+    .value-card .vicon { width:56px; height:56px; border-radius:50%; background:#fff; box-shadow: var(--shadow-sm); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+    .value-card .vicon .icon { width:1.6em; height:1.6em; margin:0; }
+    .value-card:nth-child(1) .vicon .icon { color:#C2708A; }
+    .value-card:nth-child(2) .vicon .icon { color: var(--lp-yellow-d); }
+    .value-card:nth-child(3) .vicon .icon { color: var(--lp-green-d); }
+    .value-card h3 { font-size:1.08rem; margin-bottom:10px; color: var(--text-primary); }
+    .value-card p { font-size:.9rem; line-height:1.85; color: var(--text-secondary); margin:0; }
+    .change-close { max-width:760px; margin:0 auto; text-align:center; line-height:2.05; color: var(--text-secondary); }
+    .change-close strong { color: var(--lp-deep); }
+    @media (max-width:820px) {
+      .value-card { transform:none !important; }
+      .cycle { gap:8px; }
+      .cycle-step { font-size:.84rem; padding:9px 13px; }
+    }
 
     /* ===== 12. 代表メッセージ ＋ 最終CTA ===== */
     .message-section { background: var(--lp-deep); color:#fff; }
@@ -370,7 +462,7 @@
   </header>
 
   <!-- ============================================================
-       1. ファーストビュー（フック＋講座/研修の両価値＋CTA）
+       1. ファーストビュー（フック＋講座の価値提示＋CTA）
        ============================================================ -->
   <section class="lp-hero">
     <!-- ボタニカル装飾（葉の枝） -->
@@ -391,10 +483,6 @@
     </svg>
 
     <div class="container">
-      <span class="lp-hero-badge">
-        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-sprout"/></svg>
-        就労継続支援B型事業所さま／企業のダイバーシティ・人事ご担当者さまへ
-      </span>
       <h1>
         「合う場所」に出会えれば、<br>
         人は<span class="hl em">もう一度、力を発揮できる。</span>
@@ -402,30 +490,19 @@
       <p class="lp-hero-sub">
         工賃が上がらない。売れる商品が作れない。指導のノウハウがない。<br>
         その課題を、<span class="lp-keyword">クリエイティブスキル</span>と<span class="lp-keyword">売り方の設計</span>で変えていく。<br>
-        福祉施設向けの「講座」と、企業向けの「研修」——同じ想いを、2つのかたちで。
+        利用者さんの「得意」や「好き」を仕事につなげる、実践型のクリエイティブ講座です。
       </p>
 
-      <div class="lp-hero-duo">
-        <div class="duo">
-          <b>① B型事業所向け｜クリエイティブ講座</b>
-          <span>利用者の工賃向上と、職員の指導力アップを、AI時代のスキルで実現する伴走型プログラム。</span>
-        </div>
-        <div class="duo">
-          <b>② 企業向け｜ダイバーシティ研修</b>
-          <span>多様な特性を持つ人の可能性を引き出す、福祉の知見をベースにしたマネジメント研修。</span>
-        </div>
-      </div>
-
       <div class="lp-hero-cta">
-        <a href="contact.html?type=consult&amp;target=facility&amp;utm_source=course_lp&amp;utm_medium=hero&amp;utm_campaign=facility" class="btn btn-primary">B型事業所の方はこちら</a>
-        <a href="contact.html?type=consult&amp;target=corporate&amp;utm_source=course_lp&amp;utm_medium=hero&amp;utm_campaign=corporate" class="btn btn-secondary">企業ご担当者はこちら</a>
+        <a href="contact.html?type=consult&amp;utm_source=course_lp&amp;utm_medium=hero&amp;utm_campaign=course" class="btn btn-primary">お問い合わせはこちら</a>
+        <a href="#offer" class="btn btn-secondary">講座の内容を見る</a>
       </div>
-      <p class="lp-hero-note">無理な勧誘はいたしません。まずは現状を聞かせてください。相談は無料です。</p>
+      <p class="lp-hero-note">フォームのご入力は1〜2分で完了します。内容を確認のうえ、後日メールでご連絡いたします。</p>
     </div>
   </section>
 
   <!-- ============================================================
-       2. 共感パート（B型事業所のリアルな悩みを代弁）
+       2. 共感パート（就労支援事業所のリアルな悩みを代弁）
        ============================================================ -->
   <section class="section empathy-section" id="empathy">
     <div class="container">
@@ -443,7 +520,7 @@
         </div>
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>SNSやデザインで発信したいけれど、<b>教えられるスタッフがいない</b>。ノウハウが施設に残らない。</p>
+          <p>利用者さんにクリエイティブな活動をさせてあげたいのに、<b>教えられる人が身近にいない</b>。外部で頼れる先も見つからない。</p>
         </div>
         <div class="empathy-item">
           <span class="q">Q</span>
@@ -463,57 +540,55 @@
   </section>
 
   <!-- ============================================================
-       3. 社会的ミッション（なぜこの事業をやっているのか）
+       3. クリエイティブ講座で、何が変わるの？（課題の受け皿として共感パート直後に配置）
        ============================================================ -->
-  <section class="section mission-section" id="mission">
+  <section class="section change-section" id="philosophy">
     <div class="container">
-      <p class="lp-eyebrow reveal">Our Mission</p>
-      <h2 class="reveal">なぜ、この事業をやっているのか</h2>
-
-      <p class="mission-hero-copy reveal">
-        私たちが信じているのは、たったひとつのことです。<br>
-        <strong>誰もが自分に合ったスキルと働き方に出会えれば、「ドロップアウト」してしまう社会の構造そのものを変えられる。</strong><br>
-        障害の有無でも、才能の差でもなく——ただ「合う環境に、まだ出会えていないだけ」。
-        その一点を変えるために、私たちは福祉と企業の両側から動いています。
+      <p class="lp-eyebrow reveal" style="text-align:center;">Our Focus</p>
+      <h2 class="reveal">クリエイティブ講座で、何が変わるの？</h2>
+      <p class="lp-section-lead reveal">
+        その悩みに、まとめて応えるのがこの講座です。主役は、利用者さん。<br>
+        「得意」や「好き」が、少しずつ「できる」に変わっていく——その体験を、実践サイクルで積み重ねていきます。
       </p>
 
-      <div class="mission-grid stagger">
-        <div class="mission-card">
-          <span class="mnum">01</span>
-          <h3>適材適所を、問い直す</h3>
-          <p>私自身、うつで一般的なレールから外れました。B型に通う方も同じで、「力がない」のではなく「力を発揮できる場」にまだ出会えていないだけ。環境が変われば、人は変わります。</p>
+      <div class="cycle reveal" role="list" aria-label="講座の実践サイクル">
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">1</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg>講義で学ぶ</div>
+        <span class="cycle-arrow" aria-hidden="true">→</span>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">2</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-lightbulb"/></svg>ワークで考える</div>
+        <span class="cycle-arrow" aria-hidden="true">→</span>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">3</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-palette"/></svg>作品をつくる</div>
+        <span class="cycle-arrow" aria-hidden="true">→</span>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">4</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg>発表・フィードバック</div>
+        <span class="cycle-arrow" aria-hidden="true">→</span>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">5</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg>SNSで発信</div>
+        <span class="cycle-arrow" aria-hidden="true">→</span>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">6</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-briefcase"/></svg>仕事につなげる</div>
+      </div>
+
+      <div class="value-grid stagger">
+        <div class="value-card">
+          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-target"/></svg></div>
+          <h3>自分の適性・資質に気づく</h3>
+          <p>いろんなクリエイティブに触れるうちに、「これ、好きかも」「向いてるかも」に出会える。自分を知ることが、いちばんの土台です。</p>
         </div>
-        <div class="mission-card">
-          <span class="mnum">02</span>
-          <h3>工賃格差は、構造の問題</h3>
-          <p>B型の平均工賃の低さを「かわいそう」で終わらせません。作るスキルと売り方を変えれば、工賃は上がる。これは同情ではなく、経済合理性の話です。</p>
+        <div class="value-card">
+          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg></div>
+          <h3>自分の価値を実感できる</h3>
+          <p>つくった作品に「いいね」や感想が届く。「誰かに届いた」という実感が、自己肯定感を育てていきます。</p>
         </div>
-        <div class="mission-card">
-          <span class="mnum">03</span>
-          <h3>企業にも、同じ想いを</h3>
-          <p>多様な特性を可能性に変えるマネジメントは、企業の現場でも求められています。福祉で培った知見を、人事・ダイバーシティ推進の研修として横展開しています。</p>
-        </div>
-        <div class="mission-card">
-          <span class="mnum">04</span>
-          <h3>AI時代は、追い風</h3>
-          <p>AIツールで、誰でもデザインや発信ができる時代。特別な才能がなくても戦える。クリエイティブの民主化は、これまで届かなかった人にこそ大きなチャンスです。</p>
-        </div>
-        <div class="mission-card">
-          <span class="mnum">05</span>
-          <h3>ドロップアウトを、定義し直す</h3>
-          <p>社会不適合ではなく、ただ「ルートを知らなかっただけ」。私の起業の失敗も、別居も、うつも——失敗ではなく“ルート探しの過程”でした。その語り直しを、支援の現場にも重ねたい。</p>
+        <div class="value-card">
+          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-lightbulb"/></svg></div>
+          <h3>新しい「得意」が見つかる</h3>
+          <p>「できた」の積み重ねが自己効力感に。思ってもみなかった得意が、次の挑戦への扉を開きます。</p>
         </div>
       </div>
 
-      <div class="cta-inline reveal">
-        <p>「うちの施設でも変えられるだろうか」——そう感じたら、まずは話を聞かせてください。</p>
-        <a href="contact.html?type=consult&amp;target=facility&amp;utm_source=course_lp&amp;utm_medium=mission&amp;utm_campaign=facility" class="btn btn-primary">無料で相談してみる</a>
-      </div>
+      <p class="change-close reveal">心理的安全性を大切にした環境で「できた」を積み重ねることで、<strong>自己肯定感・自己効力感が育ちます</strong>。作った作品をSNSで発信し、そこから<strong>企業からの依頼や仕事につながる</strong>ことも。将来的に取り組める生産活動の幅が広がり、工賃アップにもつながっていきます。</p>
     </div>
   </section>
 
   <!-- ============================================================
-       4. 提供者ストーリー（ちゃまるんの回復ストーリー）
+       4. 提供者ストーリー（代表の回復ストーリー）
        ============================================================ -->
   <section class="section story-section" id="story">
     <div class="container">
@@ -522,110 +597,77 @@
 
       <div class="story-wrap reveal">
         <div class="story-photo">
-          <!-- ※要差し替え：ちゃまるん本人の写真に差し替え（暫定で既存の代表写真を使用） -->
-          <img src="assets/images/r90D74yJ.jpeg" alt="クリエイティブ講座・企業研修を提供するちゃまるん（レイ）のポートレート" loading="lazy" decoding="async" width="684" height="1024" />
-          <p class="cap"><b>ちゃまるん（レイ）</b>SNSマーケティング・事業開発／講師</p>
+          <img src="assets/images/r90D74yJ.jpeg" alt="クリエイティブ講座を提供するStellize合同会社 菊野のポートレート" loading="lazy" decoding="async" width="684" height="1024" />
+          <p class="cap"><b>Stellize合同会社　菊野</b>クリエイティブ講座 講師</p>
         </div>
         <div class="story-body">
           <p>20代後半のある日、私はうつ病で休職し、家族とも別居することになりました。営業の仕事でも、立ち上げた事業でも、うまくいかない。「自分には何の力もない」——無力感と自己否定の中で、しばらく動けませんでした。</p>
           <p class="big">でも、本当に必要だったのは<br>「頑張ること」ではなく、<br>「自分を、赦すこと」でした。</p>
           <p>内面と静かに対話し、少しずつ自分を受け入れていく。その過程で気づいたのは、繊細さは弱さではなく武器だということ。やさしさは、きれいごとではなく戦略になるということ。無理はしない。でも、歩みは止めない。そうやって、私は回復してきました。</p>
-          <p>だからこそ、私は信じています。B型に通う方も、企業で生きづらさを抱える方も、決して力がないわけじゃない。まだ、合うルートに出会えていないだけ。<strong>その人の可能性を、私は本気で信じられる。</strong>苦しんだ経験は、そのための資格になりました。</p>
-
-          <div class="story-keywords">
-            <span>繊細さは武器</span>
-            <span>やさしさは戦略</span>
-            <span>無理しないけど、歩みは止めない</span>
-            <span>誰かのための前に、自分のために</span>
-          </div>
+          <p>だからこそ、私は信じています。就労支援事業所に通う方も、働くことに生きづらさを抱える方も、決して力がないわけじゃない。まだ、合うルートに出会えていないだけ。<strong>その人の可能性を、私は本気で信じられる。</strong>苦しんだ経験は、そのための資格になりました。</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ============================================================
-       5. 2つのオファー（A:クリエイティブ講座 / B:企業研修）
+       5. オファー（クリエイティブ講座）
        ============================================================ -->
   <section class="section offer-section" id="offer">
     <div class="container">
-      <p class="lp-eyebrow reveal" style="text-align:center;">Programs</p>
-      <h2 class="reveal">2つのプログラム</h2>
+      <p class="lp-eyebrow reveal" style="text-align:center;">Program</p>
+      <h2 class="reveal">クリエイティブ講座の内容</h2>
       <p class="lp-section-lead reveal">
-        現場に合わせて選べる、2つの入り口。<br>
-        「福祉施設の工賃を上げたい」方にも、「企業で多様な人材を活かしたい」方にも。
+        利用者さんの新しい可能性を見つけたい、就労支援事業所さまへ。<br>
+        現場に合わせて柔軟に設計できる、実践型のプログラムです。
       </p>
 
-      <div class="offer-grid stagger">
+      <div class="offer-grid offer-grid--single stagger">
 
-        <!-- A) B型事業所向け クリエイティブ講座 -->
+        <!-- A) 利用者向け クリエイティブ講座 -->
         <div class="offer-card is-course">
           <div class="offer-head">
-            <span class="tag">FOR B型事業所</span>
+            <svg class="head-spark s1" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>
+            <svg class="head-spark s2" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>
+            <span class="tag"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>FOR 利用者さん</span>
             <h3>クリエイティブ講座</h3>
-            <p>職員が学び、施設にノウハウを残す。利用者の工賃向上まで伴走します。</p>
+            <p>利用者さんの「得意」や「好き」を仕事につなげる。<span class="head-hl">学ぶって、楽しい。</span>できるが増えると、未来が動き出す。</p>
           </div>
           <div class="offer-body">
-            <h4>カリキュラム概要</h4>
+            <h4>学べる内容（一例）</h4>
+            <p class="skill-lead">「え、これもつくれるの？」——楽しみながら身につく、7つのスキル。</p>
+            <div class="skill-grid" role="list" aria-label="講座で学べるスキル">
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg></span><span>Instagram運用</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-palette"/></svg></span><span>Canvaデザイン</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></span><span>ChatGPT活用</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-pencil"/></svg></span><span>イラスト制作</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-video"/></svg></span><span>動画編集</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-camera"/></svg></span><span>写真撮影</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg></span><span>デザイン基礎</span></div>
+            </div>
             <ul class="offer-list">
-              <li>売れる商品・サービスの見つけ方（強みの棚卸し）</li>
-              <li>AIツールを活用したデザイン・画像制作の基礎</li>
-              <li>SNS発信の設計（誰に・何を・どう届けるか）</li>
-              <li>「売れる見せ方」への改善と、施設内での運用定着</li>
+              <li>講義→ワーク→作品づくり→発表・フィードバック→SNS発信、の実践サイクル</li>
+              <li>「できた」の積み重ねで自己効力感を育て、将来の生産活動の幅を広げる</li>
             </ul>
+            <p style="font-size:.82rem;color:var(--text-secondary);margin:-6px 0 20px;">※施設の状況や利用者さんの特性に合わせて、内容はカスタマイズできます。</p>
 
             <h4>提供形式</h4>
             <dl class="offer-meta">
-              <!-- ※要差し替え：確定した回数・期間・料金に置き換え -->
-              <div><dt>回数</dt><dd>【回数】</dd></div>
-              <div><dt>期間</dt><dd>【期間】</dd></div>
-              <div><dt>料金</dt><dd>【料金】</dd></div>
+              <!-- ※要差し替え：回数・期間・概算費用レンジが確定したら実数に置き換える（金額を推測で埋めない） -->
+              <div><dt>回数</dt><dd>柔軟に設計</dd></div>
+              <div><dt>期間</dt><dd>ご相談のうえ決定</dd></div>
+              <div><dt>費用感</dt><dd>お見積りでご案内</dd></div>
             </dl>
-            <p style="font-size:.84rem;color:var(--text-secondary);margin:-8px 0 20px;">オンライン／訪問（対面）を選択可。施設の状況に合わせて柔軟に設計します。</p>
+            <p style="font-size:.84rem;color:var(--text-secondary);margin:-8px 0 20px;">受講人数の目安：利用者さん3名〜。オンライン／訪問（対面）を選択可、施設の状況に合わせて柔軟に設計します。概算費用感はお問い合わせ時にご案内します。</p>
 
             <h4>得られる変化</h4>
             <div class="ba">
-              <div class="box before"><span class="lbl">BEFORE</span>売れる商品がなく、工賃が伸び悩む。発信はスタッフの負担頼み。</div>
+              <div class="box before"><span class="lbl">BEFORE</span>作業がマンネリ化し、自分の得意や可能性に気づく機会が少ない。「これでいいのかな」と感じることも。</div>
               <div class="arrow" aria-hidden="true">→</div>
-              <div class="box after"><span class="lbl">AFTER</span>施設に「作って・売る」力が残り、工賃向上と通所率改善の土台ができる。</div>
+              <div class="box after"><span class="lbl">AFTER</span>「得意」「好き」に気づき、「できた」を積み重ねて自分の価値を実感。新しい得意の発見が、次の挑戦につながっていく。</div>
             </div>
 
-            <a href="contact.html?type=consult&amp;target=facility&amp;utm_source=course_lp&amp;utm_medium=offer&amp;utm_campaign=facility" class="btn btn-primary">この講座を相談する</a>
-          </div>
-        </div>
-
-        <!-- B) 企業向け 研修プログラム -->
-        <div class="offer-card is-biz">
-          <div class="offer-head">
-            <span class="tag">FOR 企業</span>
-            <h3>ダイバーシティ研修</h3>
-            <p>多様な特性を「可能性」に変えるマネジメントを、福祉の知見から。</p>
-          </div>
-          <div class="offer-body">
-            <h4>内容概要</h4>
-            <ul class="offer-list">
-              <li>特性を「弱み」でなく「強み」として捉え直す視点</li>
-              <li>本人の内発的な動機を引き出す関わり方・声かけ</li>
-              <li>「合う環境」を設計するマネジメントの考え方</li>
-              <li>心理的安全性と、無理をさせない生産性の両立</li>
-            </ul>
-
-            <h4>対象部署・提供形式</h4>
-            <dl class="offer-meta">
-              <!-- ※要差し替え：確定した回数・期間・料金に置き換え -->
-              <div><dt>回数</dt><dd>【回数】</dd></div>
-              <div><dt>期間</dt><dd>【期間】</dd></div>
-              <div><dt>料金</dt><dd>【料金】</dd></div>
-            </dl>
-            <p style="font-size:.84rem;color:var(--text-secondary);margin:-8px 0 20px;">対象：人事・ダイバーシティ推進・現場マネージャー層。オンライン／対面いずれも対応。</p>
-
-            <h4>得られる変化</h4>
-            <div class="ba">
-              <div class="box before"><span class="lbl">BEFORE</span>多様な人材への関わり方が現場任せ。定着や活躍につながりにくい。</div>
-              <div class="arrow" aria-hidden="true">→</div>
-              <div class="box after"><span class="lbl">AFTER</span>特性に合わせたマネジメントが共通言語になり、離職防止と活躍を後押し。</div>
-            </div>
-
-            <a href="contact.html?type=consult&amp;target=corporate&amp;utm_source=course_lp&amp;utm_medium=offer&amp;utm_campaign=corporate" class="btn btn-secondary">この研修を相談する</a>
+            <a href="contact.html?type=consult&amp;utm_source=course_lp&amp;utm_medium=offer&amp;utm_campaign=course" class="btn btn-primary">この講座について問い合わせる</a>
           </div>
         </div>
 
@@ -651,31 +693,29 @@
           <!-- ※要差し替え：導入社数の実績。現状は事業ビジョンの目標値を掲載 -->
           <div class="pfig">30<small>社</small></div>
           <p class="plabel">2026年 導入目標</p>
-          <p class="pdesc">B型事業所・企業への導入を広げ、2028年には150社（年商1.7億円規模）を目指しています。</p>
+          <p class="pdesc">就労支援事業所への導入を広げ、2028年には150社（年商1.7億円規模）を目指しています。</p>
         </div>
         <div class="point-card">
           <span class="pnum">POINT 2</span>
-          <!-- ※要差し替え：工賃改善率の実績データ -->
-          <div class="pfig">＋<span>【実績データ】</span><small>%</small></div>
-          <p class="plabel">平均工賃の改善イメージ</p>
+          <!-- ※要差し替え：工賃改善率の実測値が確定したら「＋◯◯%」の実数に置き換える（推測で埋めない） -->
+          <div class="pfig">集計中</div>
+          <p class="plabel">平均工賃の改善率</p>
           <p class="pdesc">「売れる商品×届く発信」で、利用者の平均工賃月額の底上げを目指します。実測値は導入事例とあわせて公開予定。</p>
         </div>
         <div class="point-card">
           <span class="pnum">POINT 3</span>
-          <!-- ※要差し替え：受講者・施設満足度の実績データ -->
-          <div class="pfig">【実績データ】<small>%</small></div>
+          <div class="pfig">100<small>%</small></div>
           <p class="plabel">受講後の満足度</p>
-          <p class="pdesc">「学んだことが現場で使える」という声を数値で可視化します。アンケート集計後に掲載します。</p>
+          <p class="pdesc">これまでご相談・体験いただいた方から、100%の満足度をいただいています（自社調べ）。</p>
         </div>
         <div class="point-card">
           <span class="pnum">POINT 4</span>
-          <!-- ※要差し替え：講師の伴走実績（登壇・相談件数等） -->
-          <div class="pfig">【実績データ】<small>件</small></div>
+          <div class="pfig">3<small>件</small></div>
           <p class="plabel">相談・伴走の実績</p>
-          <p class="pdesc">現場に寄り添った相談・伴走の件数を積み上げています。実数は準備が整い次第、公開します。</p>
+          <p class="pdesc">現場に寄り添った相談を積み上げています。サービス立ち上げ初期のため件数はまだ少ないですが、一つひとつ丁寧に向き合っています。</p>
         </div>
       </div>
-      <p class="note point-note reveal">※ 数値の一部は目標値・集計中の項目です。誠実さを大切に、確定した数字のみを順次公開します。</p>
+      <p class="note point-note reveal">※ 導入社数目標・工賃改善率は目標値／集計中の項目です。誠実さを大切に、確定した数字のみを順次公開します。</p>
     </div>
   </section>
 
@@ -693,19 +733,19 @@
 
       <div class="reason-grid stagger">
         <div class="reason-card">
-          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-sprout"/></svg></div>
+          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
           <h3>うつ経験者だからこその、やさしい伴走</h3>
           <p>回復してきた道のりがあるから、つまずきの気持ちが分かる。急がせず、でも止まらない。無理をさせない伴走スタイルです。</p>
         </div>
         <div class="reason-card">
-          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-sparkle"/></svg></div>
+          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg></div>
           <h3>感性を大事にする、指導スタイル</h3>
-          <p>「やらされる」ではなく「やってみたい」から始める。内発的な動機を引き出すから、利用者も社員も主体的に動き出します。</p>
+          <p>「やらされる」ではなく「やってみたい」から始める。内発的な動機を引き出すから、利用者さんが主体的に動き出します。</p>
         </div>
         <div class="reason-card">
-          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-globe"/></svg></div>
-          <h3>福祉と企業、両方を知る唯一性</h3>
-          <p>福祉施設の現場と、企業のマネジメント課題。その両方を一貫した思想で語れるからこそ、現場に本当に効く提案ができます。</p>
+          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-globe"/></svg></div>
+          <h3>福祉とビジネス、両方を知る唯一性</h3>
+          <p>就労支援の現場と、SNSマーケティング・事業開発のビジネス経験。その両方を知るからこそ、「つくって終わり」ではなく「届いて、仕事につながる」まで伴走できます。</p>
         </div>
       </div>
 
@@ -722,23 +762,23 @@
   <section class="section cases-section" id="cases">
     <div class="container">
       <p class="lp-eyebrow reveal" style="text-align:center;">Voices</p>
-      <h2 class="reveal">導入いただいた方の声</h2>
+      <h2 class="reveal">ご検討いただいている皆さま</h2>
 
       <div class="cases-grid stagger">
-        <!-- ※要差し替え：実際の導入事例・お客様の声に差し替え -->
+        <!-- ※要差し替え：先方確認の上、コメント本文・お名前の表記を確定してから公開 -->
         <div class="case-card">
-          <p class="who">B型事業所・サービス管理者さま</p>
-          <p class="voice">職員が発信を教えられるようになり、利用者さんの表情が変わりました。「自分の作ったものが誰かに届く」体験が、通所の理由になっています。</p>
-          <p class="from">— 【導入事例】掲載準備中</p>
+          <p class="who">株式会社ゴービヨンド さま</p>
+          <p class="voice">導入をご検討・ご相談いただいています。具体的な感想・お声は、掲載のご了承をいただき次第公開いたします。</p>
+          <p class="from">— コメント掲載準備中</p>
         </div>
         <div class="case-card">
-          <p class="who">企業・人事ご担当者さま</p>
-          <p class="voice">特性を強みとして捉え直す視点が、マネージャー層に共通言語として広がりました。関わり方に迷ったときの拠りどころができています。</p>
-          <p class="from">— 【導入事例】掲載準備中</p>
+          <p class="who">ひともち鎌ヶ谷 さま</p>
+          <p class="voice">導入をご検討・ご相談いただいています。具体的な感想・お声は、掲載のご了承をいただき次第公開いたします。</p>
+          <p class="from">— コメント掲載準備中</p>
         </div>
 
         <div class="case-coming">
-          導入事例は現在準備中です。実際に導入いただいた施設さま・企業さまの声を、順次掲載してまいります。
+          その他の導入事例も現在準備中です。実際に導入いただいた施設さまの声を、順次掲載してまいります。
         </div>
       </div>
     </div>
@@ -752,44 +792,44 @@
       <p class="lp-eyebrow reveal" style="text-align:center;">Flow</p>
       <h2 class="reveal">導入までの流れ</h2>
       <p class="lp-section-lead reveal">
-        いきなり契約、はありません。まずは話すところから。<br>
+        まずは、お問い合わせフォームから。<br>
         あなたのペースで、一歩ずつ進めていきましょう。
       </p>
 
       <div class="flow stagger">
         <div class="flow-step">
           <div class="flow-badge">
-            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-mail"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-mail"/></svg>
             <span class="n">STEP 1</span>
           </div>
           <div class="flow-body">
             <h3>お問い合わせ</h3>
-            <p>フォームから、施設・企業の状況やお悩みをお気軽にお送りください。しつこい営業は一切いたしません。</p>
+            <p>フォームから、施設の状況やお悩みをお気軽にお送りください。ご入力は1〜2分で完了します。</p>
           </div>
         </div>
         <div class="flow-step">
           <div class="flow-badge">
-            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-users"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg>
             <span class="n">STEP 2</span>
           </div>
           <div class="flow-body">
-            <h3>無料相談・ヒアリング</h3>
-            <p>現状の課題や目指したい姿を、じっくりお聞きします。オンラインで気軽にご相談いただけます。</p>
+            <h3>メールでご連絡・ヒアリング</h3>
+            <p>後日、担当よりメールでご連絡します。日程を調整のうえ、現状の課題や目指したい姿をじっくりお聞きします。基本はZoomでのオンライン、ご要望に応じて訪問も可能です。</p>
           </div>
         </div>
         <div class="flow-step">
           <div class="flow-badge">
-            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-document"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-document"/></svg>
             <span class="n">STEP 3</span>
           </div>
           <div class="flow-body">
             <h3>ご提案・お見積り</h3>
-            <p>ヒアリングをもとに、講座／研修の内容・回数・期間・費用をご提案します。ご予算に応じた設計も可能です。</p>
+            <p>ヒアリングをもとに、講座の内容・回数・期間・費用をご提案します。ご予算に応じた設計も可能です。</p>
           </div>
         </div>
         <div class="flow-step">
           <div class="flow-badge">
-            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-check"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-check"/></svg>
             <span class="n">STEP 4</span>
           </div>
           <div class="flow-body">
@@ -799,39 +839,13 @@
         </div>
         <div class="flow-step">
           <div class="flow-badge">
-            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-rocket"/></svg>
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-rocket"/></svg>
             <span class="n">STEP 5</span>
           </div>
           <div class="flow-body">
-            <h3>講座／研修スタート</h3>
+            <h3>講座スタート</h3>
             <p>いよいよ開始。開始後も伴走し、現場に定着するまで一緒に走ります。ここがゴールではなく、始まりです。</p>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       10. そもそも解説
-       ============================================================ -->
-  <section class="section about-b-section" id="basics">
-    <div class="container">
-      <p class="lp-eyebrow reveal" style="text-align:center;">Basics</p>
-      <h2 class="reveal">そもそも、の話</h2>
-
-      <div class="qa-block reveal">
-        <div class="qa-box">
-          <h3><span class="qmark">Q</span>就労継続支援B型って、なに？</h3>
-          <p>「就労継続支援B型」は、障害や難病などで一般企業への就職が難しい方が、自分のペースで働きながら知識やスキルを身につけられる福祉サービスです。作業の対価として「工賃」が支払われますが、その平均額は決して高くないのが現状です。</p>
-          <p>令和6年度の報酬改定で、平均工賃月額が事業所の基本報酬に影響する仕組みになりました。つまり<span class="lp-keyword">工賃を上げることは、利用者さんのためであると同時に、事業所経営そのものの課題</span>になっているのです。</p>
-        </div>
-      </div>
-
-      <div class="qa-block reveal">
-        <div class="qa-box">
-          <h3><span class="qmark">Q</span>クリエイティブ講座で、何が変わるの？</h3>
-          <p>ポイントは「作れる」だけでなく「売れる」まで設計すること。どんなに良いものでも、知られていなければ売れません。SNSでの発信やAIツールを使ったデザインを学ぶことで、施設の商品やサービスが<span class="lp-keyword">「必要な人に、届く」状態</span>に変わります。</p>
-          <p>さらに、教えるのは講師だけではありません。<strong>職員自身がスキルを身につけ、施設にノウハウが残る</strong>ように設計しています。だから、講座が終わっても発信は続いていく。利用者さんの「できた」の積み重ねが、工賃にも、自信にもつながっていきます。</p>
         </div>
       </div>
     </div>
@@ -854,7 +868,7 @@
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>施設・企業の規模、講座／研修の回数や内容によって異なります。ご予算に合わせた柔軟なプラン設計が可能ですので、まずは無料相談でご希望をお聞かせください。無理な提案はいたしません。</p>
+              <p>施設の規模や、講座の回数・内容によって異なります。ご予算に合わせた柔軟なプラン設計が可能ですので、まずはお問い合わせフォームからご希望をお聞かせください。後日メールで概算をご案内します。</p>
             </div>
           </div>
         </div>
@@ -866,7 +880,7 @@
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>はい、まったく問題ありません。スマホやパソコンの基本操作から、一つずつ丁寧に進めます。近年はAIツールの登場で「特別な才能がなくても発信できる」時代になりました。むしろ、初めての方こそ伸びしろが大きいと感じています。</p>
+              <p>はい、まったく問題ありません。講座は講師が利用者さんと一緒に進めますので、職員の皆さまに専門知識やITスキルは必要ありません。利用者さんも、スマホやパソコンの基本操作から一つずつ丁寧に。AIツールの登場で「特別な才能がなくても作れる・発信できる」時代です。初めての方こそ、伸びしろが大きいと感じています。</p>
             </div>
           </div>
         </div>
@@ -902,19 +916,7 @@
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>どちらも対応可能です。全国どこからでも参加しやすいオンラインと、直接お会いしてきめ細やかに指導する対面、施設・企業の状況に合わせてお選びいただけます。組み合わせのご相談も歓迎です。</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <div class="accordion-header">
-            <p class="accordion-question">研修と講座、どちらを選べばいいか分かりません。</p>
-            <div class="accordion-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="accordion-content">
-            <div class="accordion-body">
-              <p>目安として、<strong>B型事業所で利用者さんの工賃を上げたい</strong>方は「クリエイティブ講座」、<strong>企業で多様な人材の可能性を引き出したい</strong>方は「ダイバーシティ研修」が合います。迷われる場合は、現状をお聞きして最適な方をご提案しますので、お気軽にご相談ください。</p>
+              <p>どちらも対応可能です。全国どこからでも参加しやすいオンラインと、直接お会いしてきめ細やかに指導する対面、施設の状況に合わせてお選びいただけます。組み合わせのご相談も歓迎です。</p>
             </div>
           </div>
         </div>
@@ -926,7 +928,7 @@
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>もちろんです。情報収集の段階でのご相談も大歓迎です。無理な勧誘は一切いたしません。「話を聞いてみたい」だけでも十分ですので、まずは気軽な気持ちでお問い合わせください。</p>
+              <p>もちろんです。情報収集の段階でのお問い合わせも大歓迎です。「話を聞いてみたい」だけでも十分ですので、まずは気軽な気持ちでフォームからお送りください。後日メールでご連絡いたします。</p>
             </div>
           </div>
         </div>
@@ -959,11 +961,11 @@
         <p class="lp-eyebrow reveal">Message</p>
         <h2 class="reveal">最後に、あなたへ</h2>
         <div class="body reveal">
-          <p>私は、一度レールから外れました。無力感の底で、「もう自分には何もない」と思っていました。でも、そうではなかった。ただ、自分に合うルートを、まだ知らなかっただけでした。</p>
-          <p>B型事業所に通う方も、企業で生きづらさを抱える方も、きっと同じです。力がないのではありません。合う環境と、合うスキルに出会えれば、人はもう一度、自分の価値に気づける。その一人ひとりの変化が積み重なれば、<strong>「ドロップアウト」してしまう社会の構造そのもの</strong>を、変えていけると信じています。</p>
-          <p>無理はしなくていい。でも、歩みは止めなくていい。その一歩を、私たちが隣で一緒に歩きます。</p>
-          <p class="sign">ちゃまるん（レイ）
-            <small>Stellize ／ クリエイティブ講座・企業研修 講師</small>
+          <p>合わない仕事があった。合わない人間関係があった。——それは、その人が<strong>「無力である」ことの証明には、なりません</strong>。ただ、合わなかっただけ。私自身が、そうでした。</p>
+          <p>だからこそ、信じています。クリエイティブ講座を通して、自分に適性のある働き方や、まだ気づいていない才能に出会えたなら——<strong>社会で価値を発揮できる場は、絶対にあります。</strong></p>
+          <p>それらを見つけるきっかけとして、私たちStellizeをご利用ください。その一歩を、隣で一緒に歩きます。</p>
+          <p class="sign">Stellize合同会社　菊野
+            <small>クリエイティブ講座 講師</small>
           </p>
         </div>
       </div>
@@ -971,29 +973,23 @@
   </section>
 
   <!-- ============================================================
-       12-2. 最終CTA（2導線）
+       12-2. 最終CTA
        ============================================================ -->
   <section class="section final-cta" id="contact">
     <div class="container">
       <p class="lp-eyebrow reveal" style="text-align:center;">Contact</p>
-      <h2 class="reveal">まずは、話すところから。</h2>
+      <h2 class="reveal">まずは、お問い合わせから。</h2>
       <p class="final-lead reveal">
-        どちらの入り口からでも大丈夫です。あなたの状況に合わせてご案内します。<br>
-        相談は無料。無理な勧誘は、いたしません。
+        フォームをお送りいただいたら、後日、担当よりメールでご連絡いたします。<br>
+        導入を決めていなくても、情報収集の段階でも大丈夫です。
       </p>
 
-      <div class="dual-cta stagger">
+      <div class="dual-cta stagger" style="max-width:520px;">
         <div class="dual-card for-fac">
-          <div class="dicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-sprout"/></svg></div>
-          <h3>B型事業所の方はこちら</h3>
-          <p>利用者さんの工賃向上・通所率改善を、クリエイティブ講座で。現状のお悩みからお聞かせください。</p>
-          <a href="contact.html?type=consult&amp;target=facility&amp;utm_source=course_lp&amp;utm_medium=final&amp;utm_campaign=facility" class="btn btn-primary">施設として相談する</a>
-        </div>
-        <div class="dual-card for-biz">
-          <div class="dicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-building"/></svg></div>
-          <h3>企業ご担当者はこちら</h3>
-          <p>多様な人材の可能性を引き出すダイバーシティ研修を。人事・現場マネジメントの課題に寄り添います。</p>
-          <a href="contact.html?type=consult&amp;target=corporate&amp;utm_source=course_lp&amp;utm_medium=final&amp;utm_campaign=corporate" class="btn btn-secondary">企業として相談する</a>
+          <div class="dicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
+          <h3>お問い合わせはこちら</h3>
+          <p>利用者さんの「得意」や「好き」を、仕事につながる価値へ。クリエイティブ講座のこと、現状のお悩みからお聞かせください。</p>
+          <a href="contact.html?type=consult&amp;utm_source=course_lp&amp;utm_medium=final&amp;utm_campaign=course" class="btn btn-primary">お問い合わせフォームへ</a>
         </div>
       </div>
 
@@ -1049,10 +1045,9 @@
     </div>
   </footer>
 
-  <!-- スマホ用スティッキーCTA（2導線・常時表示） -->
+  <!-- スマホ用スティッキーCTA（常時表示） -->
   <div class="sticky-cta" aria-label="お問い合わせ導線">
-    <a class="s-fac" href="contact.html?type=consult&amp;target=facility&amp;utm_source=course_lp&amp;utm_medium=sticky&amp;utm_campaign=facility">B型事業所の方</a>
-    <a class="s-biz" href="contact.html?type=consult&amp;target=corporate&amp;utm_source=course_lp&amp;utm_medium=sticky&amp;utm_campaign=corporate">企業ご担当者</a>
+    <a class="s-fac" href="contact.html?type=consult&amp;utm_source=course_lp&amp;utm_medium=sticky&amp;utm_campaign=course">お問い合わせはこちら</a>
   </div>
 
   <!-- ページ遷移アニメ（他ページと共通） -->
