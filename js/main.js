@@ -165,12 +165,24 @@ const STELLIZE_VOICES = [
   STELLIZE_STATS.forEach((stat) => {
     const item = document.createElement("div");
     item.className = "stat-item";
+    // value未確定の間は「集計中」演出：ぼかした数字がパラパラ変わる
     const valueHtml = stat.value == null
-      ? '<span class="stat-num stat-num--pending">準備中</span>'
+      ? `<span class="stat-num stat-num--tally" data-tally aria-hidden="true">${Math.floor(Math.random() * 90) + 10}</span><span class="stat-suffix" aria-hidden="true">${stat.suffix}</span><span class="sr-only">集計中</span>`
       : `<span class="stat-num" data-count="${stat.value}">0</span><span class="stat-suffix">${stat.suffix}</span>`;
-    item.innerHTML = `<p class="stat-value">${valueHtml}</p><p class="stat-label">${stat.label}</p>`;
+    const note = stat.value == null ? '<span class="stat-tally-note">集計中…</span>' : "";
+    item.innerHTML = `<p class="stat-value">${valueHtml}</p><p class="stat-label">${stat.label}</p>${note}`;
     grid.appendChild(item);
   });
+
+  // 集計中の数字をパラパラ回す（reduced-motion時は静止したぼかし数字のまま）
+  const tallies = grid.querySelectorAll("[data-tally]");
+  if (tallies.length && !REDUCED_MOTION) {
+    setInterval(() => {
+      tallies.forEach((el) => {
+        el.textContent = String(Math.floor(Math.random() * 90) + 10);
+      });
+    }, 160);
+  }
 
   const nums = grid.querySelectorAll(".stat-num[data-count]");
   if (!nums.length) return;
