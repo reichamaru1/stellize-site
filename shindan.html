@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>生産活動拡大 課題診断｜B型事業所オーナー・サビ管向け</title>
+<meta name="description" content="就労継続支援B型事業所のオーナー・サービス管理責任者向け。12の質問で、生産活動拡大を妨げている課題のタイプを診断します。">
+<script>
+/* ============================================================
+ * ★★★ 設定エリア（ここを編集してください） ★★★
+ * ============================================================ */
+
+// 無料説明会の申込みフォームURL（仮URL。本番のフォームURLに差し替えてください）
+const CONTACT_URL = "https://example.com/contact";
+
+// 公式LINEのURL（仮URL。本番のLINE URLに差し替えてください）
+const LINE_URL = "https://lin.ee/xxxxxxx";
+
+// 事業者名（結果画面のフッター等に表示されます）
+const BRAND_NAME = "Stellize";
+
+/* ============================================================
+ * ★★★ 設問データ（質問文を差し替える場合はここ） ★★★
+ * axis: "staff"（スタッフ・指導スキル） / "product"（商品・販路） / "user"（利用者の意欲・工賃還元）
+ * 課題が存在するほどスコアが高くなる「課題ベース」の文章にしてください
+ * ============================================================ */
+const QUESTIONS = [
+  // --- スタッフ・指導スキル軸（4問） ---
+  { axis: "staff",   text: "スタッフによって、利用者さんへの作業の教え方にばらつきがある" },
+  { axis: "staff",   text: "デザインやものづくりのスキルが、特定のスタッフの経験に頼っている" },
+  { axis: "staff",   text: "新しい作業や商品づくりを始めたくても、教えられる人がいない" },
+  { axis: "staff",   text: "指導の手順やコツが、マニュアルや「型」として残っていない" },
+
+  // --- 商品・販路軸（4問） ---
+  { axis: "product", text: "自施設の商品が、正直「売れるデザイン・魅力」になっていないと感じる" },
+  { axis: "product", text: "販売先が限られていて、新しい販路をなかなか開拓できていない" },
+  { axis: "product", text: "SNSやネットでの発信が、ほとんどできていない・続いていない" },
+  { axis: "product", text: "商品の価格が安く、作業量のわりに収益につながっていない" },
+
+  // --- 利用者の意欲・工賃還元軸（4問） ---
+  { axis: "user",    text: "利用者さんの作業へのモチベーションが上がりにくいと感じる" },
+  { axis: "user",    text: "頑張りがどう工賃に反映されるのか、利用者さんに伝わりにくい" },
+  { axis: "user",    text: "利用者さんが「できた」「褒められた」と実感できる場面が少ない" },
+  { axis: "user",    text: "工賃が思うように上げられず、利用者さんやご家族に申し訳なさを感じる" }
+];
+
+/* ============================================================
+ * ★★★ 診断結果の文言（結果コメントを差し替える場合はここ） ★★★
+ * ============================================================ */
+const AXES = {
+  staff:   { label: "スタッフ・指導スキル",     color: "#2a9d8f" },
+  product: { label: "商品・販路",               color: "#1d3557" },
+  user:    { label: "利用者の意欲・工賃還元",   color: "#e9a13b" }
+};
+
+const RESULT_TYPES = {
+  staff: {
+    name: "タイプA：指導力底上げ型",
+    catch: "現場の頑張りを、「教える型」がまだ支えきれていないようです",
+    comment: "日々の現場は一人ひとりのスタッフの努力で回っている一方で、教え方や指導のノウハウが体系化されておらず、個人の経験値に頼った属人的な指導になっている傾向が見えています。このままだと、新しい商品づくりや作業の幅を広げようとしたときに、「教えられる人がいない」ことがボトルネックになりやすい状態かもしれません。",
+    directions: [
+      "指導手順を「型」として言語化・マニュアル化し、誰が教えても同じ品質になる仕組みをつくる",
+      "外部講師によるクリエイティブ研修を導入し、スタッフ自身が「教えられるスキル」を身につける",
+      "新人スタッフでも再現できる、スモールステップの作業分解を取り入れる"
+    ]
+  },
+  product: {
+    name: "タイプB：商品力・販路開拓型",
+    catch: "「つくる力」はあるのに、「売る力」がまだ追いついていないようです",
+    comment: "日々の作業自体はしっかり回っている一方で、商品の魅力・デザイン性や販路の広さが、利用者さんの工賃向上に直結していない傾向が見えています。「良いものをつくっているのに、正当な価格で売れる場所がない」——そんなもどかしさを感じているかもしれません。",
+    directions: [
+      "商品のデザイン性・パッケージを見直し、「福祉だから買う」ではなく「欲しいから買う」商品へ",
+      "InstagramなどのSNSを活用した発信で、施設のファンを少しずつ増やす",
+      "外部のデザイナー・企業との連携で、新しい販路や委託販売先を開拓する"
+    ]
+  },
+  user: {
+    name: "タイプC：意欲・工賃改善型",
+    catch: "利用者さんの「やりがい」の設計に、伸びしろがあるようです",
+    comment: "利用者さんのモチベーションや、工賃還元の仕組み・見える化に課題がある傾向が見えています。作業そのものよりも、「頑張りがどう報われるか」が伝わりにくいことで、意欲が育ちにくくなっているのかもしれません。ここが変わると、現場の空気は大きく変わります。",
+    directions: [
+      "小さな成功体験を積み重ねられるよう、作業をスモールステップで設計する",
+      "頑張りと工賃のつながりを「見える化」し、利用者さん本人に伝わる形にする",
+      "作品が売れた・褒められたなど、達成感を得られる場面を意図的につくる"
+    ]
+  },
+  mixed: {
+    name: "タイプD：複合課題型",
+    catch: "課題は一点ではなく、複数の要因が絡み合っているようです",
+    comment: "特定の一つの課題というより、指導・商品・利用者の意欲といった複数の要因が絡み合って、生産活動の拡大を難しくしている状態が見えています。裏を返せば、どこか一つが動き出すと、他の課題にも良い連鎖が起きやすい状態でもあります。",
+    directions: [
+      "全部を一度に変えようとせず、優先順位をつけた段階的な改善から始める",
+      "まずは「教える型づくり」か「商品の見直し」など、効果が波及しやすい一点を選ぶ",
+      "外部の視点を入れて、自施設では気づきにくい優先順位を整理する"
+    ]
+  }
+};
+
+// 複合課題型と判定する軸間スコア差のしきい値
+const MIXED_THRESHOLD = 0.3;
+
+// 緊急度のしきい値（全体平均点）
+const URGENCY = [
+  { min: 3.8, label: "高", note: "できるだけ早めに手を打ちたい状態です", color: "#d0603c" },
+  { min: 2.8, label: "中", note: "今のうちに改善の一歩を踏み出したい状態です", color: "#e9a13b" },
+  { min: 0,   label: "低", note: "大きな崩れはなく、さらに伸ばせる状態です", color: "#2a9d8f" }
+];
+
+/* ============================================================
+ * ここから下はロジック・画面（通常は編集不要）
+ * ============================================================ */
+</script>
+<style>
+  :root {
+    --navy: #1d3557;
+    --teal: #2a9d8f;
+    --teal-light: #e6f4f2;
+    --orange: #e9a13b;
+    --orange-dark: #d0894a;
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --text: #2b3a4a;
+    --text-sub: #6b7a8a;
+    --line: #06c755;
+    --radius: 16px;
+    --shadow: 0 4px 20px rgba(29, 53, 87, 0.10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+  .container { max-width: 560px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* ---------- 画面切り替え ---------- */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- 進捗バー ---------- */
+  #progressWrap {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    padding: 14px 20px 10px;
+    max-width: 560px; margin: 0 auto;
+    display: none;
+  }
+  #progressWrap.visible { display: block; }
+  .progress-label { font-size: 12px; color: var(--text-sub); margin-bottom: 6px; text-align: right; }
+  .progress-track { height: 8px; background: #e3ded4; border-radius: 99px; overflow: hidden; }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--teal), var(--navy));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  /* ---------- スタート画面 ---------- */
+  .hero { padding: 52px 0 30px; text-align: center; }
+  .hero-badge {
+    display: inline-block;
+    background: var(--teal-light); color: var(--teal);
+    font-size: 12px; font-weight: 700;
+    padding: 5px 16px; border-radius: 99px;
+    margin-bottom: 18px; letter-spacing: 0.05em;
+  }
+  .hero h1 {
+    font-size: 25px; line-height: 1.5; color: var(--navy);
+    font-weight: 800; margin-bottom: 14px;
+  }
+  .hero h1 .accent { color: var(--teal); }
+  .hero p.lead { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; }
+  .hero-points {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 22px 24px; margin: 26px 0; text-align: left;
+  }
+  .hero-points li {
+    list-style: none; font-size: 14px; padding: 7px 0 7px 30px; position: relative;
+  }
+  .hero-points li::before {
+    content: "✓"; position: absolute; left: 4px; top: 7px;
+    color: var(--teal); font-weight: 800;
+  }
+  .note-small { font-size: 12px; color: var(--text-sub); text-align: center; margin-top: 12px; }
+
+  /* ---------- ボタン共通 ---------- */
+  .btn {
+    display: block; width: 100%;
+    border: none; cursor: pointer; text-decoration: none; text-align: center;
+    font-family: inherit; font-weight: 700;
+    border-radius: 99px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    color: #fff; font-size: 17px; padding: 17px 20px;
+    box-shadow: 0 6px 18px rgba(233, 161, 59, 0.4);
+  }
+  .btn-navy {
+    background: var(--navy); color: #fff; font-size: 16px; padding: 16px 20px;
+    box-shadow: 0 4px 14px rgba(29, 53, 87, 0.3);
+  }
+  .btn-line {
+    background: #fff; color: var(--line); font-size: 15px; padding: 14px 20px;
+    border: 2px solid var(--line);
+  }
+
+  /* ---------- 設問カード ---------- */
+  .quiz-area { padding-top: 14px; }
+  .q-axis-tag {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    color: var(--teal); background: var(--teal-light);
+    padding: 3px 12px; border-radius: 99px; margin-bottom: 12px;
+  }
+  .q-card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 28px 24px;
+  }
+  .q-number { font-size: 13px; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; }
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.7; color: var(--navy); margin-bottom: 22px; min-height: 3.4em; }
+  .q-options { display: flex; flex-direction: column; gap: 10px; }
+  .q-option {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 13px 16px;
+    background: #fbfaf7; border: 2px solid #e8e3d8; border-radius: 12px;
+    font-family: inherit; font-size: 15px; color: var(--text); text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+  .q-option:active { transform: scale(0.98); }
+  .q-option .num {
+    flex-shrink: 0;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--teal-light); color: var(--teal);
+    font-weight: 800; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .q-option.selected { border-color: var(--teal); background: var(--teal-light); }
+  .q-back {
+    margin-top: 16px; background: none; border: none; cursor: pointer;
+    font-family: inherit; font-size: 13px; color: var(--text-sub);
+    text-decoration: underline; padding: 6px;
+  }
+
+  /* ---------- 結果画面 ---------- */
+  .result-head { text-align: center; padding: 44px 0 8px; }
+  .result-head .small { font-size: 13px; color: var(--text-sub); margin-bottom: 10px; }
+  .result-type {
+    font-size: 24px; font-weight: 800; color: var(--navy); line-height: 1.5; margin-bottom: 10px;
+  }
+  .result-catch { font-size: 15px; color: var(--teal); font-weight: 700; }
+  .r-card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 26px 24px; margin-top: 22px;
+  }
+  .r-card h2 {
+    font-size: 15px; color: var(--navy); font-weight: 800;
+    padding-bottom: 10px; margin-bottom: 16px;
+    border-bottom: 2px solid var(--teal-light);
+  }
+  .r-card p { font-size: 14.5px; }
+
+  .urgency-row { display: flex; align-items: center; gap: 14px; }
+  .urgency-badge {
+    flex-shrink: 0;
+    width: 64px; height: 64px; border-radius: 50%;
+    color: #fff; font-weight: 800;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .urgency-badge .u-label { font-size: 22px; line-height: 1.1; }
+  .urgency-badge .u-cap { font-size: 10px; font-weight: 700; }
+  .urgency-note { font-size: 14px; font-weight: 700; color: var(--text); }
+
+  /* 棒グラフ（CSSのみ） */
+  .bar-row { margin-bottom: 18px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+  .bar-label .score { color: var(--text-sub); }
+  .bar-track { height: 14px; background: #efece4; border-radius: 99px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; width: 0%; border-radius: 99px;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar-row.top .bar-label { color: var(--navy); }
+  .bar-top-tag {
+    display: inline-block; font-size: 10px; color: #fff; background: var(--orange);
+    border-radius: 99px; padding: 1px 8px; margin-left: 6px; vertical-align: 1px;
+  }
+
+  .direction-list { list-style: none; }
+  .direction-list li {
+    position: relative; padding: 8px 0 8px 30px; font-size: 14.5px;
+  }
+  .direction-list li::before {
+    content: ""; position: absolute; left: 6px; top: 17px;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--orange);
+  }
+
+  /* ---------- CTA ---------- */
+  .cta-block {
+    background: linear-gradient(160deg, var(--navy), #27476e);
+    border-radius: var(--radius);
+    padding: 32px 24px; margin-top: 28px; text-align: center;
+    color: #fff;
+  }
+  .cta-block h2 { font-size: 19px; font-weight: 800; margin-bottom: 12px; }
+  .cta-block p { font-size: 14px; opacity: 0.92; margin-bottom: 22px; text-align: left; }
+  .cta-block .btn-primary { margin-bottom: 12px; }
+  .cta-block .cta-brand { font-size: 12px; opacity: 0.7; margin-top: 18px; margin-bottom: 0; text-align: center; }
+
+  .retry-wrap { text-align: center; margin-top: 26px; }
+  .retry-btn {
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    font-size: 13px; color: var(--text-sub); text-decoration: underline; padding: 8px;
+  }
+
+  @media (min-width: 480px) {
+    .hero h1 { font-size: 28px; }
+    .q-text { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 進捗バー -->
+<div id="progressWrap">
+  <div class="progress-label"><span id="progressText"></span></div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<div class="container">
+
+  <!-- ========== スタート画面 ========== -->
+  <section class="screen active" id="screen-start">
+    <div class="hero">
+      <span class="hero-badge">B型事業所 オーナー・サビ管向け</span>
+      <h1>生産活動の拡大を妨げている<br><span class="accent">「本当の課題」</span>を診断</h1>
+      <p class="lead">12の質問に答えるだけ。約2分で完了します。</p>
+    </div>
+    <div class="hero-points">
+      <ul>
+        <li>スタッフの指導力／商品・販路／利用者の意欲の3つの視点で分析</li>
+        <li>あなたの施設の「最重要課題タイプ」と改善の方向性がわかる</li>
+        <li>登録不要・無料。その場で結果が表示されます</li>
+      </ul>
+    </div>
+    <button class="btn btn-navy" onclick="startQuiz()">診断をはじめる（無料・約2分）</button>
+    <p class="note-small">※回答内容が外部に送信されることはありません</p>
+  </section>
+
+  <!-- ========== 設問画面 ========== -->
+  <section class="screen" id="screen-quiz">
+    <div class="quiz-area">
+      <div class="q-card">
+        <span class="q-axis-tag" id="qAxisTag"></span>
+        <p class="q-number" id="qNumber"></p>
+        <p class="q-text" id="qText"></p>
+        <div class="q-options" id="qOptions"></div>
+      </div>
+      <button class="q-back" id="qBack" onclick="goBack()">← 前の質問に戻る</button>
+    </div>
+  </section>
+
+  <!-- ========== 結果画面 ========== -->
+  <section class="screen" id="screen-result">
+    <div class="result-head">
+      <p class="small">あなたの施設の診断結果</p>
+      <p class="result-type" id="rType"></p>
+      <p class="result-catch" id="rCatch"></p>
+    </div>
+
+    <div class="r-card">
+      <h2>診断コメント</h2>
+      <p id="rComment"></p>
+    </div>
+
+    <div class="r-card">
+      <h2>改善の緊急度</h2>
+      <div class="urgency-row">
+        <div class="urgency-badge" id="rUrgencyBadge">
+          <span class="u-cap">緊急度</span>
+          <span class="u-label" id="rUrgencyLabel"></span>
+        </div>
+        <p class="urgency-note" id="rUrgencyNote"></p>
+      </div>
+    </div>
+
+    <div class="r-card">
+      <h2>3つの軸のスコア（5点満点）</h2>
+      <div id="rBars"></div>
+    </div>
+
+    <div class="r-card">
+      <h2>改善の方向性</h2>
+      <ul class="direction-list" id="rDirections"></ul>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block">
+      <h2>もっと詳しく知りたい方へ</h2>
+      <p>
+        診断で見えた課題は、正しい手順を踏めば少しずつ変えていけるものです。
+        現場で実践できるクリエイティブ講座の内容を、無料説明会でお話ししています。まずは話を聞くだけでも大丈夫です。
+      </p>
+      <a class="btn btn-primary" id="ctaContact" href="#" target="_blank" rel="noopener">無料説明会に申し込む</a>
+      <a class="btn btn-line" id="ctaLine" href="#" target="_blank" rel="noopener">LINEで気軽に質問する</a>
+      <p class="cta-brand" id="ctaBrand"></p>
+    </div>
+
+    <div class="retry-wrap">
+      <button class="retry-btn" onclick="resetQuiz()">もう一度診断する</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ---------- 状態 ---------- */
+let currentIndex = 0;
+const answers = new Array(QUESTIONS.length).fill(null);
+
+const $ = (id) => document.getElementById(id);
+
+/* ---------- 画面切り替え ---------- */
+function showScreen(name) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $("screen-" + name).classList.add("active");
+  $("progressWrap").classList.toggle("visible", name === "quiz");
+  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+}
+
+/* ---------- 診断開始 ---------- */
+function startQuiz() {
+  currentIndex = 0;
+  answers.fill(null);
+  showScreen("quiz");
+  renderQuestion();
+}
+
+/* ---------- 設問描画 ---------- */
+const SCALE_LABELS = [
+  "全く当てはまらない",
+  "あまり当てはまらない",
+  "どちらともいえない",
+  "やや当てはまる",
+  "非常に当てはまる"
+];
+
+function renderQuestion() {
+  const q = QUESTIONS[currentIndex];
+  $("qAxisTag").textContent = AXES[q.axis].label;
+  $("qNumber").textContent = "Q" + (currentIndex + 1) + " / " + QUESTIONS.length;
+  $("qText").textContent = q.text;
+  $("qBack").style.visibility = currentIndex === 0 ? "hidden" : "visible";
+
+  const wrap = $("qOptions");
+  wrap.innerHTML = "";
+  for (let v = 1; v <= 5; v++) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "q-option" + (answers[currentIndex] === v ? " selected" : "");
+    btn.innerHTML = '<span class="num">' + v + "</span><span>" + SCALE_LABELS[v - 1] + "</span>";
+    btn.onclick = () => selectAnswer(v, btn);
+    wrap.appendChild(btn);
+  }
+
+  // 進捗バー更新
+  const pct = (currentIndex / QUESTIONS.length) * 100;
+  $("progressFill").style.width = pct + "%";
+  $("progressText").textContent = "12問中 " + (currentIndex + 1) + " 問目";
+}
+
+let advancing = false;
+function selectAnswer(value, btn) {
+  if (advancing) return;
+  advancing = true;
+  answers[currentIndex] = value;
+  // 選択の視覚フィードバック後に自動遷移
+  btn.parentElement.querySelectorAll(".q-option").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  setTimeout(() => {
+    advancing = false;
+    if (currentIndex < QUESTIONS.length - 1) {
+      currentIndex++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 280);
+}
+
+function goBack() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+/* ---------- スコアリング ---------- */
+function calcScores() {
+  const sums = { staff: 0, product: 0, user: 0 };
+  const counts = { staff: 0, product: 0, user: 0 };
+  QUESTIONS.forEach((q, i) => {
+    sums[q.axis] += answers[i];
+    counts[q.axis]++;
+  });
+  const avgs = {};
+  for (const key in sums) avgs[key] = sums[key] / counts[key];
+  const overall = answers.reduce((a, b) => a + b, 0) / answers.length;
+  return { avgs, overall };
+}
+
+function decideType(avgs) {
+  const entries = Object.entries(avgs).sort((a, b) => b[1] - a[1]);
+  const [topKey, topScore] = entries[0];
+  const secondScore = entries[1][1];
+  const thirdScore = entries[2][1];
+  // 3軸すべてが僅差なら複合課題型
+  if (topScore - thirdScore < MIXED_THRESHOLD && topScore - secondScore < MIXED_THRESHOLD) {
+    return { typeKey: "mixed", topKey };
+  }
+  return { typeKey: topKey, topKey };
+}
+
+/* ---------- 結果表示 ---------- */
+function showResult() {
+  const { avgs, overall } = calcScores();
+  const { typeKey, topKey } = decideType(avgs);
+  const result = RESULT_TYPES[typeKey];
+
+  $("rType").textContent = result.name;
+  $("rCatch").textContent = result.catch;
+  $("rComment").textContent = result.comment;
+
+  // 緊急度
+  const urgency = URGENCY.find(u => overall >= u.min);
+  $("rUrgencyLabel").textContent = urgency.label;
+  $("rUrgencyBadge").style.background = urgency.color;
+  $("rUrgencyNote").textContent = urgency.note;
+
+  // 棒グラフ
+  const bars = $("rBars");
+  bars.innerHTML = "";
+  const isMixed = typeKey === "mixed";
+  Object.entries(AXES).forEach(([key, axis]) => {
+    const score = avgs[key];
+    const row = document.createElement("div");
+    const isTop = !isMixed && key === topKey;
+    row.className = "bar-row" + (isTop ? " top" : "");
+    row.innerHTML =
+      '<div class="bar-label"><span>' + axis.label +
+      (isTop ? '<span class="bar-top-tag">最重要</span>' : "") +
+      '</span><span class="score">' + score.toFixed(1) + " / 5.0</span></div>" +
+      '<div class="bar-track"><div class="bar-fill" style="background:' + axis.color + '" data-w="' + (score / 5 * 100) + '"></div></div>';
+    bars.appendChild(row);
+  });
+
+  // 改善の方向性
+  const dl = $("rDirections");
+  dl.innerHTML = "";
+  result.directions.forEach(d => {
+    const li = document.createElement("li");
+    li.textContent = d;
+    dl.appendChild(li);
+  });
+
+  // CTAリンク
+  $("ctaContact").href = CONTACT_URL;
+  $("ctaLine").href = LINE_URL;
+  $("ctaBrand").textContent = BRAND_NAME;
+
+  showScreen("result");
+
+  // バーのアニメーション（表示後に幅を適用）
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.querySelectorAll(".bar-fill").forEach(el => {
+        el.style.width = el.dataset.w + "%";
+      });
+    }, 120);
+  });
+}
+
+/* ---------- リセット ---------- */
+function resetQuiz() {
+  currentIndex = 0;
+  answers.fill(null);
+  showScreen("start");
+}
+</script>
+</body>
+</html>

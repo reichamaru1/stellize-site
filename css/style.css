@@ -565,7 +565,7 @@ body {
 
 /* フッター */
 .footer {
-    background: linear-gradient(180deg, #F5F1EB 0%, var(--color-secondary) 100%);
+    background: linear-gradient(160deg, #7C6DA8 0%, #574B7A 100%);
     color: white;
     padding: 60px 0 30px;
 }
