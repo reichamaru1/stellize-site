@@ -151,10 +151,32 @@ const STELLIZE_STATS = [
   { label: "受講継続率", value: null, suffix: "%" },
 ];
 
+// silhouette: "female" | "male"（写真が用意できたら photo に画像パスを入れると写真表示に切替）
 const STELLIZE_VOICES = [
-  { name: "準備中", org: "受講者の声", photo: null, comment: "受講者様の声は現在準備中です。事業資料の完成にあわせて掲載します。" },
-  { name: "準備中", org: "導入施設の声", photo: null, comment: "導入施設様の声は現在準備中です。事業資料の完成にあわせて掲載します。" },
-  { name: "準備中", org: "職員の声", photo: null, comment: "施設職員様の声は現在準備中です。事業資料の完成にあわせて掲載します。" },
+  {
+    role: "受講生の声",
+    comment: "未経験のSNSを0から学び、自分のペースでコツコツ発信を頑張って、先日初めて作品が売れました。",
+    name: "Aさん",
+    org: "千葉／ハンドメイド作家",
+    photo: null,
+    silhouette: "female"
+  },
+  {
+    role: "導入施設の声",
+    comment: "利用者同士のコミュニケーションが生まれたこと、講座を機にスマホを買い換えるなど、小さな一歩を踏み出せました。",
+    name: "就労継続支援B型",
+    org: "千葉",
+    photo: null,
+    silhouette: "male"
+  },
+  {
+    role: "職員の声",
+    comment: "未経験の職員が大半の中で、親身なサポートで利用者のフォローをしてくれました。",
+    name: "就労継続支援B型",
+    org: "東京",
+    photo: null,
+    silhouette: "female"
+  },
 ];
 
 // 実績数字のレンダリング + スクロール到達時CountUp
@@ -220,21 +242,35 @@ const STELLIZE_VOICES = [
   const grid = document.getElementById("voicesGrid");
   if (!grid) return;
 
+  // 人物シルエット（女性・男性）。写真が無い間の匿名アバターとして使用
+  const silhouette = (kind) => {
+    const head = kind === "male"
+      ? '<circle cx="20" cy="14" r="7"/>'
+      : '<circle cx="20" cy="14" r="7"/>';
+    // 肩のライン：femaleはやや丸く、maleはやや角ばらせて差をつける
+    const body = kind === "male"
+      ? '<path d="M6 40c0-8 6.3-13 14-13s14 5 14 13z"/>'
+      : '<path d="M7 40c0-7.5 5.8-12.5 13-12.5S33 32.5 33 40c-2.5 1.2-7.5 1.8-13 1.8S9.5 41.2 7 40z"/>';
+    return `<svg class="voice-silhouette" viewBox="0 0 40 42" aria-hidden="true">${head}${body}</svg>`;
+  };
+
   STELLIZE_VOICES.forEach((voice) => {
     const card = document.createElement("div");
     card.className = "voice-card";
-    const photoHtml = voice.photo
-      ? `<img class="voice-photo" src="${voice.photo}" alt="${voice.name}" loading="lazy" decoding="async" width="60" height="60">`
-      : `<div class="voice-photo voice-photo--placeholder" aria-hidden="true">${(voice.name || "S").charAt(0)}</div>`;
+    const avatar = voice.photo
+      ? `<img class="voice-photo" src="${voice.photo}" alt="" loading="lazy" decoding="async" width="60" height="60">`
+      : `<div class="voice-photo voice-photo--sil voice-photo--${voice.silhouette || "female"}">${silhouette(voice.silhouette)}</div>`;
+    const roleHtml = voice.role ? `<p class="voice-role">${voice.role}</p>` : "";
     card.innerHTML = `
+      ${roleHtml}
+      <p class="voice-comment">${voice.comment}</p>
       <div class="voice-head">
-        ${photoHtml}
+        ${avatar}
         <div>
           <p class="voice-name">${voice.name}</p>
           <p class="voice-org">${voice.org}</p>
         </div>
-      </div>
-      <p class="voice-comment">${voice.comment}</p>`;
+      </div>`;
     grid.appendChild(card);
   });
 })();

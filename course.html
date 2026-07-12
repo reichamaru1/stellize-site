@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
   <!-- 既存サイト共通スタイル（デザイントークン・ヘッダー/フッター・reveal・accordion等） -->
-  <link rel="stylesheet" href="css/style.css?v=20260711b" />
+  <link rel="stylesheet" href="css/style.css?v=20260711d" />
 
   <!-- ▼このLP専用スタイル（共通トークンを流用。派手なアニメ無し・表示速度重視） -->
   <style>
@@ -136,15 +136,16 @@
     .lp-hero-badge .icon { color: #E7C9A0; }
     .lp-hero h1 {
       font-family: 'Noto Serif JP', serif;
-      font-size: clamp(1.9rem, 5.2vw, 3.2rem);
-      line-height: 1.45; font-weight: 600; letter-spacing: .04em;
+      font-size: clamp(1.7rem, 4.4vw, 2.7rem);
+      line-height: 1.45; font-weight: 600; letter-spacing: .02em;
       margin-bottom: 22px; color: var(--text-primary);
+      word-break: keep-all; line-break: strict; overflow-wrap: normal;
     }
     .lp-hero h1 .em { color: var(--lp-deep); }
     .lp-hero h1 .hl {
       background: linear-gradient(transparent 62%, rgba(232,191,200,.7) 62%);
     }
-    .lp-hero-sub { font-size: 1.06rem; line-height: 2; color: var(--text-secondary); max-width: 640px; margin: 0 auto 20px; }
+    .lp-hero-sub { font-size: 1.02rem; line-height: 2; color: var(--text-secondary); max-width: 640px; margin: 0 auto 20px; word-break: keep-all; line-break: strict; overflow-wrap: normal; }
     .lp-hero-duo {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
       max-width: 720px; margin: 0 auto 30px;
@@ -158,6 +159,25 @@
     .lp-hero-duo .duo span { font-size: .9rem; color: var(--text-secondary); line-height: 1.7; }
     .lp-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
     .lp-hero-note { margin-top: 18px; font-size: .82rem; color: var(--text-light); }
+    /* 折り返してもハイライト帯がガタつかないようにする（PCでの歪み対策） */
+    .lp-hero h1 .hl { -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: .02em .08em; border-radius: 3px; }
+
+    /* ===== ヒーロー：写真オーバーレイ型（左余白にテキスト） ===== */
+    .lp-hero--photo { padding: 0; background: none; min-height: clamp(460px, 46vw, 600px); display: flex; align-items: center; }
+    .lp-hero--photo .lp-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% center; z-index: 0; }
+    .lp-hero--photo .lp-hero-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(90deg, rgba(251,247,240,.97) 0%, rgba(251,247,240,.9) 34%, rgba(251,247,240,.45) 60%, rgba(251,247,240,0) 80%); }
+    .lp-hero--photo .container { position: relative; z-index: 2; width: 100%; }
+    .lp-hero--photo .lp-hero-text { max-width: 560px; text-align: left; }
+    .lp-hero--photo h1 { text-align: left; }
+    .lp-hero--photo .lp-hero-sub { text-align: left; margin-left: 0; }
+    .lp-hero--photo .lp-hero-cta { justify-content: flex-start; }
+    .lp-hero--photo .lp-hero-note { margin-left: 0; }
+    @media (max-width: 820px) {
+      .lp-hero--photo { min-height: 500px; align-items: flex-start; padding-top: 92px; }
+      .lp-hero--photo .lp-hero-scrim { background: linear-gradient(180deg, rgba(251,247,240,.96) 0%, rgba(251,247,240,.82) 44%, rgba(251,247,240,.5) 100%); }
+      .lp-hero--photo .lp-hero-text { max-width: 100%; }
+    }
 
     /* ===== 2. 共感パート ===== */
     .empathy-section { background: var(--lp-beige); }
@@ -290,7 +310,24 @@
     .ba { display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:stretch; margin: 4px 0 22px; }
     .ba .box { border-radius: var(--radius-sm); padding: 14px 14px; font-size:.86rem; line-height:1.7; }
     .ba .before { background: #F0ECE6; color: var(--text-secondary); }
-    .ba .after { background: rgba(92,124,111,.12); color: var(--lp-deep); border:1px solid rgba(92,124,111,.3); }
+    /* AFTER：ピンク×オレンジのキラキラした「明るい未来」トーン */
+    .ba .after {
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #FFF1E4 0%, #FCE1EC 55%, #F7D8EC 100%);
+      color: #A8455F; border: 1px solid #F4C4D6; font-weight: 500;
+      box-shadow: 0 8px 22px rgba(231,154,174,.28);
+    }
+    .ba .after b, .ba .after strong { color:#9A3F63; font-weight:700; }
+    .ba .after .lbl { color: #E17B3E; opacity: 1; font-weight: 700; }
+    /* きらめきドット */
+    .ba .after::after {
+      content:""; position:absolute; inset:0; pointer-events:none;
+      background-image:
+        radial-gradient(circle 2.5px at 86% 22%, rgba(255,255,255,.95) 98%, transparent),
+        radial-gradient(circle 3.5px at 92% 40%, rgba(255,214,138,.9) 98%, transparent),
+        radial-gradient(circle 2px at 78% 68%, rgba(255,255,255,.85) 98%, transparent),
+        radial-gradient(circle 2px at 96% 78%, rgba(231,154,174,.9) 98%, transparent);
+    }
     .ba .arrow { align-self:center; color: var(--lp-green); font-weight:700; }
     .ba .lbl { display:block; font-size:.72rem; letter-spacing:.08em; margin-bottom:6px; opacity:.8; }
     .offer-card .btn { margin-top:auto; text-align:center; }
@@ -366,7 +403,7 @@
         border:2px dashed #DECDB4; border-radius:50%;
       }
       .cycle::after {
-        content:"ぐるぐる\A実践サイクル"; white-space:pre; text-align:center;
+        content:"ステップで\A成長していく"; white-space:pre; text-align:center;
         position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
         font-family:'Noto Serif JP',serif; font-size:1.12rem; line-height:1.7;
         color: var(--lp-deep); letter-spacing:.08em;
@@ -382,9 +419,9 @@
     }
     .value-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:18px; max-width:960px; margin:0 auto 40px; }
     .value-card { border:1.5px solid; border-radius:18px; padding:28px 24px; text-align:center; }
-    .value-card:nth-child(1) { background: var(--lp-pink-l); border-color:#EFC9D4; transform: rotate(-1deg); }
-    .value-card:nth-child(2) { background: var(--lp-yellow-l); border-color:#EBD9A8; transform: rotate(.7deg); }
-    .value-card:nth-child(3) { background: var(--lp-green-l); border-color:#CBDDC2; transform: rotate(-.5deg); }
+    .value-card:nth-child(1) { background: var(--lp-pink-l); border-color:#EFC9D4; }
+    .value-card:nth-child(2) { background: var(--lp-yellow-l); border-color:#EBD9A8; }
+    .value-card:nth-child(3) { background: var(--lp-green-l); border-color:#CBDDC2; }
     .value-card .vicon { width:56px; height:56px; border-radius:50%; background:#fff; box-shadow: var(--shadow-sm); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
     .value-card .vicon .icon { width:1.6em; height:1.6em; margin:0; }
     .value-card:nth-child(1) .vicon .icon { color:#C2708A; }
@@ -494,40 +531,29 @@
   <!-- ============================================================
        1. ファーストビュー（フック＋講座の価値提示＋CTA）
        ============================================================ -->
-  <section class="lp-hero">
-    <!-- ボタニカル装飾（葉の枝） -->
-    <svg class="lp-botanical lp-botanical--tl" viewBox="0 0 210 190" fill="none" aria-hidden="true">
-      <path d="M8 6C55 34 92 62 118 150" stroke="#8AA982" stroke-width="2.4" stroke-linecap="round"/>
-      <g fill="#A7C0A0" fill-opacity="0.75" stroke="#8AA982" stroke-width="1.2">
-        <path d="M32 26c-14-6-26-3-32 6 10 8 24 8 32-6z"/>
-        <path d="M40 30c6-14 18-20 31-16-2 14-14 22-31 16z"/>
-        <path d="M62 58c-15-4-27 1-31 11 11 7 25 5 31-11z"/>
-        <path d="M72 64c4-15 16-22 29-19-1 14-12 23-29 19z"/>
-        <path d="M92 100c-15-3-26 3-29 13 11 6 25 3 29-13z"/>
-        <path d="M101 107c3-15 15-23 28-21 0 14-11 24-28 21z"/>
-      </g>
-    </svg>
-    <!-- 小鳥 -->
-    <svg class="lp-botanical lp-botanical--bird" viewBox="0 0 60 34" fill="none" aria-hidden="true">
-      <path d="M4 20c9-9 16-9 26 0 10-9 17-9 26 0" stroke="#6C86B5" stroke-width="2.4" stroke-linecap="round"/>
-    </svg>
+  <section class="lp-hero lp-hero--photo">
+    <!-- ※要差し替え：ヒーロー画像。ご指定の水彩イラストを assets/images/course-hero.jpg として保存してください -->
+    <img src="assets/images/course-hero.jpg" alt="就労支援事業所のアトリエで、講師に見守られながらノートパソコンで穏やかに制作に取り組む利用者さんたち（水彩イラスト）" class="lp-hero-bg" width="1789" height="864" fetchpriority="high" />
+    <span class="lp-hero-scrim" aria-hidden="true"></span>
 
     <div class="container">
-      <h1>
-        「合う場所」に出会えれば、<br>
-        人は<span class="hl em">もう一度、力を発揮できる。</span>
-      </h1>
-      <p class="lp-hero-sub">
-        工賃が上がらない。売れる商品が作れない。指導のノウハウがない。<br>
-        その課題を、<span class="lp-keyword">クリエイティブスキル</span>と<span class="lp-keyword">売り方の設計</span>で変えていく。<br>
-        利用者さんの「得意」や「好き」を仕事につなげる、実践型のクリエイティブ講座です。
-      </p>
+      <div class="lp-hero-text">
+        <h1>
+          クリエイティブスキルで、<br>
+          働き方も、仕事も、<span class="hl em">「選べる」自分に。</span>
+        </h1>
+        <p class="lp-hero-sub">
+          AIの登場で、特別な才能がなくても「つくる・伝える」ができる時代。<br>
+          まずは"自分に合った作業や働き方"を知ることから。<br>
+          利用者さん一人ひとりの「得意」を見つける、就労支援事業所向けのクリエイティブ講座です。
+        </p>
 
-      <div class="lp-hero-cta">
-        <a href="contact.html?type=consult&amp;utm_source=course_lp&amp;utm_medium=hero&amp;utm_campaign=course" class="btn btn-primary">お問い合わせはこちら</a>
-        <a href="#offer" class="btn btn-secondary">講座の内容を見る</a>
+        <div class="lp-hero-cta">
+          <a href="contact.html?type=consult&amp;utm_source=course_lp&amp;utm_medium=hero&amp;utm_campaign=course" class="btn btn-primary">お問い合わせはこちら</a>
+          <a href="#offer" class="btn btn-secondary">講座の内容を見る</a>
+        </div>
+        <p class="lp-hero-note">フォームのご入力は1〜2分で完了します。内容を確認のうえ、後日メールでご連絡いたします。</p>
       </div>
-      <p class="lp-hero-note">フォームのご入力は1〜2分で完了します。内容を確認のうえ、後日メールでご連絡いたします。</p>
     </div>
   </section>
 
@@ -539,32 +565,32 @@
       <p class="lp-eyebrow reveal">Empathy</p>
       <h2 class="reveal">こんな悩み、抱えていませんか</h2>
       <p class="lp-section-lead reveal">
-        工賃を上げたい。その想いはあるのに、何から手をつければいいか分からない。<br>
-        それは、あなたの努力不足ではありません。多くの事業所が、同じ壁の前に立っています。
+        利用者さんに、もっと合う作業を見つけてあげたい。自信を持ってほしい。<br>
+        そう願っても、何から始めればいいか分からない——その悩みは、あなただけのものではありません。
       </p>
 
       <div class="empathy-list stagger">
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>利用者さんの<b>工賃を上げたい</b>のに、売れる商品やサービスがなかなか生み出せない。</p>
+          <p>利用者さんに<b>合う作業がなかなか見つからず</b>、いつも同じ単純作業になってしまう。</p>
         </div>
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>利用者さんにクリエイティブな活動をさせてあげたいのに、<b>教えられる人が身近にいない</b>。外部で頼れる先も見つからない。</p>
+          <p>「自分なんて」と<b>自信をなくしている</b>利用者さんに、どう関わればいいか迷ってしまう。</p>
         </div>
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>良いものを作っているのに<b>「知られていない」だけ</b>で売れず、努力が数字にならない。</p>
+          <p>得意や「好き」を<b>引き出してあげたい</b>のに、そのきっかけをどうつくればいいか分からない。</p>
         </div>
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>報酬改定で工賃が経営指標になった今、<b>次の一手が見えない</b>まま時間だけが過ぎていく。</p>
+          <p>クリエイティブなことに挑戦させたくても、<b>教えられる人が身近にいない</b>。頼れる先も見つからない。</p>
         </div>
       </div>
 
       <p class="empathy-close reveal">
         大丈夫です。あなただけじゃない。<br>
-        そして、この構造は「スキル」と「売り方」で、確かに変えられます。
+        まずは利用者さん自身が「自分に合った作業・働き方」に気づくところから、始めましょう。
       </p>
     </div>
   </section>
@@ -577,22 +603,22 @@
       <p class="lp-eyebrow reveal" style="text-align:center;">Our Focus</p>
       <h2 class="reveal">クリエイティブ講座で、何が変わるの？</h2>
       <p class="lp-section-lead reveal">
-        その悩みに、まとめて応えるのがこの講座です。主役は、利用者さん。<br>
-        「得意」や「好き」が、少しずつ「できる」に変わっていく——その体験を、実践サイクルで積み重ねていきます。
+        この講座の主役は、利用者さん。工賃や売上の前に、まず<br>
+        「自分は何が得意で、どんな働き方が合うのか」に出会うことから始めます。
       </p>
 
-      <div class="cycle reveal" role="list" aria-label="講座の実践サイクル">
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">1</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg>講義で学ぶ</div>
+      <div class="cycle reveal" role="list" aria-label="上達と自己肯定感が段階的に上がる6ステップ">
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">1</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg>まず、触れてみる</div>
         <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">2</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-lightbulb"/></svg>ワークで考える</div>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">2</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-lightbulb"/></svg>「好き」に気づく</div>
         <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">3</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-palette"/></svg>作品をつくる</div>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">3</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-palette"/></svg>つくれる</div>
         <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">4</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg>発表・フィードバック</div>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">4</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>自信がつく</div>
         <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">5</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg>SNSで発信</div>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">5</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg>伝わる・認められる</div>
         <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">6</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-briefcase"/></svg>仕事につなげる</div>
+        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">6</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-briefcase"/></svg>実務レベルへ</div>
       </div>
 
       <div class="value-grid stagger">
@@ -613,7 +639,7 @@
         </div>
       </div>
 
-      <p class="change-close reveal">心理的安全性を大切にした環境で「できた」を積み重ねることで、<strong>自己肯定感・自己効力感が育ちます</strong>。作った作品をSNSで発信し、そこから<strong>企業からの依頼や仕事につながる</strong>ことも。将来的に取り組める生産活動の幅が広がり、工賃アップにもつながっていきます。</p>
+      <p class="change-close reveal">心理的安全性を大切にした環境で「できた」を積み重ねるほど、<strong>上達と自己肯定感が、段階を追って育っていきます</strong>。少しずつ力がつき、やがて<strong>実務レベルで作業ができる</strong>ように。取り組める仕事の幅も、働き方の選択肢も、ぐんと広がっていきます。</p>
     </div>
   </section>
 
@@ -659,42 +685,39 @@
           <div class="offer-head">
             <svg class="head-spark s1" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>
             <svg class="head-spark s2" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>
-            <span class="tag"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>FOR 利用者さん</span>
             <h3>クリエイティブ講座</h3>
             <p>利用者さんの「得意」や「好き」を仕事につなげる。<span class="head-hl">学ぶって、楽しい。</span>できるが増えると、未来が動き出す。</p>
           </div>
           <div class="offer-body">
             <h4>学べる内容（一例）</h4>
-            <p class="skill-lead">「え、これもつくれるの？」——楽しみながら身につく、7つのスキル。</p>
+            <p class="skill-lead">「え、これもつくれるの？」——楽しみながら身につく、6つのスキル。</p>
             <div class="skill-grid" role="list" aria-label="講座で学べるスキル">
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg></span><span>Instagram運用</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg></span><span>SNS運用</span></div>
               <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-palette"/></svg></span><span>Canvaデザイン</span></div>
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></span><span>ChatGPT活用</span></div>
+              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></span><span>AI活用</span></div>
               <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-pencil"/></svg></span><span>イラスト制作</span></div>
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-video"/></svg></span><span>動画編集</span></div>
               <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-camera"/></svg></span><span>写真撮影</span></div>
               <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg></span><span>デザイン基礎</span></div>
             </div>
             <ul class="offer-list">
-              <li>講義→ワーク→作品づくり→発表・フィードバック→SNS発信、の実践サイクル</li>
-              <li>「できた」の積み重ねで自己効力感を育て、将来の生産活動の幅を広げる</li>
+              <li>「触れる→好きに気づく→つくれる→自信がつく」を、段階を追って習得</li>
+              <li>「できた」の積み重ねで自己効力感を育て、実務レベルの力まで伸ばす</li>
             </ul>
             <p style="font-size:.82rem;color:var(--text-secondary);margin:-6px 0 20px;">※施設の状況や利用者さんの特性に合わせて、内容はカスタマイズできます。</p>
 
             <h4>提供形式</h4>
             <dl class="offer-meta">
-              <!-- ※要差し替え：回数・期間・概算費用レンジが確定したら実数に置き換える（金額を推測で埋めない） -->
-              <div><dt>回数</dt><dd>柔軟に設計</dd></div>
-              <div><dt>期間</dt><dd>ご相談のうえ決定</dd></div>
-              <div><dt>費用感</dt><dd>お見積りでご案内</dd></div>
+              <div><dt>回数</dt><dd>1回/月〜</dd></div>
+              <div><dt>期間</dt><dd>3ヶ月〜</dd></div>
+              <div><dt>費用</dt><dd>15,000円/回〜</dd></div>
             </dl>
-            <p style="font-size:.84rem;color:var(--text-secondary);margin:-8px 0 20px;">受講人数の目安：利用者さん3名〜。オンライン／訪問（対面）を選択可、施設の状況に合わせて柔軟に設計します。概算費用感はお問い合わせ時にご案内します。</p>
+            <p style="font-size:.84rem;color:var(--text-secondary);margin:-8px 0 20px;">オンライン／対面（訪問）を選択可。施設の状況に合わせて柔軟に設計します。</p>
 
             <h4>得られる変化</h4>
             <div class="ba">
               <div class="box before"><span class="lbl">BEFORE</span>作業がマンネリ化し、自分の得意や可能性に気づく機会が少ない。「これでいいのかな」と感じることも。</div>
               <div class="arrow" aria-hidden="true">→</div>
-              <div class="box after"><span class="lbl">AFTER</span>「得意」「好き」に気づき、「できた」を積み重ねて自分の価値を実感。新しい得意の発見が、次の挑戦につながっていく。</div>
+              <div class="box after"><span class="lbl">✨ AFTER</span>「得意」に気づき、自信を積み重ねながら上達。最終的には<b>実務レベルで作業ができる</b>ように。仕事も、働き方も、自分で選べるようになる。</div>
             </div>
 
             <a href="contact.html?type=consult&amp;utm_source=course_lp&amp;utm_medium=offer&amp;utm_campaign=course" class="btn btn-primary">この講座について問い合わせる</a>
@@ -1078,6 +1101,6 @@
   <!-- ページ遷移アニメ（他ページと共通） -->
   <div id="pageTransition" class="page-transition" aria-hidden="true"></div>
 
-  <script src="js/main.js?v=20260720"></script>
+  <script src="js/main.js?v=20260722"></script>
 </body>
 </html>
