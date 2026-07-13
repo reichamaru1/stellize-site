@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
   <!-- 既存サイト共通スタイル（デザイントークン・ヘッダー/フッター・reveal・accordion等） -->
-  <link rel="stylesheet" href="css/style.css?v=20260711d" />
+  <link rel="stylesheet" href="css/style.css?v=20260711e" />
 
   <!-- ▼このLP専用スタイル（共通トークンを流用。派手なアニメ無し・表示速度重視） -->
   <style>
@@ -138,7 +138,7 @@
       font-family: 'Noto Serif JP', serif;
       font-size: clamp(1.7rem, 4.4vw, 2.7rem);
       line-height: 1.45; font-weight: 600; letter-spacing: .02em;
-      margin-bottom: 22px; color: var(--text-primary);
+      margin-bottom: 30px; color: var(--text-primary);
       word-break: keep-all; line-break: strict; overflow-wrap: normal;
     }
     .lp-hero h1 .em { color: var(--lp-deep); }
@@ -160,10 +160,10 @@
     .lp-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
     .lp-hero-note { margin-top: 18px; font-size: .82rem; color: var(--text-light); }
     /* 折り返してもハイライト帯がガタつかないようにする（PCでの歪み対策） */
-    .lp-hero h1 .hl { -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: .02em .08em; border-radius: 3px; }
+    .lp-hero h1 .hl { display: inline-block; -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: .02em .08em; border-radius: 3px; }
 
     /* ===== ヒーロー：写真オーバーレイ型（左余白にテキスト） ===== */
-    .lp-hero--photo { padding: 0; background: none; min-height: clamp(460px, 46vw, 600px); display: flex; align-items: center; }
+    .lp-hero--photo { padding: 132px 0 100px; background: none; min-height: clamp(580px, 60vw, 760px); display: flex; align-items: center; }
     .lp-hero--photo .lp-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% center; z-index: 0; }
     .lp-hero--photo .lp-hero-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none;
       background: linear-gradient(90deg, rgba(251,247,240,.97) 0%, rgba(251,247,240,.9) 34%, rgba(251,247,240,.45) 60%, rgba(251,247,240,0) 80%); }
@@ -174,7 +174,7 @@
     .lp-hero--photo .lp-hero-cta { justify-content: flex-start; }
     .lp-hero--photo .lp-hero-note { margin-left: 0; }
     @media (max-width: 820px) {
-      .lp-hero--photo { min-height: 500px; align-items: flex-start; padding-top: 92px; }
+      .lp-hero--photo { min-height: 540px; align-items: flex-start; padding: 112px 0 68px; }
       .lp-hero--photo .lp-hero-scrim { background: linear-gradient(180deg, rgba(251,247,240,.96) 0%, rgba(251,247,240,.82) 44%, rgba(251,247,240,.5) 100%); }
       .lp-hero--photo .lp-hero-text { max-width: 100%; }
     }
@@ -607,20 +607,6 @@
         「自分は何が得意で、どんな働き方が合うのか」に出会うことから始めます。
       </p>
 
-      <div class="cycle reveal" role="list" aria-label="上達と自己肯定感が段階的に上がる6ステップ">
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">1</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg>まず、触れてみる</div>
-        <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">2</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-lightbulb"/></svg>「好き」に気づく</div>
-        <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">3</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-palette"/></svg>つくれる</div>
-        <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">4</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>自信がつく</div>
-        <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">5</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg>伝わる・認められる</div>
-        <span class="cycle-arrow" aria-hidden="true">→</span>
-        <div class="cycle-step" role="listitem"><span class="cnum" aria-hidden="true">6</span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-briefcase"/></svg>実務レベルへ</div>
-      </div>
-
       <div class="value-grid stagger">
         <div class="value-card">
           <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-target"/></svg></div>
@@ -815,7 +801,7 @@
   <section class="section cases-section" id="cases">
     <div class="container">
       <p class="lp-eyebrow reveal" style="text-align:center;">Voices</p>
-      <h2 class="reveal">ご検討いただいている皆さま</h2>
+      <h2 class="reveal">導入企業の声</h2>
 
       <div class="cases-grid stagger">
         <!-- ※要差し替え：先方確認の上、コメント本文・お名前の表記を確定してから公開 -->
@@ -829,9 +815,14 @@
           <p class="voice">導入をご検討・ご相談いただいています。具体的な感想・お声は、掲載のご了承をいただき次第公開いたします。</p>
           <p class="from">— コメント掲載準備中</p>
         </div>
+        <div class="case-card">
+          <p class="who">東京都 障害者雇用事業者</p>
+          <p class="voice">導入をご検討・ご相談いただいています。具体的な感想・お声は、掲載のご了承をいただき次第公開いたします。</p>
+          <p class="from">— コメント掲載準備中</p>
+        </div>
 
         <div class="case-coming">
-          その他の導入事例も現在準備中です。実際に導入いただいた施設さまの声を、順次掲載してまいります。
+          その他の導入事例も現在準備中です。実際に導入いただいた企業さま・施設さまの声を、順次掲載してまいります。
         </div>
       </div>
     </div>
@@ -1101,6 +1092,6 @@
   <!-- ページ遷移アニメ（他ページと共通） -->
   <div id="pageTransition" class="page-transition" aria-hidden="true"></div>
 
-  <script src="js/main.js?v=20260722"></script>
+  <script src="js/main.js?v=20260723"></script>
 </body>
 </html>
