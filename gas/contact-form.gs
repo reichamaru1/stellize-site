@@ -87,6 +87,15 @@ function doGet() {
   return ContentService.createTextOutput('Stellize contact endpoint: OK');
 }
 
+// スクリプトエディタから1回だけ実行して、シートへの書き込み権限を承認するための関数
+// （メニューの関数選択で testAppend を選び「実行」→ 権限を許可すればOK）
+function testAppend() {
+  appendToSheet([
+    new Date(), 'テスト太郎', 'テスト事業所', 'test@example.com', '000-0000-0000',
+    'その他', '検索', '', 'これはテスト行です。', 'test', 'manual', 'setup', 'gas-editor'
+  ]);
+}
+
 // ====== 内部処理 ======
 function appendToSheet(row) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
