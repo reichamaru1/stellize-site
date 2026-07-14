@@ -720,9 +720,10 @@ const STABLE_THRESHOLD = 3.0;
         <div class="quote-box" id="rQuote"></div>
       </div>
 
-      <!-- 5軸スコア -->
+      <!-- 5軸スコア（できている度） -->
       <div class="r-section glass">
-        <h2>5つの軸のスコア（5点満点）</h2>
+        <h2>5つの軸の「できている度」</h2>
+        <p class="score-note">数字が高いほど「できている」。当てはまる項目が多い（＝課題がある）軸ほど低くなります。</p>
         <div id="rScores"></div>
       </div>
 
@@ -1076,15 +1077,16 @@ function showResult() {
   wrap.innerHTML = "";
   const isStable = typeKey === "stable";
   AXES.forEach(a => {
-    const score = avgs[a.key];
-    const isTop = !isStable && topKeys.includes(a.key);
+    // できている度（%）：当てはまる(できていない)は加点なし。全て「当てはまらない」で100%
+    const done = Math.round((5 - avgs[a.key]) / 4 * 100);
+    const isTop = !isStable && topKeys.includes(a.key); // 最も課題が大きい＝できている度が低い軸
     const row = document.createElement("div");
     row.className = "score-row" + (isTop ? " top" : "");
     row.innerHTML =
       '<div class="score-head"><span>' + a.label +
-      (isTop ? '<span class="top-tag">課題大</span>' : "") +
-      '</span><span class="val">' + score.toFixed(1) + '<small> / 5.0</small></span></div>' +
-      '<div class="score-track"><div class="score-fill" data-w="' + (score / 5 * 100) + '"></div></div>';
+      (isTop ? '<span class="top-tag">のびしろ</span>' : "") +
+      '</span><span class="val">' + done + '<small> %</small></span></div>' +
+      '<div class="score-track"><div class="score-fill" data-w="' + done + '"></div></div>';
     wrap.appendChild(row);
   });
 
