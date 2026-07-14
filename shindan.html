@@ -559,13 +559,15 @@ const STABLE_THRESHOLD = 3.0;
     border-radius: 99px; padding: 1px 8px; margin-left: 7px; vertical-align: 1.5px;
     font-weight: 700;
   }
+  .score-note { font-size: 12px; color: var(--text-light); margin: -8px 0 18px; }
   .score-track { height: 8px; background: var(--bg-section); border-radius: 99px; overflow: hidden; }
   .score-fill {
     height: 100%; width: 0%; border-radius: 99px;
-    background: #D9D2C7;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
     transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .score-row.top .score-fill { background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); }
+  /* のびしろ（できている度が低い）軸は淡色にして「これから」を表す */
+  .score-row.top .score-fill { background: #D9D2C7; }
 
   /* 優先アクション */
   .action-list { list-style: none; counter-reset: act; }
