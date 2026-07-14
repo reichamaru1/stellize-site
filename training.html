@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="就労支援事業所向け『SNS・生産活動研修』。良い製品を“知られる・売れる”状態へ。SNS発信で販路と工賃を伸ばし、利用者さんが主役になる実践型研修です。オンライン／訪問どちらも対応。" />
-  <title>SNS・生産活動研修 | Stellize｜生産活動を"売れる"活動へ</title>
+  <meta name="description" content="就労支援事業所向け『SNS・生産活動研修』。SNS発信・生産活動獲得（法人営業）・AI活用・職員コミュニケーションの4つの専門研修で、現場の課題をピンポイントに解決。リスキリング助成金の申請フォローつきで、研修後も自走できる体制構築までワンストップで支援します。" />
+  <title>SNS・生産活動研修 | Stellize｜就労支援の現場の課題を、専門研修でまるごと解決</title>
 
   <!-- OGP / SNSシェア対応：og:image・og:urlは仮値。本番ドメイン確定と専用画像（1200x630）準備後に差し替え ※要差し替え -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Stellize" />
   <meta property="og:title" content="SNS・生産活動研修 | Stellize" />
-  <meta property="og:description" content="就労支援事業所向け『SNS・生産活動研修』。良い製品を“知られる・売れる”状態へ。SNS発信で販路と工賃を伸ばします。" />
+  <meta property="og:description" content="4つの専門研修で現場の課題をピンポイントに解決。リスキリング助成金の申請フォローつきで、研修後も自走できる体制構築までワンストップで支援します。" />
   <meta property="og:url" content="https://stellize-site.netlify.app/training.html" />
   <meta property="og:image" content="https://stellize-site.netlify.app/assets/images/bh3ieUsE.jpeg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="SNS・生産活動研修 | Stellize" />
-  <meta name="twitter:description" content="就労支援事業所向け『SNS・生産活動研修』。良い製品を“知られる・売れる”状態へ。" />
+  <meta name="twitter:description" content="4つの専門研修で現場の課題をピンポイントに解決。リスキリング助成金の申請フォローつき。" />
   <meta name="twitter:image" content="https://stellize-site.netlify.app/assets/images/bh3ieUsE.jpeg" />
 
   <!-- Google Fonts -->
@@ -66,43 +66,27 @@
     .cta-inline .btn-primary { background: #fff; color: var(--lp-deep); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
     .cta-inline .btn-primary:hover { transform: translateY(-3px); background:#fff; color: var(--lp-deep); }
 
-    /* ボタニカル装飾 */
-    .lp-botanical { position: absolute; pointer-events: none; z-index: 0; opacity: .9; }
-    .lp-botanical--tl { top: -6px; left: -20px; width: clamp(120px, 18vw, 210px); }
-    .lp-botanical--bird { top: 92px; right: 10%; width: 66px; opacity: .8; }
-    @media (max-width: 820px) {
-      .lp-botanical--bird { display: none; }
-      .lp-botanical--tl { width: 120px; left: -30px; opacity: .7; }
-    }
-
-    /* ===== 1. ファーストビュー（センター配置グラデーション） ===== */
+    /* ===== 1. ファーストビュー（写真オーバーレイ型） ===== */
     .lp-hero { position: relative; padding: 148px 0 96px; overflow: hidden;
       background:
         radial-gradient(120% 90% at 80% 0%, rgba(92,124,111,.14), transparent 60%),
         linear-gradient(180deg, var(--lp-cream) 0%, #fff 100%); }
     .lp-hero .container { position: relative; z-index: 1; }
-    .lp-hero-text { max-width: 800px; margin: 0 auto; text-align: center; }
-    .lp-hero-badge { display: inline-flex; gap: 8px; align-items: center; background: var(--lp-deep); border: none; color: #fff; font-size: .82rem; font-weight: 600; padding: 8px 18px; border-radius: 50px; margin-bottom: 24px; box-shadow: 0 6px 18px rgba(74,64,56,.22); }
-    .lp-hero-badge .icon { color: #E7C9A0; }
-    .lp-hero h1 { font-family: 'Noto Serif JP', serif; font-size: clamp(1.7rem, 4.4vw, 2.7rem); line-height: 1.5; font-weight: 600; letter-spacing: .02em; margin-bottom: 28px; color: var(--text-primary); text-align: center; word-break: keep-all; line-break: strict; overflow-wrap: normal; }
+    .lp-hero h1 { font-family: 'Noto Serif JP', serif; font-size: clamp(1.7rem, 4.4vw, 2.7rem); line-height: 1.5; font-weight: 600; letter-spacing: .02em; margin-bottom: 28px; color: var(--text-primary); word-break: keep-all; line-break: strict; overflow-wrap: normal; }
     .lp-hero h1 .em { color: var(--lp-deep); }
     /* inline-blockで「フレーズ単位」で折り返す（keep-allでも右端で見切れない） */
     .lp-hero h1 .hl { display: inline-block; background: linear-gradient(transparent 62%, rgba(232,191,200,.7) 62%); -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: .02em .08em; border-radius: 3px; }
-    .lp-hero-sub { font-size: 1.02rem; line-height: 2; color: var(--text-secondary); max-width: 660px; margin: 0 auto 26px; word-break: keep-all; line-break: strict; overflow-wrap: normal; }
-    .lp-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+    .lp-hero-sub { font-size: 1.02rem; line-height: 2; color: var(--text-secondary); max-width: 660px; margin: 0 0 26px; word-break: keep-all; line-break: strict; overflow-wrap: normal; }
+    .lp-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
     .lp-hero-note { margin-top: 18px; font-size: .82rem; color: var(--text-light); }
 
-    /* ===== ヒーロー：写真オーバーレイ型（左余白にテキスト） ===== */
     .lp-hero--photo { padding: 132px 0 100px; background: none; min-height: clamp(580px, 60vw, 760px); display: flex; align-items: center; }
     .lp-hero--photo .lp-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% center; z-index: 0; }
     .lp-hero--photo .lp-hero-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none;
       background: linear-gradient(90deg, rgba(251,247,240,.97) 0%, rgba(251,247,240,.9) 34%, rgba(251,247,240,.45) 60%, rgba(251,247,240,0) 80%); }
     .lp-hero--photo .container { position: relative; z-index: 2; width: 100%; }
-    .lp-hero--photo .lp-hero-text { max-width: 560px; margin: 0; text-align: left; }
+    .lp-hero--photo .lp-hero-text { max-width: 600px; margin: 0; text-align: left; }
     .lp-hero--photo h1 { text-align: left; }
-    .lp-hero--photo .lp-hero-sub { text-align: left; margin-left: 0; }
-    .lp-hero--photo .lp-hero-cta { justify-content: flex-start; }
-    .lp-hero--photo .lp-hero-note { margin-left: 0; }
     @media (max-width: 820px) {
       .lp-hero--photo { min-height: 540px; align-items: flex-start; padding: 112px 0 68px; }
       .lp-hero--photo .lp-hero-scrim { background: linear-gradient(180deg, rgba(251,247,240,.96) 0%, rgba(251,247,240,.82) 44%, rgba(251,247,240,.5) 100%); }
@@ -116,9 +100,10 @@
     .empathy-item .q { font-size: 1.4rem; line-height: 1; color: var(--color-accent); font-family: 'Noto Serif JP', serif; flex-shrink: 0; }
     .empathy-item p { margin: 0; line-height: 1.85; }
     .empathy-item p b { color: var(--lp-deep); }
-    .empathy-close { text-align: center; max-width: 720px; margin: 40px auto 0; font-size: 1.14rem; line-height: 2; color: var(--lp-deep); font-weight: 500; }
+    .empathy-close { text-align: center; max-width: 760px; margin: 40px auto 0; font-size: 1.08rem; line-height: 2.05; color: var(--lp-deep); font-weight: 500; }
+    .empathy-close strong { color: var(--lp-red); }
 
-    /* ===== 3. この研修で変わること（value cards） ===== */
+    /* ===== 3. 研修によって変わること ===== */
     .change-section { background:#fff; }
     .value-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:18px; max-width:960px; margin:0 auto 40px; }
     .value-card { border:1.5px solid; border-radius:18px; padding:28px 24px; text-align:center; }
@@ -135,7 +120,7 @@
     .change-close { max-width:760px; margin:0 auto; text-align:center; line-height:2.05; color: var(--text-secondary); }
     .change-close strong { color: var(--lp-deep); }
 
-    /* ===== 4. 提供者ストーリー ===== */
+    /* ===== 4. 創業者挨拶 ===== */
     .story-section { background: var(--lp-beige); }
     .story-wrap { display: grid; grid-template-columns: 300px 1fr; gap: 44px; align-items: start; max-width: 980px; margin: 0 auto; }
     .story-photo { text-align: center; }
@@ -144,100 +129,71 @@
     .story-photo .cap b { display:block; color: var(--text-primary); font-size: 1.05rem; }
     .story-body p { line-height: 1.95; margin-bottom: 16px; }
     .story-body .big { font-family: 'Noto Serif JP', serif; font-size: 1.3rem; line-height: 1.7; color: var(--lp-deep); margin: 8px 0 20px; }
-    .story-keywords { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-    .story-keywords span { background: #fff; color: var(--lp-deep); border: 1px solid var(--lp-line); border-radius: 50px; padding: 7px 16px; font-size: .88rem; font-weight: 500; }
 
-    /* ===== 5. 研修内容（オファー） ===== */
-    .offer-section { background: #fff; }
-    .offer-grid { display: grid; grid-template-columns: 1fr; max-width: 640px; margin: 0 auto; }
-    .offer-card { background: #fff; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; border: 1px solid var(--lp-line); }
-    .offer-head { position: relative; overflow: hidden; padding: 26px 28px 20px; color: #fff;
-      background:
-        radial-gradient(circle at 88% 12%, rgba(231,154,174,.5), transparent 44%),
-        radial-gradient(circle at 6% 92%, rgba(255,233,168,.38), transparent 46%),
-        linear-gradient(135deg, var(--lp-green-d), var(--lp-green)); }
-    .offer-head::after { content:""; position:absolute; inset:0; pointer-events:none;
-      background-image:
-        radial-gradient(circle 3px at 18% 24%, rgba(255,255,255,.55) 98%, transparent),
-        radial-gradient(circle 2px at 68% 74%, rgba(255,233,168,.8) 98%, transparent),
-        radial-gradient(circle 2.5px at 44% 12%, rgba(231,154,174,.85) 98%, transparent),
-        radial-gradient(circle 2px at 92% 58%, rgba(255,255,255,.6) 98%, transparent),
-        radial-gradient(circle 3px at 58% 42%, rgba(255,255,255,.35) 98%, transparent),
-        radial-gradient(circle 2px at 30% 80%, rgba(255,255,255,.5) 98%, transparent); }
-    .offer-head > * { position: relative; z-index: 1; }
-    .head-spark { position:absolute; color:#FFE9A8; z-index:1; }
-    .head-spark.s1 { width:36px; height:36px; top:14px; right:16px; opacity:.95; }
-    .head-spark.s2 { width:20px; height:20px; bottom:14px; right:62px; opacity:.7; }
-    .offer-head h3 { font-size: 1.32rem; line-height:1.5; margin:0 0 6px; color:#fff; }
-    .offer-head p { margin:0; font-size:.92rem; color: rgba(255,255,255,.92); line-height:1.7; }
-    .offer-head .head-hl { background: linear-gradient(transparent 58%, rgba(255,233,168,.5) 58%); font-weight: 600; }
-    .offer-body { padding: 24px 28px 28px; display:flex; flex-direction:column; flex:1; }
-    .offer-body h4 { font-size:.95rem; color: var(--lp-deep); margin: 4px 0 12px; padding-bottom:8px; border-bottom: 1px solid var(--lp-line); }
-    .offer-list { list-style:none; margin:0 0 22px; padding:0; }
-    .offer-list li { position:relative; padding-left: 26px; margin-bottom:10px; line-height:1.75; font-size:.95rem; }
-    .offer-list li::before { content:""; position:absolute; left:4px; top:.6em; width:8px; height:8px; border-radius:50%; background: var(--color-accent); }
-    .skill-lead { text-align:center; font-size:.98rem; color: var(--lp-deep); font-weight:600; margin: 0 0 16px; line-height:1.8; }
-    .skill-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(108px,1fr)); gap:14px; margin:0 0 18px; justify-items:center; }
-    .skill-item { background: var(--si-bg, var(--lp-cream)); border:1px solid var(--lp-line); width:100%; aspect-ratio:1/1; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; text-align:center; transition: transform .22s ease, box-shadow .22s ease; }
-    .skill-item:hover { transform: translateY(-4px) rotate(-1deg); box-shadow: var(--shadow-md); }
-    .skill-item .icon-badge { width:38px; height:38px; margin:0 0 6px; border-radius:50%; flex-shrink:0; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 6px rgba(74,64,56,.1); }
-    .skill-item .icon { width:1.25em; height:1.25em; margin:0; display:block; color: var(--si-icon, var(--lp-green-d)); }
-    .skill-item span:not(.icon-badge) { display:block; font-size:.7rem; font-weight:700; line-height:1.35; color: var(--text-primary); }
-    .skill-item:nth-child(6n+1) { --si-bg: var(--lp-green-l); --si-icon: var(--lp-green-d); }
-    .skill-item:nth-child(6n+2) { --si-bg: var(--lp-pink-l); --si-icon: var(--lp-red); }
-    .skill-item:nth-child(6n+3) { --si-bg: var(--lp-yellow-l); --si-icon: var(--lp-yellow-d); }
-    .skill-item:nth-child(6n+4) { --si-bg: var(--lp-blue-l); --si-icon: var(--lp-blue-d); }
-    .skill-item:nth-child(6n+5) { --si-bg: var(--lp-peach-l); --si-icon: var(--lp-red); }
-    .skill-item:nth-child(6n+6) { --si-bg: var(--lp-green-l); --si-icon: var(--lp-green-d); }
-    .offer-meta { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin: 0 0 20px; }
-    .offer-meta div { background: var(--lp-beige); border-radius: var(--radius-sm); padding: 12px 8px; text-align:center; }
-    .offer-meta dt { font-size:.72rem; color: var(--text-light); margin-bottom:4px; }
-    .offer-meta dd { margin:0; font-size:.9rem; font-weight:600; color: var(--lp-deep); }
-    .ba { display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:stretch; margin: 4px 0 22px; }
-    .ba .box { border-radius: var(--radius-sm); padding: 14px 14px; font-size:.86rem; line-height:1.7; }
-    .ba .before { background: #F0ECE6; color: var(--text-secondary); }
-    .ba .after { position: relative; overflow: hidden; background: linear-gradient(135deg, #FFF1E4 0%, #FCE1EC 55%, #F7D8EC 100%); color: #A8455F; border: 1px solid #F4C4D6; font-weight: 500; box-shadow: 0 8px 22px rgba(231,154,174,.28); }
-    .ba .after b, .ba .after strong { color:#9A3F63; font-weight:700; }
-    .ba .after .lbl { color: #E17B3E; opacity: 1; font-weight: 700; }
-    .ba .after::after { content:""; position:absolute; inset:0; pointer-events:none;
-      background-image:
-        radial-gradient(circle 2.5px at 86% 22%, rgba(255,255,255,.95) 98%, transparent),
-        radial-gradient(circle 3.5px at 92% 40%, rgba(255,214,138,.9) 98%, transparent),
-        radial-gradient(circle 2px at 78% 68%, rgba(255,255,255,.85) 98%, transparent),
-        radial-gradient(circle 2px at 96% 78%, rgba(231,154,174,.9) 98%, transparent); }
-    .ba .arrow { align-self:center; color: var(--lp-green); font-weight:700; }
-    .ba .lbl { display:block; font-size:.72rem; letter-spacing:.08em; margin-bottom:6px; opacity:.8; }
-    .offer-card .btn { margin-top:auto; text-align:center; }
+    /* ===== 5. 研修の種類（4カード） ===== */
+    .type-section { background: #fff; }
+    .type-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:18px; max-width:880px; margin:0 auto 36px; }
+    .type-card { background: var(--lp-cream); border:1px solid var(--lp-line); border-radius: var(--radius-md); padding: 28px 26px; box-shadow: var(--shadow-sm); }
+    .type-card .ticon { width:52px; height:52px; border-radius:50%; background:#fff; box-shadow: 0 2px 8px rgba(74,64,56,.1); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+    .type-card .ticon .icon { width:1.5em; height:1.5em; margin:0; }
+    .type-card:nth-child(1) .ticon .icon { color: var(--lp-red); }
+    .type-card:nth-child(2) .ticon .icon { color: var(--lp-blue-d); }
+    .type-card:nth-child(3) .ticon .icon { color: var(--lp-yellow-d); }
+    .type-card:nth-child(4) .ticon .icon { color: var(--lp-green-d); }
+    .type-card h3 { font-size:1.14rem; margin-bottom:8px; color: var(--text-primary); }
+    .type-card p { font-size:.93rem; line-height:1.85; color: var(--text-secondary); margin:0; }
 
-    /* ===== 6. 実績 POINT ===== */
-    .point-section { background: var(--lp-beige); }
-    .point-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:20px; max-width:1040px; margin:0 auto; }
-    .point-card { background: #fff; border:1px solid var(--lp-line); border-radius: var(--radius-md); padding: 26px 22px; position:relative; }
-    .point-card .pnum { display:inline-block; background: var(--lp-deep); color:#fff; font-size:.72rem; font-weight:600; letter-spacing:.08em; padding:4px 12px; border-radius:50px; margin-bottom:16px; }
-    .point-card .pfig { font-family:'Noto Serif JP', serif; font-size: clamp(2.1rem,5vw,2.7rem); color: var(--lp-deep); line-height:1.1; font-weight:600; }
-    .point-card .pfig small { font-size: .95rem; font-weight:400; color: var(--text-secondary); margin-left:4px; }
-    .point-card .plabel { margin-top:10px; font-weight:600; color: var(--text-primary); }
-    .point-card .pdesc { margin-top:8px; font-size:.86rem; color: var(--text-secondary); line-height:1.7; }
-    .point-note { text-align:center; margin-top:30px; }
+    /* ===== 6. 提携企業 ===== */
+    .partner-section { background: var(--lp-beige); }
+    .partner-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:16px; max-width:880px; margin:0 auto 28px; }
+    .partner-slot { background:#fff; border:1.5px dashed var(--lp-line); border-radius: var(--radius-md); padding: 18px 14px; text-align:center; }
+    .partner-slot .plogo { height: 84px; display:flex; align-items:center; justify-content:center; color: var(--text-light); font-size:.82rem; background: var(--lp-cream); border-radius: var(--radius-sm); margin-bottom: 10px; }
+    .partner-slot .pname { font-size:.86rem; font-weight:600; color: var(--text-primary); }
+    .partner-slot .prole { font-size:.76rem; color: var(--lp-green-d); margin-top:2px; }
+    .partner-more { text-align:center; }
 
-    /* ===== 7. 選ばれる理由 ===== */
-    .reason-section { background: #fff; }
+    /* ===== 7. リスキリング助成金 ===== */
+    .subsidy-section { background: #fff; }
+    .subsidy-box { max-width: 860px; margin: 0 auto 36px; background: var(--lp-cream); border:1px solid var(--lp-line); border-radius: var(--radius-md); padding: 32px 30px; }
+    .subsidy-box p { line-height: 2; color: var(--text-secondary); margin: 0 0 14px; }
+    .subsidy-box p strong { color: var(--lp-deep); }
+    /* 助成金の仕組み：図解（施設 ⇄ 国） */
+    .subsidy-diagram { display:grid; grid-template-columns: 130px 1fr 130px; gap:16px; align-items:stretch; margin: 24px 0 18px; }
+    .sd-actor { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:#fff; border:2px solid var(--lp-green); border-radius: var(--radius-md); padding: 18px 8px; text-align:center; box-shadow: var(--shadow-sm); }
+    .sd-actor .icon { width:2em; height:2em; margin:0 0 4px; color: var(--lp-green-d); }
+    .sd-actor b { font-size:1.02rem; color: var(--text-primary); line-height:1.3; }
+    .sd-actor small { font-size:.72rem; color: var(--text-light); line-height:1.4; }
+    .sd-arrows { display:flex; flex-direction:column; justify-content:center; gap:20px; min-width:0; }
+    .sd-arrow .lbl { display:block; text-align:center; font-size:.86rem; font-weight:600; color: var(--lp-deep); margin-bottom:7px; line-height:1.55; }
+    .sd-arrow .lbl .n { display:inline-flex; width:20px; height:20px; border-radius:50%; background:var(--lp-green); color:#fff; font-size:.7rem; font-weight:700; align-items:center; justify-content:center; margin-right:6px; vertical-align:-3px; }
+    .sd-line { display:block; position:relative; height:2px; background: var(--lp-green); margin: 0 4px; }
+    .sd-line::after { content:""; position:absolute; right:-2px; top:50%; transform:translateY(-50%); border:6px solid transparent; border-left:9px solid var(--lp-green); border-right:0; }
+    /* ③支給の矢印は逆向き（国→施設）・お金の色 */
+    .sd-arrow--back .lbl { color: var(--lp-red); }
+    .sd-arrow--back .lbl .n { background: var(--lp-red); }
+    .sd-arrow--back .sd-line { background: var(--lp-red); }
+    .sd-arrow--back .sd-line::after { content:none; }
+    .sd-arrow--back .sd-line::before { content:""; position:absolute; left:-2px; top:50%; transform:translateY(-50%); border:6px solid transparent; border-right:9px solid var(--lp-red); border-left:0; }
+    @media (max-width: 560px) {
+      .subsidy-diagram { grid-template-columns: 84px 1fr 84px; gap:8px; }
+      .sd-actor { padding: 12px 4px; }
+      .sd-actor b { font-size:.86rem; }
+      .sd-actor small { font-size:.64rem; }
+      .sd-arrow .lbl { font-size:.72rem; }
+    }
+    .subsidy-note { font-size:.82rem; color: var(--text-light); line-height:1.8; margin:0; }
+    .subsidy-support { max-width:860px; margin:0 auto; text-align:center; background: linear-gradient(135deg, #FFF1E4 0%, #FCE1EC 100%); border:1px solid #F4C4D6; border-radius: var(--radius-md); padding: 26px 24px; font-size:1.04rem; line-height:2; color:#A8455F; box-shadow: 0 8px 22px rgba(231,154,174,.22); }
+    .subsidy-support strong { color:#9A3F63; }
+
+    /* ===== 8. 選ばれる理由 ===== */
+    .reason-section { background: var(--lp-beige); }
     .reason-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:20px; max-width:1000px; margin:0 auto; }
     .reason-card { background:#fff; border-radius: var(--radius-md); padding: 28px 26px; box-shadow: var(--shadow-sm); border-top: 4px solid var(--lp-green); }
     .reason-card .ricon { width:52px; height:52px; border-radius:14px; background: rgba(92,124,111,.12); display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
     .reason-card .ricon .icon { width:1.5em; height:1.5em; margin:0; color: var(--lp-deep); }
     .reason-card h3 { font-size:1.1rem; margin-bottom:10px; color: var(--text-primary); }
     .reason-card p { font-size:.94rem; line-height:1.85; color: var(--text-secondary); margin:0; }
-
-    /* ===== 8. 導入企業の声 ===== */
-    .cases-section { background: var(--lp-beige); }
-    .cases-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:20px; max-width:1000px; margin:0 auto; }
-    .case-card { background: #fff; border:1px solid var(--lp-line); border-radius: var(--radius-md); padding: 26px 24px; }
-    .case-card .who { font-size:.82rem; color: var(--lp-green); font-weight:600; margin-bottom:10px; }
-    .case-card .voice { line-height:1.9; color: var(--text-primary); margin:0 0 14px; }
-    .case-card .voice::before { content:"“"; font-family:'Noto Serif JP',serif; color: var(--color-accent); font-size:1.6rem; margin-right:4px; vertical-align:-.2em; }
-    .case-card .from { font-size:.84rem; color: var(--text-secondary); }
-    .case-coming { grid-column: 1/-1; text-align:center; background: #fff; border:1px dashed var(--lp-line); border-radius: var(--radius-md); padding: 34px 20px; color: var(--text-secondary); }
+    .reason-card p b { color: var(--lp-red); }
 
     /* ===== 9. 導入までの流れ ===== */
     .flow-section { background: #fff; }
@@ -250,6 +206,8 @@
     .flow-body { background: var(--lp-cream); border:1px solid var(--lp-line); border-radius: var(--radius-md); padding: 20px 24px; box-shadow: var(--shadow-sm); }
     .flow-body h3 { font-size:1.08rem; margin-bottom:6px; color: var(--lp-deep); }
     .flow-body p { margin:0; font-size:.93rem; line-height:1.8; color: var(--text-secondary); }
+    .flow-badge--subsidy { border-color: var(--lp-pink); }
+    .flow-badge--subsidy .n { color: #C2708A; }
 
     /* ===== 11. 代表メッセージ ＋ 最終CTA ===== */
     .message-section { background: var(--lp-deep); color:#fff; }
@@ -258,6 +216,7 @@
     .message-wrap h2 { color:#fff; }
     .message-wrap .body { font-size:1.08rem; line-height:2.1; color:#EFF3EF; }
     .message-wrap .body p { margin-bottom: 18px; }
+    .message-wrap .body strong { color:#FFD9E4; }
     .message-wrap .sign { font-family:'Noto Serif JP',serif; font-size:1.2rem; margin-top:24px; color:#fff; }
     .message-wrap .sign small { display:block; font-size:.82rem; color:#CBD8CF; margin-top:6px; font-family:'Noto Sans JP',sans-serif; }
 
@@ -283,14 +242,15 @@
       .lp-hero { padding: 120px 0 68px; }
       .story-wrap { grid-template-columns: 1fr; gap: 28px; }
       .story-photo { max-width: 260px; margin: 0 auto; }
-      .ba { grid-template-columns: 1fr; }
-      .ba .arrow { transform: rotate(90deg); justify-self:center; }
       .sticky-cta { display:flex; }
       body { padding-bottom: 76px; }
       .cta-inline { padding: 28px 20px; }
+      .subsidy-box { padding: 26px 20px; }
     }
-    @media (max-width: 420px) {
-      .offer-meta { grid-template-columns: 1fr; }
+    /* スマホ：見出しのハイライト句が見切れないよう、フォント調整＋inline化（下線を行ごとに引く） */
+    @media (max-width: 480px) {
+      .lp-hero h1 { font-size: 1.55rem; }
+      .lp-hero h1 .hl { display: inline; }
     }
   </style>
 </head>
@@ -332,28 +292,28 @@
   </header>
 
   <!-- ============================================================
-       1. ファーストビュー（フック＋研修の価値提示＋CTA）
+       1. ファーストビュー（生産活動獲得＝経営＋利用者の未来）
        ============================================================ -->
   <section class="lp-hero lp-hero--photo">
     <!-- ※要差し替え：ヒーロー画像。ご指定の水彩イラストを assets/images/training-hero.jpg として保存してください -->
-    <img src="assets/images/training-hero.jpg" alt="就労支援事業所の研修室で、講師の説明を聞きながらノートパソコンでSNS発信に取り組む職員と利用者さんたち（水彩イラスト）" class="lp-hero-bg" width="1819" height="896" fetchpriority="high" />
+    <img src="assets/images/training-hero.jpg" alt="就労支援事業所の研修室で、講師の説明を聞きながらノートパソコンで学ぶ職員と利用者さんたち（水彩イラスト）" class="lp-hero-bg" width="1819" height="896" fetchpriority="high" />
     <span class="lp-hero-scrim" aria-hidden="true"></span>
 
     <div class="container">
       <div class="lp-hero-text">
         <h1>
-          「いいもの」なのに、売れない。<br>
-          その理由は、<span class="hl em">"知られていない"だけ。</span>
+          就労支援の現場の課題を、<br>
+          <span class="hl em">専門研修で、まるごと解決。</span>
         </h1>
         <p class="lp-hero-sub">
-          令和6年度の報酬改定で、工賃は経営を左右する指標になりました。<br>
-          施設の生産活動を、SNS発信で<span class="lp-keyword">"知られる・売れる"活動</span>へ。<br>
-          利用者さんが主役になって発信する、就労支援事業所向けの実践型研修です。
+          人間関係・発信や集客・生産活動の獲得——現場の課題に、4つの専門研修でピンポイントに応えます。<br>
+          リスキリング助成金の活用で、費用の負担も抑えられる。<br>
+          『研修後も自走できる体制構築』まで、ワンストップでフォローする実践型研修です。
         </p>
 
         <div class="lp-hero-cta">
           <a href="contact.html?type=consult&amp;utm_source=training_lp&amp;utm_medium=hero&amp;utm_campaign=training" class="btn btn-primary">お問い合わせはこちら</a>
-          <a href="#offer" class="btn btn-secondary">研修の内容を見る</a>
+          <a href="#types" class="btn btn-secondary">研修の内容を見る</a>
         </div>
         <p class="lp-hero-note">フォームのご入力は1〜2分で完了します。内容を確認のうえ、後日メールでご連絡いたします。</p>
       </div>
@@ -361,291 +321,269 @@
   </section>
 
   <!-- ============================================================
-       2. 共感パート（生産活動・販路の悩みを代弁）
+       2. 共感パート（現場の3つの課題）
        ============================================================ -->
   <section class="section empathy-section" id="empathy">
     <div class="container">
       <p class="lp-eyebrow reveal">Empathy</p>
       <h2 class="reveal">こんな悩み、抱えていませんか</h2>
       <p class="lp-section-lead reveal">
-        丁寧に、良いものを作っている。それなのに、売上も工賃も伸び悩む。<br>
-        その原因は「品質」ではなく、「届け方」にあるのかもしれません。
+        現場を良くしたい想いはあるのに、課題は慢性化していく。<br>
+        その悩みは、あなたの施設だけのものではありません。
       </p>
 
       <div class="empathy-list stagger">
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>良い製品をつくっているのに、<b>「知られていない」だけ</b>で売れず、在庫が積み上がっていく。</p>
+          <p>職場内の<b>人間関係のトラブル</b>が絶えず、支援やサービスの質にまで影響してしまう。</p>
         </div>
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>自主製品や受託作業の<b>販路が単発</b>で終わり、安定した受注につながらない。</p>
+          <p><b>利用者さん主導の発信・集客</b>に挑戦したいのに、何から始めればいいか分からない。</p>
         </div>
         <div class="empathy-item">
           <span class="q">Q</span>
-          <p>SNSで発信したいけれど、<b>やり方も、続ける仕組みも人手もない</b>。何から始めればいいか分からない。</p>
-        </div>
-        <div class="empathy-item">
-          <span class="q">Q</span>
-          <p>報酬改定で工賃が経営指標になった今、<b>生産活動収支の改善が急務</b>。でも次の一手が見えない。</p>
+          <p>生産活動の獲得が<b>自治体からの依頼やオーナー個人の人脈頼み</b>。施設としての営業体制が整っていない。</p>
         </div>
       </div>
 
       <p class="empathy-close reveal">
-        大丈夫です。あなただけじゃない。<br>
-        「つくる力」に「売れる・届く」を足すことで、その壁は確かに越えられます。
+        これらの課題一つひとつに、<strong>ピンポイントで解決できる研修</strong>をご用意しています。<br>
+        フォロー体制の完備、研修後も活用できる成果物つき——<br>
+        <strong>『研修後も自走できる体制構築』</strong>まで、ワンストップでフォローします。
       </p>
     </div>
   </section>
 
   <!-- ============================================================
-       3. この研修で変わること
+       3. 研修によって変わること（3つのメリット）
        ============================================================ -->
   <section class="section change-section" id="focus">
     <div class="container">
-      <p class="lp-eyebrow reveal" style="text-align:center;">Our Focus</p>
-      <h2 class="reveal">SNS・生産活動研修で、変わること</h2>
+      <p class="lp-eyebrow reveal" style="text-align:center;">Our Value</p>
+      <h2 class="reveal">研修によって、変わること</h2>
       <p class="lp-section-lead reveal">
-        せっかくの良いものを、必要な人に届ける。<br>
-        「作る」から「売れる・続く」まで、生産活動をまるごと設計しなおす研修です。
+        「なんとなく学んで終わり」の研修とは、違います。<br>
+        現場が本当に変わるための、3つの仕組みを揃えました。
       </p>
 
       <div class="value-grid stagger">
         <div class="value-card">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-refresh"/></svg></div>
-          <h3>「売れる」商品に変わる</h3>
-          <p>今ある製品や作業を「誰に・どう届けるか」で棚卸し。強みを活かした"買いたくなる"見せ方に整えます。</p>
+          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-target"/></svg></div>
+          <h3>課題にピンポイントの研修</h3>
+          <p>現場の課題から逆算した、4つの専門研修。人間関係・発信・営業・AI活用——必要なものを、必要なだけ選べます。</p>
         </div>
         <div class="value-card">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg></div>
-          <h3>販路が「続く」ものに変わる</h3>
-          <p>SNSでファンとつながり、単発で終わらない継続的な販路・受注の土台をつくります。</p>
+          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg></div>
+          <h3>フォロー体制の完備</h3>
+          <p>動画を見て終わり、にしません。現場レベルで実装できるまで伴走する、フォローアップ体制を整えています。</p>
         </div>
         <div class="value-card">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
-          <h3>利用者さんが「主役」になる</h3>
-          <p>発信の担い手は利用者さん。「自分の仕事が誰かに届いた」実感が、やりがいと自己肯定感を育てます。</p>
+          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-document"/></svg></div>
+          <h3>研修後も使える成果物つき</h3>
+          <p>研修の中でつくったマニュアルやテンプレートが、そのまま現場の資産に。研修が終わっても、活用は続きます。</p>
         </div>
       </div>
 
-      <p class="change-close reveal">「売れる商品づくり」と「届くSNS発信」をひとつにつなげることで、<strong>生産活動収支と工賃の改善</strong>を目指します。そして何より、<strong>利用者さん一人ひとりの「できた」と誇り</strong>が積み重なっていく——それが、この研修のいちばんの成果です。</p>
+      <p class="change-close reveal">この3つがそろっているから、<strong>『研修後も自走できる体制構築』までワンストップ</strong>でフォローできます。研修は受けて終わりではなく、現場が変わり続けるための出発点です。</p>
 
       <div class="cta-inline reveal">
-        <p>「うちの生産活動でも変えられるだろうか」——そう感じたら、まずはお問い合わせください。後日、メールでご連絡いたします。</p>
+        <p>「うちの課題にも合う研修はある？」——そう感じたら、まずはお問い合わせください。後日、メールでご連絡いたします。</p>
         <a href="contact.html?type=consult&amp;utm_source=training_lp&amp;utm_medium=focus&amp;utm_campaign=training" class="btn btn-primary">お問い合わせはこちら</a>
       </div>
     </div>
   </section>
 
   <!-- ============================================================
-       4. 提供者ストーリー
+       4. 創業者挨拶
        ============================================================ -->
   <section class="section story-section" id="story">
     <div class="container">
-      <p class="lp-eyebrow reveal" style="text-align:center;">Story</p>
-      <h2 class="reveal">「届ける」を、あきらめない。</h2>
+      <p class="lp-eyebrow reveal" style="text-align:center;">Greeting</p>
+      <h2 class="reveal">創業者挨拶</h2>
 
       <div class="story-wrap reveal">
         <div class="story-photo">
-          <!-- ※要差し替え：講師写真。暫定で代表写真を使用 -->
-          <img src="assets/images/r90D74yJ.jpeg" alt="SNS・生産活動研修を担当するStellize合同会社 菊野のポートレート" loading="lazy" decoding="async" width="684" height="1024" />
-          <p class="cap"><b>Stellize合同会社　菊野</b>SNSマーケティング・事業開発／講師</p>
+          <!-- ※要差し替え：責任者写真。暫定で代表写真を使用 -->
+          <img src="assets/images/r90D74yJ.jpeg" alt="SNS・生産活動研修の責任者 Stellize合同会社 菊野のポートレート" loading="lazy" decoding="async" width="684" height="1024" />
+          <p class="cap"><b>Stellize合同会社　責任者</b>SNS・生産活動研修</p>
         </div>
         <div class="story-body">
-          <p>私はもともと、SNSマーケティングと事業開発を仕事にしてきました。「良いものが、届かないまま埋もれていく」——そのもどかしさを、何度も現場で見てきました。</p>
-          <p class="big">価値がないんじゃない。<br>ただ、「届け方」を<br>知らなかっただけ。</p>
-          <p>就労支援の現場にも、同じことが起きています。心を込めてつくられた製品が、「知られていない」というだけで売れない。それは、あまりにもったいない。売り方とスキルを変えれば、工賃も、やりがいも、確かに変えられます。</p>
-          <p>そして、発信の主役は利用者さんです。「自分のつくったものが、誰かに届いた」。その一つひとつの手応えが、<strong>数字だけでなく、人の心まで動かしていく</strong>。私は、その両方に本気で伴走します。</p>
-
-          <div class="story-keywords">
-            <span>繊細さは武器</span>
-            <span>やさしさは戦略</span>
-            <span>無理しないけど、歩みは止めない</span>
-          </div>
+          <p>就労支援の現場には、本当にたくさんの課題があります。職場の人間関係、発信や集客、生産活動の獲得——。そして、その多くが「慢性的に解決されないまま」になっています。</p>
+          <p class="big">解決策は、必ずどこかにある。<br>ただ、業界全体で<br>共有されていないだけ。</p>
+          <p>全国の現場では、同じ課題に向き合い、乗り越えてきた事例がすでに生まれています。それなのに、その知見は一つの施設・一つの地域にとどまり、業界全体には届いていない。私たちは、これこそが就労支援の現場が抱える構造的な問題だと考えています。</p>
+          <p>だからこそ、この研修は各専門分野の「課題解決のエキスパート」と連携してお届けします。一つの施設の改善で終わらせず、<strong>現場の課題解決力の"業界水準"そのものを底上げする</strong>。そのための研修です。</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ============================================================
-       5. 研修内容（オファー）
+       5. 研修の種類（4つの専門研修）
        ============================================================ -->
-  <section class="section offer-section" id="offer">
+  <section class="section type-section" id="types">
     <div class="container">
-      <p class="lp-eyebrow reveal" style="text-align:center;">Program</p>
-      <h2 class="reveal">SNS・生産活動研修の内容</h2>
+      <p class="lp-eyebrow reveal" style="text-align:center;">Programs</p>
+      <h2 class="reveal">研修の種類</h2>
       <p class="lp-section-lead reveal">
-        現場に合わせて柔軟に設計できる、実践型のプログラム。<br>
-        「棚卸し → 発信設計 → 実践と改善」で、無理なく"売れる生産活動"へ。
+        現場の課題に合わせて選べる、4つの専門研修。<br>
+        単発でも、組み合わせでも。それぞれの分野のエキスパートがお届けします。
       </p>
 
-      <div class="offer-grid stagger">
-        <div class="offer-card">
-          <div class="offer-head">
-            <svg class="head-spark s1" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>
-            <svg class="head-spark s2" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg>
-            <h3>SNS・生産活動研修</h3>
-            <p>「作る・伝える・届く」をひとつに。<span class="head-hl">売れる、が続く。</span>利用者さんが主役の、実践型研修です。</p>
-          </div>
-          <div class="offer-body">
-            <h4>研修で身につくこと（一例）</h4>
-            <p class="skill-lead">「作る」に「売れる・届く」を足す、6つの実践スキル。</p>
-            <div class="skill-grid" role="list" aria-label="研修で身につくスキル">
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-refresh"/></svg></span><span>生産活動の棚卸し</span></div>
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-camera"/></svg></span><span>商品撮影</span></div>
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg></span><span>SNS発信</span></div>
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-pencil"/></svg></span><span>投稿・文章づくり</span></div>
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg></span><span>ファン・販路づくり</span></div>
-              <div class="skill-item" role="listitem"><span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></span><span>受注・お客様対応</span></div>
-            </div>
-            <ul class="offer-list">
-              <li>「棚卸し → 発信設計 → 実践と改善」の3ステップで進行</li>
-              <li>撮影・投稿・お客様対応まで、続けられる運用の型を施設に残す</li>
-            </ul>
-            <p style="font-size:.82rem;color:var(--text-secondary);margin:-6px 0 20px;">※施設の状況や生産活動の内容に合わせて、内容はカスタマイズできます。</p>
-
-            <h4>提供形式</h4>
-            <dl class="offer-meta">
-              <!-- ※要差し替え：回数・期間・費用が確定したら実数に置き換える（金額を推測で埋めない） -->
-              <div><dt>回数</dt><dd>柔軟に設計</dd></div>
-              <div><dt>期間</dt><dd>ご相談のうえ決定</dd></div>
-              <div><dt>費用</dt><dd>お見積りでご案内</dd></div>
-            </dl>
-            <p style="font-size:.84rem;color:var(--text-secondary);margin:-8px 0 20px;">オンライン／対面（訪問）を選択可、組み合わせにも対応します。施設の状況に合わせて柔軟に設計します。</p>
-
-            <h4>得られる変化</h4>
-            <div class="ba">
-              <div class="box before"><span class="lbl">BEFORE</span>良い製品をつくっても「知られていない」だけで売れず、工賃も伸び悩む。発信は続かない。</div>
-              <div class="arrow" aria-hidden="true">→</div>
-              <div class="box after"><span class="lbl">✨ AFTER</span>SNSで「知られる・売れる」状態に。ファンと販路が育ち、<b>生産活動収支と工賃の改善</b>へ。利用者さんの発信が、やりがいにもつながる。</div>
-            </div>
-
-            <a href="contact.html?type=consult&amp;utm_source=training_lp&amp;utm_medium=offer&amp;utm_campaign=training" class="btn btn-primary">この研修について問い合わせる</a>
-          </div>
+      <div class="type-grid stagger">
+        <div class="type-card">
+          <div class="ticon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-smartphone"/></svg></div>
+          <h3>SNS発信研修</h3>
+          <p>各SNSの基本の使い方から、施設として案件に取り組むための体制構築まで。利用者さん主導の発信・集客を実現します。</p>
+        </div>
+        <div class="type-card">
+          <div class="ticon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-briefcase"/></svg></div>
+          <h3>生産活動獲得研修</h3>
+          <p>法人営業の基礎から、組織として営業を獲得できるようになるまで。人脈頼みから脱却し、施設に営業体制を残します。</p>
+        </div>
+        <div class="type-card">
+          <div class="ticon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></div>
+          <h3>AI活用研修</h3>
+          <p>AIの基本的な活用方法から、サイト制作・アプリ制作、そして施設として案件を受けられる体制づくりまで学べる講座です。</p>
+        </div>
+        <div class="type-card">
+          <div class="ticon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg></div>
+          <h3>自己理解・職員コミュニケーション研修</h3>
+          <p>EQ（心の知能指数）を活用して、職場のコミュニケーションを円滑にする講座。人間関係のトラブルを根本から減らします。</p>
         </div>
       </div>
+
     </div>
   </section>
 
   <!-- ============================================================
-       6. 実績・数字（POINT1〜4）
+       6. 提携企業
        ============================================================ -->
-  <section class="section point-section" id="points">
+  <section class="section partner-section" id="partners">
     <div class="container">
-      <p class="lp-eyebrow reveal" style="text-align:center;">By the Numbers</p>
-      <h2 class="reveal">数字で見る、私たちの現在地</h2>
+      <p class="lp-eyebrow reveal" style="text-align:center;">Partners</p>
+      <h2 class="reveal">提携企業</h2>
       <p class="lp-section-lead reveal">
-        曖昧な言葉より、数字で語ります。<br>
-        （※印は現在集計中・目標値です。実績確定後に順次差し替えます）
+        各研修は、それぞれの分野の課題解決エキスパート企業と連携して実施します。
       </p>
 
-      <div class="point-grid stagger">
-        <div class="point-card">
-          <span class="pnum">POINT 1</span>
-          <!-- ※要差し替え：導入社数の実績。現状は事業ビジョンの目標値を掲載 -->
-          <div class="pfig">30<small>社</small></div>
-          <p class="plabel">2026年 導入目標</p>
-          <p class="pdesc">就労支援事業所への導入を広げ、2028年には150社（年商1.7億円規模）を目指しています。</p>
+      <div class="partner-grid stagger">
+        <!-- ※要差し替え：提携企業のロゴ画像・社名が確定したら差し替え（<img src="assets/images/partner-1.png" alt="社名"> の形で） -->
+        <div class="partner-slot">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <p class="pname">【提携企業名】</p>
+          <p class="prole">SNS発信研修</p>
         </div>
-        <div class="point-card">
-          <span class="pnum">POINT 2</span>
-          <!-- ※要差し替え：工賃改善率の実測値が確定したら「＋◯◯%」の実数に置き換える（推測で埋めない） -->
-          <div class="pfig">集計中</div>
-          <p class="plabel">生産活動収支・工賃の改善率</p>
-          <p class="pdesc">「売れる商品×届く発信」で、生産活動収支と平均工賃月額の底上げを目指します。実測値は導入事例とあわせて公開予定。</p>
+        <div class="partner-slot">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <p class="pname">【提携企業名】</p>
+          <p class="prole">生産活動獲得研修</p>
         </div>
-        <div class="point-card">
-          <span class="pnum">POINT 3</span>
-          <div class="pfig">100<small>%</small></div>
-          <p class="plabel">受講後の満足度</p>
-          <p class="pdesc">これまでご相談・体験いただいた方から、100%の満足度をいただいています（自社調べ）。</p>
+        <div class="partner-slot">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <p class="pname">【提携企業名】</p>
+          <p class="prole">AI活用研修</p>
         </div>
-        <div class="point-card">
-          <span class="pnum">POINT 4</span>
-          <div class="pfig">3<small>件</small></div>
-          <p class="plabel">相談・伴走の実績</p>
-          <p class="pdesc">現場に寄り添った相談を積み上げています。サービス立ち上げ初期のため件数はまだ少ないですが、一つひとつ丁寧に向き合っています。</p>
+        <div class="partner-slot">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <p class="pname">【提携企業名】</p>
+          <p class="prole">自己理解・職員コミュニケーション研修</p>
         </div>
       </div>
-      <p class="note point-note reveal">※ 導入社数目標・改善率は目標値／集計中の項目です。誠実さを大切に、確定した数字のみを順次公開します。</p>
+
+      <p class="partner-more reveal">
+        <a href="partners.html" class="btn-link">提携企業の紹介を見る <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
     </div>
   </section>
 
   <!-- ============================================================
-       7. 選ばれる理由
+       7. リスキリング助成金とは
+       ============================================================ -->
+  <section class="section subsidy-section" id="subsidy">
+    <div class="container">
+      <p class="lp-eyebrow reveal" style="text-align:center;">Subsidy</p>
+      <h2 class="reveal">リスキリング助成金って、なに？</h2>
+
+      <div class="subsidy-box reveal">
+        <p>国は今、「働く人の学び直し（＝リスキリング）」を応援しています。会社が職員に研修を受けさせると、<strong>かかった費用の一部を、あとから国が負担してくれる</strong>——それがリスキリング助成金の仕組みです。</p>
+
+        <!-- 仕組みの図解：施設 ⇄ 国（労働局） -->
+        <div class="subsidy-diagram" role="img" aria-label="リスキリング助成金の仕組み：施設が国に研修の計画を届け出て、研修を実施・報告すると、国から研修費用の一部が施設に支給される">
+          <div class="sd-actor">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-building"/></svg>
+            <b>施設</b>
+            <small>あなたの事業所</small>
+          </div>
+          <div class="sd-arrows">
+            <div class="sd-arrow">
+              <span class="lbl"><span class="n">1</span>「この研修を受けます」と計画を届け出る</span>
+              <span class="sd-line" aria-hidden="true"></span>
+            </div>
+            <div class="sd-arrow">
+              <span class="lbl"><span class="n">2</span>研修を受けて、「実施しました」と報告する</span>
+              <span class="sd-line" aria-hidden="true"></span>
+            </div>
+            <div class="sd-arrow sd-arrow--back">
+              <span class="lbl"><span class="n">3</span>研修費用の一部が、施設に支給される</span>
+              <span class="sd-line" aria-hidden="true"></span>
+            </div>
+          </div>
+          <div class="sd-actor">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-flag"/></svg>
+            <b>国</b>
+            <small>労働局</small>
+          </div>
+        </div>
+
+        <p class="subsidy-note">※ 対象となる条件・助成率・上限額は、制度やコース、施設の状況によって異なります。審査があるため支給を保証するものではありませんが、活用できる制度をヒアリング時に個別にご案内します。</p>
+      </div>
+
+      <div class="subsidy-support reveal">
+        「書類が多くて大変そう…」——ご安心ください。<br>
+        <strong>助成金の申請まで、私たちがフォローします。</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       8. 選ばれる理由
        ============================================================ -->
   <section class="section reason-section" id="reasons">
     <div class="container">
       <p class="lp-eyebrow reveal" style="text-align:center;">Why Us</p>
       <h2 class="reveal">選ばれる、3つの理由</h2>
-      <p class="lp-section-lead reveal">
-        ノウハウを教えるだけの研修でも、数字だけを追うコンサルでもない。<br>
-        「その人らしさ」を大切にしながら、"売れる"まで確かに伴走します。
-      </p>
 
       <div class="reason-grid stagger">
         <div class="reason-card">
-          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chart"/></svg></div>
-          <h3>「作る」で終わらせない、"売れる"まで伴走</h3>
-          <p>SNSマーケティング・事業開発の実務経験があるから、発信して終わりではなく「届いて、売れる」まで設計できます。</p>
-        </div>
-        <div class="reason-card">
-          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
-          <h3>利用者さんが主役になる設計</h3>
-          <p>「やらされる」ではなく「やってみたい」から始める。内発的な動機を引き出すから、発信が自然と続いていきます。</p>
+          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-yen"/></svg></div>
+          <h3>助成金活用で、手頃な金額に</h3>
+          <p>通常<b>300〜400万円程度</b>かかる規模の研修も、リスキリング助成金の活用で費用負担を大きく抑えて受講できます。</p>
         </div>
         <div class="reason-card">
           <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-refresh"/></svg></div>
-          <h3>続く運用が、施設に残る</h3>
-          <p>撮影・投稿・お客様対応までの型を施設に残すから、研修後も自走できる。単発で終わらない仕組みづくりです。</p>
+          <h3>動画だけじゃない、フォロー体制</h3>
+          <p>動画の閲覧だけで終わらせません。現場レベルで実装できるようになるまで、フォローアップ体制が充実しています。</p>
+        </div>
+        <div class="reason-card">
+          <div class="ricon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
+          <h3>受けてすぐ、現場で実践できる</h3>
+          <p>受けっぱなしにしない。利用者さん主導の目線に立ったワークを盛り込み、受けたその日から現場で実践できるプログラムです。</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ============================================================
-       8. 導入企業の声
-       ============================================================ -->
-  <section class="section cases-section" id="cases">
-    <div class="container">
-      <p class="lp-eyebrow reveal" style="text-align:center;">Voices</p>
-      <h2 class="reveal">導入企業の声</h2>
-
-      <div class="cases-grid stagger">
-        <!-- ※要差し替え：先方確認の上、コメント本文・お名前の表記を確定してから公開 -->
-        <div class="case-card">
-          <p class="who">東京都 就労継続支援B型</p>
-          <p class="voice">導入をご検討・ご相談いただいています。具体的な感想・お声は、掲載のご了承をいただき次第公開いたします。</p>
-          <p class="from">— コメント掲載準備中</p>
-        </div>
-        <div class="case-card">
-          <p class="who">千葉県 就労継続支援B型</p>
-          <p class="voice">導入をご検討・ご相談いただいています。具体的な感想・お声は、掲載のご了承をいただき次第公開いたします。</p>
-          <p class="from">— コメント掲載準備中</p>
-        </div>
-        <div class="case-card">
-          <p class="who">東京都 障害者雇用事業者</p>
-          <p class="voice">導入をご検討・ご相談いただいています。具体的な感想・お声は、掲載のご了承をいただき次第公開いたします。</p>
-          <p class="from">— コメント掲載準備中</p>
-        </div>
-
-        <div class="case-coming">
-          その他の導入事例も現在準備中です。実際に導入いただいた企業さま・施設さまの声を、順次掲載してまいります。
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       9. 導入までの流れ（5ステップ）
+       9. 導入までの流れ（助成金の申請〜着金まで）
        ============================================================ -->
   <section class="section flow-section" id="flow">
     <div class="container">
       <p class="lp-eyebrow reveal" style="text-align:center;">Flow</p>
       <h2 class="reveal">導入までの流れ</h2>
       <p class="lp-section-lead reveal">
-        まずは、お問い合わせフォームから。<br>
-        あなたのペースで、一歩ずつ進めていきましょう。
+        お問い合わせから、助成金の着金まで。<br>
+        書類まわりも含めて、あなたのペースで一歩ずつ進めていきましょう。
       </p>
 
       <div class="flow stagger">
@@ -656,7 +594,7 @@
           </div>
           <div class="flow-body">
             <h3>お問い合わせ</h3>
-            <p>フォームから、施設の生産活動の状況やお悩みをお気軽にお送りください。ご入力は1〜2分で完了します。</p>
+            <p>フォームから、施設の状況やお悩みをお気軽にお送りください。ご入力は1〜2分で完了します。</p>
           </div>
         </div>
         <div class="flow-step">
@@ -666,7 +604,7 @@
           </div>
           <div class="flow-body">
             <h3>メールでご連絡・ヒアリング</h3>
-            <p>後日、担当よりメールでご連絡します。日程を調整のうえ、生産活動の現状や目指したい姿をお聞きします。基本はZoom、ご要望に応じて訪問も可能です。</p>
+            <p>後日、担当よりメールでご連絡します。日程を調整のうえ、現場の課題や目指したい姿をお聞きします。基本はZoom、ご要望に応じて訪問も可能です。</p>
           </div>
         </div>
         <div class="flow-step">
@@ -675,18 +613,18 @@
             <span class="n">STEP 3</span>
           </div>
           <div class="flow-body">
-            <h3>ご提案・お見積り</h3>
-            <p>ヒアリングをもとに、研修の内容・回数・期間・費用をご提案します。ご予算に応じた設計も可能です。</p>
+            <h3>ご提案・助成金のご案内</h3>
+            <p>課題に合わせた研修プランと、活用できる助成金をあわせてご提案します。ご予算に応じた設計も可能です。</p>
           </div>
         </div>
         <div class="flow-step">
-          <div class="flow-badge">
-            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-check"/></svg>
+          <div class="flow-badge flow-badge--subsidy">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-pencil"/></svg>
             <span class="n">STEP 4</span>
           </div>
           <div class="flow-body">
-            <h3>導入の決定</h3>
-            <p>内容にご納得いただけたら、スケジュールを調整して導入を決定。準備が整うまで丁寧にサポートします。</p>
+            <h3>助成金の申請（計画届の提出）</h3>
+            <p>研修開始前に、国（労働局）へ計画届を提出します。必要書類の準備・作成を私たちがフォローするので、初めてでも安心です。</p>
           </div>
         </div>
         <div class="flow-step">
@@ -696,7 +634,27 @@
           </div>
           <div class="flow-body">
             <h3>研修スタート</h3>
-            <p>いよいよ開始。開始後も伴走し、発信が施設に定着するまで一緒に走ります。ここがゴールではなく、始まりです。</p>
+            <p>動画＋現場で実践できるワーク＋フォローアップで進行。研修内でつくった成果物は、そのまま現場の資産になります。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-badge flow-badge--subsidy">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-check"/></svg>
+            <span class="n">STEP 6</span>
+          </div>
+          <div class="flow-body">
+            <h3>実施報告・支給申請</h3>
+            <p>研修修了後、実施報告と助成金の支給申請を行います。ここでも書類の作成・提出をフォローします。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-badge flow-badge--subsidy">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-yen"/></svg>
+            <span class="n">STEP 7</span>
+          </div>
+          <div class="flow-body">
+            <h3>助成金の着金</h3>
+            <p>労働局の審査を経て、助成金が施設の口座に支給されます。着金まで、進捗を一緒に確認していきます。</p>
           </div>
         </div>
       </div>
@@ -715,24 +673,48 @@
       <div class="faq-excerpt-list lp-narrow reveal">
         <div class="accordion-item">
           <div class="accordion-header">
-            <p class="accordion-question">SNSをやったことのない職員でも大丈夫ですか？</p>
+            <p class="accordion-question">リスキリング助成金は、どんな施設でも使えますか？</p>
             <div class="accordion-icon" aria-hidden="true">+</div>
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>はい、まったく問題ありません。アカウントの作り方から、撮影・投稿・お客様対応まで、一つずつ丁寧に進めます。近年はスマホとAIツールで、専門知識がなくても発信できる時代です。むしろ、初めての方こそ伸びしろが大きいと感じています。</p>
+              <p>雇用保険の適用事業所であることなど、一定の要件があります。対象になるか、どのコースが活用できるかは施設の状況によって異なるため、ヒアリング時に個別にご案内します。なお、審査があるため支給を保証するものではありません。その点も含めて、正直にご説明します。</p>
             </div>
           </div>
         </div>
 
         <div class="accordion-item">
           <div class="accordion-header">
-            <p class="accordion-question">生産活動（自主製品・受託作業）がまだ弱くても導入できますか？</p>
+            <p class="accordion-question">助成金の申請手続きが難しそうで不安です。</p>
             <div class="accordion-icon" aria-hidden="true">+</div>
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>もちろんです。研修は「棚卸し」から始めます。今ある製品や作業の強みを一緒に見つけ、「誰に・どう届けるか」から整えていくので、これから生産活動を伸ばしたい施設さまにこそ向いています。</p>
+              <p>ご安心ください。研修開始前の計画届の提出から、修了後の実施報告・支給申請、着金の確認まで、必要書類の準備を私たちがフォローします。初めての施設さまでも、迷わず進められます。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <div class="accordion-header">
+            <p class="accordion-question">4つの研修、どれから始めればいいですか？</p>
+            <div class="accordion-icon" aria-hidden="true">+</div>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-body">
+              <p>ヒアリングで現場の課題を整理し、優先度の高いものからご提案します。「営業体制が先か、発信が先か」など迷われている場合も、現状をお聞きすれば最適な順番をご案内できます。単発でも、組み合わせでも受講可能です。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <div class="accordion-header">
+            <p class="accordion-question">研修は動画を見るだけですか？</p>
+            <div class="accordion-icon" aria-hidden="true">+</div>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-body">
+              <p>いいえ。動画教材に加えて、現場で実践できるワークと、実装までのフォローアップがセットです。「受けたその日から現場で使える」ことを大切に設計しています。研修内でつくった成果物（マニュアル・テンプレート等）も、そのまま現場に残ります。</p>
             </div>
           </div>
         </div>
@@ -744,55 +726,43 @@
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>施設の状況や研修の頻度・範囲によって異なります。ご予算に合わせた柔軟なプラン設計が可能ですので、まずはお問い合わせフォームからご希望をお聞かせください。後日メールで概算をご案内します。</p>
+              <p>研修の内容や範囲によって異なりますが、通常300〜400万円程度かかる規模の研修も、リスキリング助成金の活用で実質負担を大きく抑えられるケースがあります。施設の状況に合わせた概算は、お問い合わせ後にメールでご案内します。</p>
             </div>
           </div>
         </div>
 
         <div class="accordion-item">
           <div class="accordion-header">
-            <p class="accordion-question">利用者さんの障害特性への配慮はありますか？</p>
+            <p class="accordion-question">研修が終わった後のサポートはありますか？</p>
             <div class="accordion-icon" aria-hidden="true">+</div>
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>はい。選択理論心理学に基づき、一人ひとりのペースや特性を尊重し「やってみたい」を引き出す進め方を大切にしています。撮影が得意な方、文章が得意な方など、役割を分担しながら無理なく発信を続けられる設計です。</p>
+              <p>はい。この研修のゴールは「研修後も自走できる体制構築」です。成果物が現場に残ることに加えて、現場レベルで実装できるまでフォローアップします。受けて終わり、にはしません。</p>
             </div>
           </div>
         </div>
 
         <div class="accordion-item">
           <div class="accordion-header">
-            <p class="accordion-question">研修が終わった後も、発信を続けられますか？</p>
+            <p class="accordion-question">誰が研修を行うのですか？</p>
             <div class="accordion-icon" aria-hidden="true">+</div>
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>そのための研修です。撮影・投稿・お客様対応までの「続けられる運用の型」を施設に残すことを重視しています。導入後も伴走し、施設だけで自走できる状態を一緒に目指します。</p>
+              <p>各分野の課題解決エキスパートである提携企業と連携して実施します。SNS・法人営業・AI活用・組織コミュニケーション、それぞれの専門家が担当するからこそ、現場で本当に効く内容をお届けできます。（<a href="partners.html" class="lp-keyword">提携企業の紹介はこちら</a>）</p>
             </div>
           </div>
         </div>
 
         <div class="accordion-item">
           <div class="accordion-header">
-            <p class="accordion-question">オンラインと対面（訪問）、どちらでも受けられますか？</p>
+            <p class="accordion-question">小規模な施設でも導入できますか？</p>
             <div class="accordion-icon" aria-hidden="true">+</div>
           </div>
           <div class="accordion-content">
             <div class="accordion-body">
-              <p>どちらも対応可能です。全国どこからでも参加しやすいオンラインと、直接お会いしてきめ細やかに指導する対面、施設の状況に合わせてお選びいただけます。組み合わせのご相談も歓迎です。</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <div class="accordion-header">
-            <p class="accordion-question">「クリエイティブ講座」との違いは何ですか？</p>
-            <div class="accordion-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="accordion-content">
-            <div class="accordion-body">
-              <p>「クリエイティブ講座」は、利用者さん一人ひとりが自分の「得意」や「好き」に気づき、スキルを身につける<strong>個人の成長</strong>にフォーカスした講座です。一方この「SNS・生産活動研修」は、施設の<strong>生産活動を"売れる・届く"活動に変える</strong>ことにフォーカスしています。どちらが合うか分からない場合も、現状をお聞きしてご提案しますので、お気軽にご相談ください。（<a href="course.html" class="lp-keyword">クリエイティブ講座はこちら</a>）</p>
+              <p>はい。施設の規模や職員数に合わせて、研修の回数・範囲を柔軟に設計します。「まずは一つの課題から」という始め方も歓迎です。お気軽にご相談ください。</p>
             </div>
           </div>
         </div>
@@ -805,7 +775,7 @@
   </section>
 
   <!-- ============================================================
-       11-1. 代表メッセージ
+       11-1. 代表メッセージ（創業者の想い）
        ============================================================ -->
   <section class="section message-section" id="message">
     <div class="container">
@@ -813,11 +783,10 @@
         <p class="lp-eyebrow reveal">Message</p>
         <h2 class="reveal">最後に</h2>
         <div class="body reveal">
-          <p>売れないのは、価値がないからじゃない。ただ、まだ「届いていない」だけ。私は、そう信じています。</p>
-          <p>心を込めてつくられた製品には、必ず、それを必要とする人がいます。あいだにある「届け方」の壁さえ越えれば、工賃も、やりがいも、施設の空気も変わっていく。そして発信の主役は、利用者さん自身です。「自分の仕事が、誰かに届いた」——その手応えが、次の一歩をつくります。</p>
-          <p>無理はしなくていい。でも、歩みは止めなくていい。その一歩を、私たちが隣で一緒に歩きます。</p>
-          <p class="sign">Stellize合同会社　菊野
-            <small>SNS・生産活動研修 講師</small>
+          <p>就労支援の現場には、解決されないまま繰り返されている課題が、あまりにも多い。どこかの現場で生まれた答えが、業界全体には共有されていない。——私は、それを本気で変えたいと思っています。</p>
+          <p>各分野のエキスパートと手を組み、現場の課題解決力の水準そのものを底上げする。一つの施設の成功で、終わらせない。生産活動の場が広がれば、施設の経営は強くなり、利用者さんの活躍の場が広がり、就労への前向きな自信が育っていく。<strong>その連鎖を、業界全体でつくる。</strong>この研修は、そのための挑戦です。</p>
+          <p class="sign">Stellize合同会社　責任者
+            <small>SNS・生産活動研修</small>
           </p>
         </div>
       </div>
@@ -833,14 +802,14 @@
       <h2 class="reveal">まずは、お問い合わせから。</h2>
       <p class="final-lead reveal">
         フォームをお送りいただいたら、後日、担当よりメールでご連絡いたします。<br>
-        導入を決めていなくても、情報収集の段階でも大丈夫です。
+        導入を決めていなくても、助成金が使えるかの確認だけでも大丈夫です。
       </p>
 
       <div class="dual-cta stagger">
         <div class="dual-card">
           <div class="dicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
           <h3>お問い合わせはこちら</h3>
-          <p>施設の生産活動を"売れる・届く"活動へ。SNS・生産活動研修のこと、現状のお悩みからお聞かせください。</p>
+          <p>現場の課題に合わせた研修プランと、活用できる助成金をご案内します。現状のお悩みからお聞かせください。</p>
           <a href="contact.html?type=consult&amp;utm_source=training_lp&amp;utm_medium=final&amp;utm_campaign=training" class="btn btn-primary">お問い合わせフォームへ</a>
         </div>
       </div>

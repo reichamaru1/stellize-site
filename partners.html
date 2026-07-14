@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Stellize『SNS・生産活動研修』の提携企業のご紹介。SNS発信・生産活動獲得（法人営業）・AI活用・職員コミュニケーション、各分野の課題解決エキスパートと連携して研修をお届けします。" />
+  <title>提携企業のご紹介 | Stellize</title>
+
+  <!-- OGP ※要差し替え：本番ドメイン確定後 -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Stellize" />
+  <meta property="og:title" content="提携企業のご紹介 | Stellize" />
+  <meta property="og:description" content="SNS・生産活動研修の各分野を担当する、課題解決エキスパート企業のご紹介です。" />
+  <meta property="og:url" content="https://stellize-site.netlify.app/partners.html" />
+  <meta property="og:image" content="https://stellize-site.netlify.app/assets/images/bh3ieUsE.jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="提携企業のご紹介 | Stellize" />
+  <meta name="twitter:description" content="SNS・生産活動研修の各分野を担当する、課題解決エキスパート企業のご紹介です。" />
+  <meta name="twitter:image" content="https://stellize-site.netlify.app/assets/images/bh3ieUsE.jpeg" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20260711e" />
+
+  <!-- ▼このページ専用スタイル（training.html と同じデザイントークン） -->
+  <style>
+    :root {
+      --lp-deep: #4A4038;
+      --lp-green: #7E9B79;
+      --lp-green-d: #5F7E63;
+      --lp-beige: #F3ECE0;
+      --lp-line: #E6DAC8;
+      --lp-cream: #FBF7F0;
+      --lp-red: #C05C46;
+      --lp-pink-l: #F7E3E8;
+    }
+    .lp-eyebrow { display: inline-block; font-size: 0.8rem; letter-spacing: 0.18em; color: var(--lp-green); font-weight: 600; margin-bottom: 14px; text-transform: uppercase; }
+    .lp-section-lead { max-width: 760px; margin: 0 auto 44px; text-align: center; color: var(--text-secondary); line-height: 2; }
+
+    /* 提携企業カード */
+    .partner-list { display: grid; gap: 24px; max-width: 900px; margin: 0 auto; }
+    .partner-card {
+      display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start;
+      background: #fff; border: 1px solid var(--lp-line); border-radius: var(--radius-md);
+      padding: 30px 30px; box-shadow: var(--shadow-sm);
+    }
+    /* ロゴ枠：ロゴ画像をもらったら <img> に差し替え */
+    .partner-card .plogo {
+      aspect-ratio: 5 / 3; display: flex; align-items: center; justify-content: center;
+      background: var(--lp-cream); border: 1.5px dashed var(--lp-line); border-radius: var(--radius-sm);
+      color: var(--text-light); font-size: .84rem;
+    }
+    .partner-card .plogo img { max-width: 85%; max-height: 80%; object-fit: contain; }
+    .partner-card .prole {
+      display: inline-block; background: var(--lp-beige); color: var(--lp-green-d);
+      border-radius: 50px; padding: 4px 14px; font-size: .78rem; font-weight: 600; margin-bottom: 10px;
+    }
+    .partner-card h3 { font-size: 1.2rem; color: var(--text-primary); margin-bottom: 10px; }
+    .partner-card p { font-size: .94rem; line-height: 1.9; color: var(--text-secondary); margin: 0 0 10px; }
+    .partner-card .plink { font-size: .86rem; }
+    .partner-note { max-width: 900px; margin: 28px auto 0; text-align: center; font-size: .84rem; color: var(--text-light); line-height: 1.8; }
+
+    .back-cta { text-align: center; margin-top: 48px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    @media (max-width: 720px) {
+      .partner-card { grid-template-columns: 1fr; gap: 18px; padding: 24px 20px; }
+      .partner-card .plogo { max-width: 260px; margin: 0 auto; width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ローディング（他ページと共通・main.jsで制御） -->
+  <div id="loader" class="loader loader--crazy">
+    <div class="loader-bg">
+      <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+    </div>
+    <div class="loader-inner">
+      <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
+        <path class="logo-path"
+          d="M155 55 C130 30, 70 35, 70 75 C70 110, 120 105, 120 135 C120 170, 70 175, 60 150"
+          fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="logo-path logo-path-2"
+          d="M160 150 C150 185, 100 195, 75 175"
+          fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="loader-text">Stellize</p>
+      <p class="loader-sub">Loading...</p>
+    </div>
+  </div>
+
+  <!-- ヘッダー（他ページと共通） -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">Stellize</a>
+      <nav class="nav">
+        <a href="index.html">トップ</a>
+        <a href="index.html#about">企業情報</a>
+        <a href="index.html#business">事業紹介</a>
+        <a href="blog.html">ブログ</a>
+        <a href="faq.html">よくある質問</a>
+        <a href="contact.html" class="btn-contact">無料相談を予約する</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ページヒーロー -->
+  <section class="page-hero">
+    <div class="container">
+      <p class="label">Partners</p>
+      <h1>提携企業のご紹介</h1>
+      <p class="lead">『SNS・生産活動研修』は、各分野の課題解決エキスパートと連携してお届けしています。<br>それぞれの専門家が担当するからこそ、現場で本当に効く研修になります。</p>
+    </div>
+  </section>
+
+  <!-- 提携企業一覧 -->
+  <section class="section">
+    <div class="container">
+      <div class="partner-list">
+
+        <!-- ※要差し替え：提携企業の確定後、ロゴ画像（.plogo内を<img src="assets/images/partner-sns.png" alt="社名">に）・社名・紹介文・URLを差し替え -->
+        <div class="partner-card">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <div>
+            <span class="prole">担当：SNS発信研修</span>
+            <h3>【提携企業名】</h3>
+            <p>【会社紹介文：SNS運用・発信支援の専門企業。各SNSの使い方の基礎から、施設として案件に取り組むための体制構築までを担当します。実績・得意分野などを掲載予定】</p>
+            <!-- ※要差し替え：企業サイトURL確定後 -->
+            <p class="plink"><a href="#" class="btn-link">企業サイトを見る <span class="arrow" aria-hidden="true">→</span></a></p>
+          </div>
+        </div>
+
+        <div class="partner-card">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <div>
+            <span class="prole">担当：生産活動獲得研修</span>
+            <h3>【提携企業名】</h3>
+            <p>【会社紹介文：法人営業支援の専門企業。営業の基礎から、オーナー個人に依存せず組織として生産活動を獲得できる営業体制づくりまでを担当します。実績・得意分野などを掲載予定】</p>
+            <p class="plink"><a href="#" class="btn-link">企業サイトを見る <span class="arrow" aria-hidden="true">→</span></a></p>
+          </div>
+        </div>
+
+        <div class="partner-card">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <div>
+            <span class="prole">担当：AI活用研修</span>
+            <h3>【提携企業名】</h3>
+            <p>【会社紹介文：AI活用・開発支援の専門企業。AIの基本的な活用方法から、サイト制作・アプリ制作、施設として案件を受けられる体制づくりまでを担当します。実績・得意分野などを掲載予定】</p>
+            <p class="plink"><a href="#" class="btn-link">企業サイトを見る <span class="arrow" aria-hidden="true">→</span></a></p>
+          </div>
+        </div>
+
+        <div class="partner-card">
+          <div class="plogo">ロゴ掲載準備中</div>
+          <div>
+            <span class="prole">担当：自己理解・職員コミュニケーション研修</span>
+            <h3>【提携企業名】</h3>
+            <p>【会社紹介文：EQ（心の知能指数）を活用した組織開発の専門企業。職場のコミュニケーションを円滑にし、人間関係のトラブルを根本から減らす研修を担当します。実績・得意分野などを掲載予定】</p>
+            <p class="plink"><a href="#" class="btn-link">企業サイトを見る <span class="arrow" aria-hidden="true">→</span></a></p>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="partner-note">※ 提携企業の情報は、掲載のご了承をいただき次第、順次公開してまいります。</p>
+
+      <div class="back-cta">
+        <a href="training.html" class="btn btn-secondary">研修の詳細に戻る</a>
+        <a href="contact.html?type=consult&amp;utm_source=partners&amp;utm_medium=page&amp;utm_campaign=training" class="btn btn-primary">お問い合わせはこちら</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- フッター（他ページと共通） -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-col">
+          <h3>Stellize合同会社</h3>
+          <p>自分の価値に、気づく。<br>誰もが自分らしく働ける社会へ。</p>
+        </div>
+        <div class="footer-col">
+          <h4>ページ</h4>
+          <a href="index.html">トップ</a>
+          <a href="index.html#about">企業情報</a>
+          <a href="index.html#business">事業紹介</a>
+        </div>
+        <div class="footer-col">
+          <h4>サービス</h4>
+          <a href="course.html">クリエイティブ講座</a>
+          <a href="training.html">SNS・生産活動研修</a>
+          <a href="gpac.html">G-PaC</a>
+        </div>
+        <div class="footer-col">
+          <h4>情報</h4>
+          <a href="blog.html">ブログ</a>
+          <a href="faq.html">よくある質問</a>
+          <a href="contact.html">お問い合わせフォーム</a>
+          <a href="privacy.html">プライバシーポリシー</a>
+          <a href="tokushoho.html">特定商取引法に基づく表記</a>
+        </div>
+        <div class="footer-col">
+          <h4>SNS</h4>
+          <!-- TODO: Instagram実URL確定後にhrefを差し替え ※要差し替え -->
+          <a href="#" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="#" class="coming-soon">Threads <span>Coming Soon</span></a>
+          <a href="#" class="coming-soon">X（旧Twitter） <span>Coming Soon</span></a>
+          <a href="#" class="coming-soon">Facebook <span>Coming Soon</span></a>
+          <a href="#" class="coming-soon">TikTok <span>Coming Soon</span></a>
+          <a href="#" class="coming-soon">公式LINE <span>Coming Soon</span></a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Stellize. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ページ遷移アニメ（他ページと共通） -->
+  <div id="pageTransition" class="page-transition" aria-hidden="true"></div>
+
+  <script src="js/main.js?v=20260723"></script>
+</body>
+</html>
