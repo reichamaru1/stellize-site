@@ -1,0 +1,14 @@
+{
+  "name": "shuro-db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "全国就労支援事業所データベース（WAM NET オープンデータ）",
+  "engines": { "node": ">=22.5.0" },
+  "scripts": {
+    "fetch": "node --no-warnings src/ingest/fetch.mjs",
+    "build": "node --no-warnings src/db/build.mjs",
+    "start": "node --no-warnings src/server.mjs",
+    "test": "node --no-warnings --test test/*.test.mjs"
+  }
+}

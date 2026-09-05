@@ -1,0 +1,4 @@
+data/raw/
+data/*.db
+data/*.db-journal
+node_modules/
