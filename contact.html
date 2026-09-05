@@ -24,7 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css?v=20260723">
+    <link rel="stylesheet" href="css/style.css?v=20260714a">
     <style>
         /* フォーム専用スタイル */
         .form-group {
@@ -235,6 +235,7 @@
                                 <option value="">選択してください</option>
                                 <option value="施設導入について">施設への導入について</option>
                                 <option value="企業研修について">企業研修について</option>
+                                <option value="WelfareAIについて">WelfareAIについて</option>
                                 <option value="講座内容について">講座内容について</option>
                                 <option value="費用について">費用について</option>
                                 <option value="説明会について">説明会・体験講座について</option>
@@ -373,6 +374,7 @@
                     <a href="course.html">クリエイティブ講座</a>
                     <a href="training.html">SNS・生産活動研修</a>
                     <a href="gpac.html">G-PaC</a>
+                    <a href="welfareai.html">WelfareAI</a>
                 </div>
                 <div class="footer-col">
                     <h4>情報</h4>
@@ -407,15 +409,21 @@
 
         // ① CTAの ?type= / ?target= を種別セレクトに反映
         var type = params.get("type");
-        var targetParam = params.get("target"); // "facility" | "corporate"
+        var targetParam = params.get("target"); // "facility" | "corporate" | "welfareai"
         var typeSelect = document.getElementById("inquiry-type");
         if (typeSelect) {
           var selected = "";
           if (type === "document") {
             selected = "資料請求";
           } else if (type === "consult") {
-            // target=corporate なら企業研修、それ以外（facility/未指定）は施設導入をデフォルトに
-            selected = targetParam === "corporate" ? "企業研修について" : "施設導入について";
+            // target=corporate なら企業研修、welfareai ならWelfareAI、それ以外（facility/未指定）は施設導入をデフォルトに
+            if (targetParam === "corporate") {
+              selected = "企業研修について";
+            } else if (targetParam === "welfareai") {
+              selected = "WelfareAIについて";
+            } else {
+              selected = "施設導入について";
+            }
           }
           if (selected) {
             // 資料請求の選択肢が無ければ先頭に追加
