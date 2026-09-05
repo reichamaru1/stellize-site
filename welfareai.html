@@ -143,23 +143,94 @@
     }
     .issue-close b { color: var(--wa-blue); font-size: 1.2rem; }
 
-    /* ===== 3. ビジョン（6つの価値） ===== */
-    .vision-sec { background: #fff; }
-    .vision-copy { max-width: 800px; margin: 0 auto 46px; text-align: center; font-size: 1.08rem; line-height: 2.05; color: var(--wa-muted); }
+    /* ===== 3. ビジョン（価値が循環するオービット図） ===== */
+    .vision-sec { background: #fff; position: relative; overflow: hidden; }
+    /* 背景のやわらかな光（循環の余韻） */
+    .vision-sec::before {
+      content: ""; position: absolute; left: 50%; top: 46%; transform: translate(-50%,-50%);
+      width: min(1100px, 120vw); aspect-ratio: 1/1; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(18,160,147,.07) 0%, rgba(27,74,158,.05) 45%, transparent 68%);
+    }
+    .vision-sec .container { position: relative; z-index: 1; }
+    .vision-copy { max-width: 800px; margin: 0 auto 20px; text-align: center; font-size: 1.08rem; line-height: 2.05; color: var(--wa-muted); }
     .vision-copy strong { color: var(--wa-blue); }
-    .val6-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; max-width: 1060px; margin: 0 auto; }
-    .val6 { background: var(--vb, var(--wa-blue-l)); border-radius: 18px; padding: 26px 22px; text-align: center; }
-    .val6 .vicon { width: 56px; height: 56px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; box-shadow: 0 3px 10px rgba(0,0,0,.06); }
-    .val6 .vicon .icon { width: 1.6em; height: 1.6em; margin: 0; color: var(--vc, var(--wa-blue)); }
-    .val6 h3 { font-size: 1.14rem; color: var(--vc, var(--wa-blue)); margin-bottom: 8px; }
-    .val6 .vlead { font-size: .92rem; font-weight: 600; color: var(--wa-text); margin-bottom: 8px; }
-    .val6 p { font-size: .88rem; line-height: 1.8; color: var(--wa-muted); margin: 0; }
-    .val6:nth-child(6n+1) { --vb: var(--wa-pink-l); --vc: #C2607A; }
-    .val6:nth-child(6n+2) { --vb: var(--wa-blue-l); --vc: var(--wa-blue); }
-    .val6:nth-child(6n+3) { --vb: var(--wa-teal-l); --vc: var(--wa-teal-d); }
-    .val6:nth-child(6n+4) { --vb: var(--wa-lav-l); --vc: #6F5FA8; }
-    .val6:nth-child(6n+5) { --vb: var(--wa-orange-l); --vc: #B87A26; }
-    .val6:nth-child(6n+6) { --vb: var(--wa-green-l); --vc: #4F8B63; }
+    .vision-turn {
+      max-width: 760px; margin: 0 auto 46px; text-align: center;
+      font-size: 1.06rem; line-height: 2; color: var(--wa-text); font-weight: 600;
+    }
+    .vision-turn em { font-style: normal; color: var(--wa-teal-d); }
+
+    /* --- オービット（モバイル優先：縦フロー） --- */
+    .orbit-wrap { max-width: 800px; margin: 0 auto; }
+    .orbit { display: grid; }
+    .orbit-ring { display: none; }
+    .orbit-hub {
+      background: linear-gradient(135deg, var(--wa-blue), var(--wa-teal)); color: #fff;
+      border-radius: 20px; padding: 26px 20px; text-align: center; margin-bottom: 34px;
+      position: relative; box-shadow: 0 14px 34px rgba(27,74,158,.24);
+    }
+    .orbit-hub b { display: block; font-size: 1.16rem; letter-spacing: .01em; }
+    .orbit-hub span { display: block; font-size: .82rem; line-height: 1.7; color: #DCEFF2; margin-top: 8px; }
+    .orbit-hub::after {
+      content: "↓"; position: absolute; left: 50%; bottom: -27px; transform: translateX(-50%);
+      color: var(--wa-teal); font-size: 1.25rem; font-weight: 700; line-height: 1;
+    }
+    .orbit-node {
+      position: relative; background: #fff; border: 1px solid var(--wa-line);
+      border-top: 4px solid var(--nc, var(--wa-blue)); border-radius: 16px;
+      padding: 20px 16px; text-align: center; margin-bottom: 34px;
+      box-shadow: 0 6px 20px rgba(27,74,158,.09);
+    }
+    .orbit-node:last-of-type { margin-bottom: 0; }
+    .orbit-node::after {
+      content: "↓"; position: absolute; left: 50%; bottom: -27px; transform: translateX(-50%);
+      color: var(--wa-teal); font-size: 1.25rem; font-weight: 700; line-height: 1;
+    }
+    .orbit-node:last-of-type::after { content: none; }
+    .orbit-node .oicon {
+      width: 46px; height: 46px; border-radius: 50%; background: var(--nb, var(--wa-blue-l));
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+    }
+    .orbit-node .oicon .icon { width: 1.4em; height: 1.4em; margin: 0; color: var(--nc, var(--wa-blue)); }
+    .orbit-node h3 { font-size: 1.06rem; color: var(--nc, var(--wa-blue)); margin-bottom: 6px; }
+    .orbit-node .olead { font-size: .8rem; font-weight: 700; color: var(--wa-text); line-height: 1.6; margin-bottom: 6px; }
+    .orbit-node p { font-size: .77rem; line-height: 1.7; color: var(--wa-muted); margin: 0; }
+    .n1 { --nc: #C2607A; --nb: var(--wa-pink-l); }
+    .n2 { --nc: var(--wa-blue); --nb: var(--wa-blue-l); }
+    .n3 { --nc: var(--wa-teal-d); --nb: var(--wa-teal-l); }
+    .n4 { --nc: #6F5FA8; --nb: var(--wa-lav-l); }
+    .n5 { --nc: #B87A26; --nb: var(--wa-orange-l); }
+    .n6 { --nc: #4F8B63; --nb: var(--wa-green-l); }
+    /* 循環の締め（また次へ戻る） */
+    .orbit-loop {
+      max-width: 700px; margin: 34px auto 0; text-align: center; padding: 20px 22px;
+      border-radius: 50px; background: linear-gradient(135deg, var(--wa-blue-l), var(--wa-teal-l));
+      color: var(--wa-blue); font-weight: 700; font-size: 1rem; line-height: 1.8;
+    }
+    .orbit-loop .rot { display: inline-block; margin-right: 6px; color: var(--wa-teal-d); }
+
+    /* --- デスクトップ：円環に配置して「回る」を見せる --- */
+    @media (min-width: 901px) {
+      .orbit { position: relative; aspect-ratio: 1 / 1; display: block; }
+      .orbit-ring { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+      .orbit-hub {
+        position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+        width: 33%; aspect-ratio: 1/1; border-radius: 50%; margin: 0; padding: 14px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+      }
+      .orbit-hub::after { content: none; }
+      .orbit-node {
+        position: absolute; transform: translate(-50%,-50%);
+        width: 26%; margin: 0;
+      }
+      .orbit-node::after { content: none !important; }
+      .orbit .n1 { left: 50%;   top: 12.5%; }
+      .orbit .n2 { left: 82.5%; top: 31.25%; }
+      .orbit .n3 { left: 82.5%; top: 68.75%; }
+      .orbit .n4 { left: 50%;   top: 87.5%; }
+      .orbit .n5 { left: 17.5%; top: 68.75%; }
+      .orbit .n6 { left: 17.5%; top: 31.25%; }
+    }
 
     /* ===== 4. 主な機能 ===== */
     .feat-sec { background: var(--wa-cream); }
@@ -480,46 +551,79 @@
       <p class="vision-copy reveal">
         <strong>すべての人が、自分らしく輝ける社会へ。</strong><br>
         福祉の現場には、まだ多くの課題や制約があります。情報・ノウハウ・つながり・機会が分断されていることで、本来の支援や成長のチャンスが十分に届けられていません。<br>
-        WelfareAIは、テクノロジーと人の力をかけ合わせ、<span class="lp-keyword">仕事・学び・相談・つながりをひとつにした共創型プラットフォーム</span>を通じて、福祉の未来をアップデートしていきます。
+        WelfareAIは、その分断をつなぎ直し、<span class="lp-keyword">仕事・学び・相談・つながりがめぐり続ける仕組み</span>を、福祉の新しいインフラとして届けます。
       </p>
 
-      <div class="val6-grid stagger">
-        <div class="val6">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
+      <p class="vision-turn reveal">
+        6つの価値は、それぞれが独立したものではありません。<br>
+        <em>ひとつの「できた」が、次の可能性を呼ぶ。</em>——めぐるほどに、育っていきます。
+      </p>
+
+      <div class="orbit-wrap reveal">
+        <div class="orbit">
+          <!-- 循環を示す円環と矢印（装飾） -->
+          <svg class="orbit-ring" viewBox="0 0 800 800" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="waRing" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1B4A9E"/>
+                <stop offset="100%" stop-color="#12A093"/>
+              </linearGradient>
+            </defs>
+            <circle cx="400" cy="400" r="300" fill="none" stroke="url(#waRing)" stroke-width="2" stroke-dasharray="5 11" stroke-linecap="round" opacity=".62"/>
+            <g fill="url(#waRing)" opacity=".85">
+        <path d="M-9 -7 L 9 0 L -9 7 Z" transform="translate(550.0 140.2) rotate(30)"/>
+        <path d="M-9 -7 L 9 0 L -9 7 Z" transform="translate(700.0 400.0) rotate(90)"/>
+        <path d="M-9 -7 L 9 0 L -9 7 Z" transform="translate(550.0 659.8) rotate(150)"/>
+        <path d="M-9 -7 L 9 0 L -9 7 Z" transform="translate(250.0 659.8) rotate(210)"/>
+        <path d="M-9 -7 L 9 0 L -9 7 Z" transform="translate(100.0 400.0) rotate(270)"/>
+        <path d="M-9 -7 L 9 0 L -9 7 Z" transform="translate(250.0 140.2) rotate(330)"/>
+            </g>
+          </svg>
+
+          <div class="orbit-hub">
+            <b>WelfareAI</b>
+            <span>仕事・学び・相談・つながりが<br>めぐり続ける</span>
+          </div>
+
+        <div class="orbit-node n1">
+          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
           <h3>支える</h3>
-          <p class="vlead">利用者の可能性を見つけ、育てる</p>
+          <p class="olead">利用者の可能性を見つけ、育てる</p>
           <p>一人ひとりの「やってみたい」を大切にし、未来の選択肢を広げます。</p>
         </div>
-        <div class="val6">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg></div>
+        <div class="orbit-node n2">
+          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg></div>
           <h3>学ぶ</h3>
-          <p class="vlead">スキルと知識をいつでも身につける</p>
+          <p class="olead">スキルと知識をいつでも身につける</p>
           <p>動画やコンテンツで、楽しく学び、成長を後押しします。</p>
         </div>
-        <div class="val6">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></div>
+        <div class="orbit-node n3">
+          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></div>
           <h3>活用する</h3>
-          <p class="vlead">AIで相談・支援をもっと身近に</p>
+          <p class="olead">AIで相談・支援をもっと身近に</p>
           <p>AIカウンセラーや業務支援で、支援の質と効率を高めます。</p>
         </div>
-        <div class="val6">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-rocket"/></svg></div>
+        <div class="orbit-node n4">
+          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-rocket"/></svg></div>
           <h3>広げる</h3>
-          <p class="vlead">情報や機会を地域と未来へ</p>
+          <p class="olead">情報や機会を地域と未来へ</p>
           <p>イベントやお知らせを通じて、つながりと挑戦の機会を広げます。</p>
         </div>
-        <div class="val6">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg></div>
+        <div class="orbit-node n5">
+          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg></div>
           <h3>つながる</h3>
-          <p class="vlead">人・地域・企業をつなぐハブに</p>
+          <p class="olead">人・地域・企業をつなぐハブに</p>
           <p>多様な主体と連携し、共に支え合う地域社会をつくります。</p>
         </div>
-        <div class="val6">
-          <div class="vicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chart"/></svg></div>
+        <div class="orbit-node n6">
+          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chart"/></svg></div>
           <h3>生み出す</h3>
-          <p class="vlead">データとAIで新しい価値を共創</p>
-          <p>データを活用し、エビデンスに基づいた新しいサービスや価値を生み出します。</p>
+          <p class="olead">データとAIで新しい価値を共創</p>
+          <p>データを活用し、エビデンスに基づいた新しい価値を生み出します。</p>
         </div>
+        </div>
+
+        <p class="orbit-loop reveal"><span class="rot" aria-hidden="true">↻</span>そして、また次の「やってみたい」へ。</p>
       </div>
 
       <div class="cta-inline reveal">
