@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全国 就労支援事業所データベース</title>
+<meta name="description" content="就労移行支援・就労継続支援A型/B型・就労定着支援の事業所を全国横断で検索できます。">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#results">検索結果へ移動</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <h1>全国 就労支援事業所データベース</h1>
+    <p class="lede">
+      就労移行支援・就労継続支援A型/B型・就労定着支援の事業所を、全国横断で検索できます。
+    </p>
+    <p class="freshness" id="freshness">データを読み込んでいます…</p>
+  </div>
+</header>
+
+<div class="wrap layout">
+
+  <form class="filters" id="filters" role="search" aria-label="事業所の検索条件">
+    <h2 class="filters-title">検索条件</h2>
+
+    <div class="field">
+      <label for="q">キーワード</label>
+      <input type="search" id="q" name="q" autocomplete="off"
+             placeholder="事業所名・法人名・住所・ふりがな">
+      <p class="hint" id="q-hint">ひらがな・カタカナ・全角半角の違いは自動で吸収します。</p>
+    </div>
+
+    <fieldset class="field">
+      <legend>サービス種別</legend>
+      <div id="service-types" class="checks"></div>
+    </fieldset>
+
+    <div class="field">
+      <label for="pref">都道府県</label>
+      <select id="pref" name="pref"><option value="">すべて</option></select>
+    </div>
+
+    <div class="field">
+      <label for="city">市区町村</label>
+      <select id="city" name="city" disabled><option value="">都道府県を先に選んでください</option></select>
+    </div>
+
+    <fieldset class="field">
+      <legend>定員</legend>
+      <div class="range">
+        <label class="sr-only" for="capacity_min">定員の下限</label>
+        <input type="number" id="capacity_min" name="capacity_min" min="0" max="500" placeholder="下限" inputmode="numeric">
+        <span aria-hidden="true">〜</span>
+        <label class="sr-only" for="capacity_max">定員の上限</label>
+        <input type="number" id="capacity_max" name="capacity_max" min="0" max="500" placeholder="上限" inputmode="numeric">
+      </div>
+      <p class="hint">定員は約2割の事業所で未公表です。指定すると未公表の事業所は結果から外れます。</p>
+    </fieldset>
+
+    <div class="field">
+      <label for="status">掲載状況</label>
+      <select id="status" name="status">
+        <option value="active">最新データに掲載あり</option>
+        <option value="presumed_closed">過去に掲載・現在なし（廃止推定）</option>
+        <option value="all">すべて</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="sort">並び順</label>
+      <select id="sort" name="sort">
+        <option value="pref">所在地順</option>
+        <option value="name">事業所名順</option>
+        <option value="newest">新しく掲載された順</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn primary">検索する</button>
+      <button type="reset" class="btn">条件をクリア</button>
+    </div>
+    <p class="actions-note"><a id="csv-link" href="/api/export.csv">この条件の結果をCSVでダウンロード</a></p>
+  </form>
+
+  <main id="results" tabindex="-1">
+    <div class="results-head">
+      <p class="count" id="count" role="status" aria-live="polite">条件を指定して検索してください。</p>
+      <div class="view-toggle" role="group" aria-label="表示の切り替え">
+        <button type="button" class="btn small" id="view-list" aria-pressed="true">一覧</button>
+        <button type="button" class="btn small" id="view-map" aria-pressed="false">地図</button>
+      </div>
+    </div>
+
+    <div id="map-panel" hidden>
+      <div id="map" role="application" aria-label="事業所の地図"></div>
+      <p class="hint">地図には現在のページに表示中の事業所のみを表示します。</p>
+    </div>
+
+    <ol class="cards" id="cards"></ol>
+
+    <nav class="pager" id="pager" aria-label="ページ送り" hidden>
+      <button type="button" class="btn" id="prev">前のページ</button>
+      <span id="pageinfo"></span>
+      <button type="button" class="btn" id="next">次のページ</button>
+    </nav>
+  </main>
+</div>
+
+<dialog id="detail" aria-labelledby="detail-title">
+  <div class="detail-inner">
+    <button type="button" class="btn close" id="detail-close" aria-label="詳細を閉じる">閉じる</button>
+    <div id="detail-body"></div>
+  </div>
+</dialog>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <h2>このデータについて</h2>
+    <p>
+      出典：<a href="https://www.wam.go.jp/content/wamnet/pcpub/top/sfkopendata/" rel="noopener">
+      独立行政法人福祉医療機構（WAM NET）「障害福祉サービス等情報公表システム」オープンデータ</a>
+    </p>
+    <p class="disclaimer">
+      本サイトの情報は公開データを基にしたものであり、最新性・正確性を保証するものではありません。
+      元データは年2回（3月末・9月末）の更新であり、その間の開設・廃止は反映されていません。
+      利用前に必ず各事業所へ直接ご確認ください。
+    </p>
+    <p class="disclaimer">
+      「廃止推定」は、過去のデータに掲載され最新データに掲載がないことを示すもので、
+      実際の廃止・休止を確認したものではありません。名称や所在地の変更でもこの状態になります。
+    </p>
+    <details id="quality">
+      <summary>データの欠損状況を見る</summary>
+      <div id="quality-body"></div>
+    </details>
+  </div>
+</footer>
+
+<script src="/app.js" type="module"></script>
+</body>
+</html>
