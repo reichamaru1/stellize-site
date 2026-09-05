@@ -505,16 +505,6 @@ body {
     margin-top: 50px;
 }
 
-/* 事業4本立て：ワイド画面では2×2で均等に並べる（3+1の孤立段を防ぐ） */
-@media (min-width: 900px) {
-    .business-cards {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 1000px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
 .card {
     background: white;
     border-radius: 20px;
