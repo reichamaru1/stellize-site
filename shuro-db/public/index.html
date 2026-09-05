@@ -63,7 +63,7 @@
       <label for="status">掲載状況</label>
       <select id="status" name="status">
         <option value="active">最新データに掲載あり</option>
-        <option value="presumed_closed">過去に掲載・現在なし（廃止推定）</option>
+        <option value="presumed_closed">過去に掲載・最新データにはなし</option>
         <option value="all">すべて</option>
       </select>
     </div>
@@ -85,6 +85,7 @@
   </form>
 
   <main id="results" tabindex="-1">
+    <h2 class="sr-only">検索結果</h2>
     <div class="results-head">
       <p class="count" id="count" role="status" aria-live="polite">条件を指定して検索してください。</p>
       <div class="view-toggle" role="group" aria-label="表示の切り替え">
@@ -128,8 +129,9 @@
       利用前に必ず各事業所へ直接ご確認ください。
     </p>
     <p class="disclaimer">
-      「廃止推定」は、過去のデータに掲載され最新データに掲載がないことを示すもので、
-      実際の廃止・休止を確認したものではありません。名称や所在地の変更でもこの状態になります。
+      「最新データに掲載なし」は、過去のデータに掲載され最新データに掲載がないことを示すもので、
+      実際の廃止・休止を確認したものではありません。事業所番号の変更・改称・移転でもこの状態になります。
+      同一施設の可能性がある記録は、詳細画面に候補として表示します（自動統合はしていません）。
     </p>
     <details id="quality">
       <summary>データの欠損状況を見る</summary>

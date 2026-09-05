@@ -157,7 +157,17 @@ function detail(key) {
   const history = db.prepare(
     "SELECT period, change, service_type FROM changes WHERE facility_key=? ORDER BY period",
   ).all(key);
-  return { ...f, services, related, history };
+  // 名寄せ候補（自動統合していないもの）。双方向に引く。
+  const candidates = db.prepare(
+    `SELECT m.reason,
+            CASE WHEN m.closed_key = :k THEN m.active_key ELSE m.closed_key END AS other_key,
+            o.name, o.address_full, o.status
+     FROM merge_candidates m
+     JOIN facilities o ON o.facility_key =
+       CASE WHEN m.closed_key = :k THEN m.active_key ELSE m.closed_key END
+     WHERE m.closed_key = :k OR m.active_key = :k`,
+  ).all({ k: key });
+  return { ...f, services, related, history, candidates };
 }
 
 function trend() {

@@ -13,6 +13,7 @@
   --warn-bg: #fdf3e3;
   --warn-text: #6b4210;
   --focus: #0b57d0;
+  --link: #0b57d0;
   --radius: 10px;
   --max: 1200px;
 }
@@ -29,10 +30,14 @@
     --warn-bg: #3a2f1c;
     --warn-text: #f0d9ae;
     --focus: #8ab4f8;
+    --link: #9ec5ff;
   }
 }
 
 * { box-sizing: border-box; }
+
+a { color: var(--link); }
+a:hover { text-decoration-thickness: 2px; }
 
 body {
   margin: 0;
@@ -207,3 +212,22 @@ dialog::backdrop { background: rgb(0 0 0 / .5); }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* --- 狭い画面の調整 ---
+   定義リストの2カラムは幅が足りないと読めなくなるため、縦積みに切り替える。 */
+@media (max-width: 600px) {
+  .card dl, #detail-body dl { grid-template-columns: 1fr; gap: 0 0; }
+  .card dt, #detail-body dt { margin-top: 8px; font-size: .82rem; }
+  .card dt:first-child, #detail-body dt:first-child { margin-top: 0; }
+  .detail-inner { padding: 16px; }
+  .close { float: none; display: block; width: 100%; margin: 0 0 12px; }
+  .results-head { flex-direction: column; align-items: stretch; }
+}
+
+/* 詳細ダイアログは画面いっぱいに近づける（小さな画面での可読性） */
+@media (max-width: 600px) {
+  dialog { max-width: 100vw; max-height: 92vh; margin: auto 0 0; border-radius: var(--radius) var(--radius) 0 0; }
+}
+
+/* 詳細内のリンク集はボタンが並ぶので行頭記号を出さない */
+#detail-body ul { list-style: none; padding: 0; margin: 8px 0 0; }

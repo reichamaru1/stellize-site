@@ -1,4 +1,8 @@
+# 取得した生データ（再取得可能・33MB）
 data/raw/
+
+# 構築済みDBとSQLiteの付随ファイル（再構築可能・40MB）
 data/*.db
-data/*.db-journal
+data/*.db-*
+
 node_modules/

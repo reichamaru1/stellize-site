@@ -13,13 +13,15 @@ CREATE TABLE IF NOT EXISTS snapshots (
   record_count INTEGER NOT NULL
 );
 
--- 施設。同一性は 事業所番号 + 正規化名称 + 正規化住所。
--- （事業所番号は一意ではない。同一番号で別名称・別住所の事業所が実在する）
+-- 施設。同一性は 事業所番号 + 正規化名称。
+-- 事業所番号は一意ではない（同一番号で別名称の事業所が実在する）ため名称を併用する。
+-- 住所はキーに含めない：建物名・階数・部屋番号が頻繁に変わり、同一施設が分裂するため。
 CREATE TABLE IF NOT EXISTS facilities (
   id              INTEGER PRIMARY KEY,
   facility_key    TEXT NOT NULL UNIQUE,
   office_no       TEXT NOT NULL,
   name            TEXT NOT NULL,
+  name_norm       TEXT NOT NULL,      -- 名寄せ・候補提示用の正規化名称
   name_kana       TEXT,
   corp_name       TEXT,
   corp_kana       TEXT,
@@ -80,6 +82,18 @@ CREATE TABLE IF NOT EXISTS changes (
   detail       TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_chg_period ON changes(period, change);
+
+-- 名寄せ候補。自動統合はせず、人が判断できるように候補として残す。
+-- （事業所番号の変更などで同一施設が別レコードになった疑いのあるもの）
+CREATE TABLE IF NOT EXISTS merge_candidates (
+  id           INTEGER PRIMARY KEY,
+  closed_key   TEXT NOT NULL,
+  active_key   TEXT NOT NULL,
+  reason       TEXT NOT NULL,
+  UNIQUE(closed_key, active_key)
+);
+CREATE INDEX IF NOT EXISTS idx_mc_closed ON merge_candidates(closed_key);
+CREATE INDEX IF NOT EXISTS idx_mc_active ON merge_candidates(active_key);
 
 -- 取り込み時の品質指標。管理画面で欠損を可視化する。
 CREATE TABLE IF NOT EXISTS quality_metrics (

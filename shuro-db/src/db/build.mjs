@@ -14,7 +14,7 @@ import { readCsvFromZip } from '../ingest/unzip.mjs';
 import { parseCsvObjects } from '../ingest/csv.mjs';
 import { TARGET_SERVICE_TYPES, WAMNET_INDEX } from '../ingest/sources.mjs';
 import {
-  normalizeText, normalizeCorpName, splitAddress, normalizeAddress,
+  normalizeText, normalizeCorpName, splitAddress,
   normalizePhone, parseCapacity, parseLatLng, normalizeUrl, PREF_BY_CODE,
 } from '../ingest/normalize.mjs';
 
@@ -39,9 +39,17 @@ const C = {
 
 const periodLabel = (p) => `${p.slice(0, 4)}年${Number(p.slice(4, 6))}月末時点`;
 
-/** 施設の同一性キー。事業所番号だけでは一意にならないため名称・住所を含める。 */
-function facilityKey(officeNo, nameNorm, addrNorm) {
-  return createHash('sha1').update(`${officeNo}|${nameNorm}|${addrNorm}`).digest('hex').slice(0, 16);
+/**
+ * 施設の同一性キー。
+ * 事業所番号だけでは一意にならない（同一番号で別事業所が実在する）ため名称を併用する。
+ * 住所は含めない：建物名・階数・部屋番号の変更で同一施設が分裂するため。
+ * 実データでの検証結果（202509→202603）:
+ *   番号+名+住所 … 誤って消失扱い 959件 / 過剰マージ 0
+ *   番号+名      … 誤って消失扱い 576件 / 過剰マージ 0  ← これを採用
+ *   名+市区町村   … 誤って消失扱い 530件 / 過剰マージ 618（別事業所を混ぜるため不採用）
+ */
+function facilityKey(officeNo, nameNorm) {
+  return createHash('sha1').update(`${officeNo}|${nameNorm}`).digest('hex').slice(0, 16);
 }
 
 /** CSV 1行 → 正規化済みレコード。判断に迷う欠損は null のまま残す（推測で埋めない）。 */
@@ -50,7 +58,6 @@ export function normalizeRow(r) {
   const prefCode = (r[C.prefCode] ?? '').trim().slice(0, 2);
   const addr = splitAddress(r[C.city], r[C.detail], prefCode);
   const nameNorm = normalizeText(r[C.name]);
-  const addrNorm = normalizeAddress(addr.full);
   const phone = normalizePhone(r[C.phone]);
   const fax = normalizePhone(r[C.fax]);
   const { lat, lng } = parseLatLng(r[C.lat], r[C.lng]);
@@ -61,8 +68,9 @@ export function normalizeRow(r) {
   ].filter(Boolean).join(' '));
 
   return {
-    key: facilityKey(officeNo, nameNorm, addrNorm),
+    key: facilityKey(officeNo, nameNorm),
     officeNo,
+    nameNorm,
     name: (r[C.name] ?? '').trim(),
     nameKana: (r[C.nameKana] ?? '').trim() || null,
     corpName: (r[C.corpName] ?? '').trim() || null,
@@ -174,10 +182,10 @@ export async function build({ dbPath = DB_PATH, verbose = true } = {}) {
 
   // 書き込み
   const insF = db.prepare(`INSERT INTO facilities
-    (facility_key,office_no,name,name_kana,corp_name,corp_kana,corp_no,corp_url,designator,
+    (facility_key,office_no,name,name_norm,name_kana,corp_name,corp_kana,corp_no,corp_url,designator,
      pref_code,prefecture,city,address_detail,address_full,phone,fax,url,lat,lng,search_text,
      first_seen,last_seen,status)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
   const insS = db.prepare(`INSERT INTO services
     (facility_key,service_type,source_no,capacity,hours_weekday,hours_sat,hours_sun,hours_holiday,
      closed_days,hours_note,first_seen,last_seen,status)
@@ -186,7 +194,7 @@ export async function build({ dbPath = DB_PATH, verbose = true } = {}) {
 
   db.exec('BEGIN');
   for (const f of facilities.values()) {
-    insF.run(f.facility_key, f.office_no, f.name, f.name_kana, f.corp_name, f.corp_kana, f.corp_no,
+    insF.run(f.facility_key, f.office_no, f.name, f.name_norm, f.name_kana, f.corp_name, f.corp_kana, f.corp_no,
       f.corp_url, f.designator, f.pref_code, f.prefecture, f.city, f.address_detail, f.address_full,
       f.phone, f.fax, f.url, f.lat, f.lng, f.search_text, f.first_seen, f.last_seen, f.status);
   }
@@ -203,6 +211,7 @@ export async function build({ dbPath = DB_PATH, verbose = true } = {}) {
   }
   db.exec('COMMIT');
 
+  const candidates = writeMergeCandidates(db);
   writeQualityMetrics(db, latest);
 
   const stats = {
@@ -213,7 +222,8 @@ export async function build({ dbPath = DB_PATH, verbose = true } = {}) {
     active: [...facilities.values()].filter((f) => f.status === 'active').length,
     closed: [...facilities.values()].filter((f) => f.status === 'presumed_closed').length,
   };
-  log(`\n施設 ${stats.facilities}件（稼働 ${stats.active} / 廃止推定 ${stats.closed}）`);
+  log(`\n施設 ${stats.facilities}件（稼働 ${stats.active} / 掲載なし ${stats.closed}）`);
+  log(`名寄せ候補（自動統合せず要確認）: ${candidates}件`);
   log(`サービス ${stats.services}件`);
   if (periods.length > 1) {
     const added = db.prepare(`SELECT count(*) c FROM changes WHERE change='added' AND period=?`).get(latest).c;
@@ -226,7 +236,7 @@ export async function build({ dbPath = DB_PATH, verbose = true } = {}) {
 
 function pickLive(n) {
   return {
-    office_no: n.officeNo, name: n.name, name_kana: n.nameKana,
+    office_no: n.officeNo, name: n.name, name_norm: n.nameNorm, name_kana: n.nameKana,
     corp_name: n.corpName, corp_kana: n.corpKana, corp_no: n.corpNo, corp_url: n.corpUrl,
     designator: n.designator, pref_code: n.prefCode, prefecture: n.prefecture, city: n.city,
     address_detail: n.addressDetail, address_full: n.addressFull,
@@ -241,6 +251,33 @@ function sliceService(n) {
   };
 }
 
+/**
+ * 名寄せ候補の抽出。
+ * 「最新データに掲載がない施設」と「同じ名称・同じ市区町村で掲載がある施設」を突き合わせる。
+ * 事業所番号の変更や移転で別レコードになったケースを人が確認できるようにする。
+ * 自動では統合しない（別法人の同名施設を誤って統合しうるため）。
+ */
+function writeMergeCandidates(db) {
+  const rows = db.prepare(`
+    SELECT f.facility_key AS closed_key, g.facility_key AS active_key,
+           f.office_no AS o1, g.office_no AS o2
+    FROM facilities f
+    JOIN facilities g
+      ON g.status = 'active' AND g.name_norm = f.name_norm
+     AND g.prefecture = f.prefecture AND g.city = f.city
+     AND g.facility_key <> f.facility_key
+    WHERE f.status = 'presumed_closed'
+  `).all();
+  const ins = db.prepare('INSERT OR IGNORE INTO merge_candidates (closed_key,active_key,reason) VALUES (?,?,?)');
+  db.exec('BEGIN');
+  for (const r of rows) {
+    const reason = r.o1 === r.o2 ? '同一事業所番号・同一名称・同一市区町村' : `事業所番号が変更された可能性（${r.o1} → ${r.o2}）`;
+    ins.run(r.closed_key, r.active_key, reason);
+  }
+  db.exec('COMMIT');
+  return rows.length;
+}
+
 function writeQualityMetrics(db, period) {
   const total = db.prepare('SELECT count(*) c FROM facilities').get().c;
   const put = db.prepare('INSERT OR REPLACE INTO quality_metrics (period,metric,value,detail) VALUES (?,?,?,?)');
@@ -253,6 +290,8 @@ function writeQualityMetrics(db, period) {
   const capMissing = db.prepare(`SELECT count(*) c FROM services WHERE capacity IS NULL`).get().c;
   const svcTotal = db.prepare(`SELECT count(*) c FROM services`).get().c;
   put.run(period, 'missing.capacity', svcTotal ? capMissing / svcTotal : 0, `${capMissing}/${svcTotal}`);
+  const cand = db.prepare('SELECT count(*) c FROM merge_candidates').get().c;
+  put.run(period, 'merge_candidates', cand, '自動統合せず要確認');
   put.run(period, 'facilities.total', total, null);
   put.run(period, 'services.total', svcTotal, null);
   db.exec('COMMIT');

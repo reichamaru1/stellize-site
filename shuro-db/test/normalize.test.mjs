@@ -91,3 +91,23 @@ test('URL はスキームを補い、不正なものは null にする', () => {
   assert.equal(normalizeUrl(''), null);
   assert.equal(normalizeUrl('なし'), null);
 });
+
+/* --- 施設同一性キーの設計判断を固定するテスト ---
+   実データ（202509→202603）での検証にもとづき、住所を同一性キーに含めない。
+   建物名・階数・部屋番号が頻繁に変わり、同一施設が別レコードに分裂するため。 */
+test('住所の建物名・階数の違いは施設の同一性を変えない', () => {
+  const a = normalizeText('ワークトピアあすか三笠');
+  const b = normalizeText('ワークトピアあすか三笠');
+  assert.equal(a, b);
+  // 同一施設で階数だけ違う住所は、正規化しても一致しない（＝キーに含めてはいけない）
+  const x = normalizeAddress('北海道札幌市南区澄川４条２丁目４番１２号澄川８８ビル２階');
+  const y = normalizeAddress('北海道札幌市南区澄川４条２丁目４番１２号澄川８８ビル３階');
+  assert.notEqual(x, y);
+});
+
+test('全角・半角の違いしかない住所は正規化で一致する', () => {
+  assert.equal(
+    normalizeAddress('北海道三笠市幾春別栗丘町１６番４'),
+    normalizeAddress('北海道三笠市幾春別栗丘町16番4'),
+  );
+});
