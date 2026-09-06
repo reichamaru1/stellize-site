@@ -3009,10 +3009,14 @@ body { padding-top: var(--header-h); }
     text-shadow: 0 0 34px rgba(174, 159, 196, 0.55);
 }
 .stats-section .stat-suffix { color: rgba(255, 255, 255, 0.8); }
+/* 「集計中…」チップ：素の指定は淡い塗り(#F8F5FF)のピル型なので、
+   濃色セクションでは文字が背景に埋もれる。金の縁取りに置き換える */
 .stats-section .stat-tally-note {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
+    color: var(--color-gold-light);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(230, 211, 168, 0.42);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
 }
 
 /* ---- ヘッダーロゴ（画像差し替え） ----
