@@ -105,7 +105,9 @@ onScrollHeader();
 // 安全策：Observerが発火しない環境でも、画面内の要素は必ず表示する。
 // ヒーロー等のファーストビューが opacity:0 のまま消えるのを防ぐ。
 // ================================
-const reveals = document.querySelectorAll(".reveal, .fade-in, .stagger");
+const reveals = document.querySelectorAll(
+  ".reveal, .fade-in, .stagger, .reveal-left, .reveal-right, .reveal-scale"
+);
 const revealNow = (el) => el.classList.add("is-in");
 
 if (REDUCED_MOTION || !("IntersectionObserver" in window)) {

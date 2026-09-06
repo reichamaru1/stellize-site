@@ -123,14 +123,21 @@
     </div>
   </header>
 
-  <!-- ヒーロー（画像の左余白にテキストをオーバーレイ） -->
-  <section class="hero hero--overlay">
+  <!-- ヒーロー（全画面／画像の左余白にテキストをオーバーレイ）
+       h1は行ごとに .hero-line で包み、1行ずつ時間差で立ち上げる -->
+  <section class="hero hero--overlay hero--full">
     <div class="hero-banner">
       <img src="assets/images/hero.jpg" alt="福祉施設のアトリエで、パソコンやスマホを使い穏やかにSNS発信や制作に取り組む人々" class="hero-bg" width="1821" height="864">
       <span class="hero-scrim" aria-hidden="true"></span>
+      <!-- 背景で緩やかに漂う光のオーブ（装飾） -->
+      <span class="hero-orbs" aria-hidden="true">
+        <span class="orb orb-1"></span>
+        <span class="orb orb-2"></span>
+        <span class="orb orb-3"></span>
+      </span>
       <div class="container">
         <div class="hero-text">
-          <h1>価値を咲かせ、<br><span>共に生きる。</span></h1>
+          <h1><span class="hero-line">価値を咲かせ、</span><span class="hero-line"><span>共に生きる。</span></span></h1>
           <p>社会に貢献したい。自分らしく働きたい。<br>その想いを実現する舞台を、Stellizeはつくります。</p>
           <div class="hero-buttons">
             <a href="#business" class="btn btn-primary">事業を見る</a>
@@ -138,6 +145,10 @@
           </div>
         </div>
       </div>
+      <a href="#business" class="hero-scroll" aria-label="事業紹介へスクロール">
+        <span class="hero-scroll-label">Scroll</span>
+        <span class="hero-scroll-line" aria-hidden="true"></span>
+      </a>
     </div>
   </section>
 
@@ -226,7 +237,7 @@
             <h3>すべての講座・研修の土台にある「選択理論心理学」</h3>
             <p class="choice-theory-lead">Stellizeが提供するすべての講座・企業研修は、<br>選択理論心理学を土台にしています。</p>
 
-            <div class="choice-theory-box hover-float">
+            <div class="choice-theory-box hover-float reveal-scale">
               <h4>選択理論心理学とは？</h4>
               <p>選択理論心理学は、アメリカの精神科医ウィリアム・グラッサー博士が提唱した心理学です。<strong>「人間のすべての行動は、自分が選択している」</strong>という考え方を軸に、外部からのコントロールではなく、<strong>内発的な動機</strong>を大切にします。</p>
             </div>
@@ -252,11 +263,11 @@
           <div class="story reveal">
             <h3>なぜ、この事業を？</h3>
             <div class="story-grid">
-              <div class="founder-info hover-float">
+              <div class="founder-info hover-float reveal-left">
                 <img src="assets/images/r90D74yJ.jpeg" alt="Stellize代表 菊野玲" class="founder-image" loading="lazy" decoding="async" width="684" height="1024">
                 <p class="founder-name">Stellize代表　菊野玲</p>
               </div>
-              <div class="story-body">
+              <div class="story-body reveal-right">
                 <p class="story-text">フリーランス時代、仕事ができなくなった私を救ってくれたのは、クライアントからの温かい一言でした。</p>
                 <p class="story-highlight">「誰かの役に立てている」という実感が、人生を前に進めてくれる。</p>
                 <p class="story-text">就労支援の現場でも同じです。<br>力がないのではなく、「力を発揮できる場」がないだけ。</p>
@@ -272,7 +283,7 @@
 
   <!-- 実績数字（フェーズ2-11-2：値はmain.jsのSTELLIZE_STATSで一元管理。
        事業資料の完成後、実データに差し替えるとCountUpアニメーションで表示される -->
-  <section id="results" class="section stats-section">
+  <section id="results" class="section stats-section sec-diag" style="--diag-from:#FFFFFF;">
     <div class="container">
       <p class="label reveal">Our Results</p>
       <h2 class="reveal">数字で見るStellize</h2>
@@ -282,7 +293,7 @@
   </section>
 
   <!-- 受講者・導入施設の声（フェーズ2-11-2：main.jsのSTELLIZE_VOICESで一元管理） -->
-  <section id="voices" class="section voices-section">
+  <section id="voices" class="section voices-section sec-diag" style="--diag-from:var(--color-ink);">
     <div class="container">
       <p class="label reveal">Voices</p>
       <h2 class="reveal">受講者・導入施設の声</h2>
@@ -380,7 +391,7 @@
   <!-- CTA -->
   <!-- CTA 3階層（フェーズ4-17）
        ①資料DL ②無料相談 ③紹介。資料PDF・Calendly URLは確定後に差し替え -->
-  <section id="contact" class="section cta-section">
+  <section id="contact" class="section cta-section sec-diag" style="--diag-from:#FFFFFF;">
     <div class="container">
       <h2 class="reveal">Stellizeが気になった方へ</h2>
       <p class="reveal delay-1">まずは知りたい方も、相談したい方も。<br>あなたのペースに合わせた入り口をご用意しました。</p>

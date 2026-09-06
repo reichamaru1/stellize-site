@@ -25,6 +25,13 @@
     --radius-md: 14px;
     --shadow-sm: 0 6px 25px rgba(110, 90, 100, 0.08);
     --shadow-md: 0 12px 40px rgba(110, 90, 100, 0.12);
+
+    /* ロゴ由来のディープネイビー。淡い紫だけだと締まらないため、
+       見出し・濃色セクション・ボタンのアクセントとして全体を引き締める役 */
+    --color-ink: #1F2A54;
+    --color-ink-deep: #151D3B;
+    --color-ink-soft: #2E3A66;
+    --shadow-lg: 0 24px 70px rgba(21, 29, 59, 0.18);
 }
 
 html {
@@ -2368,7 +2375,8 @@ body {
 }
 
 /* ヘッダーがfixedになるぶん上が被らないように */
-body { padding-top: 86px; }
+:root { --header-h: 86px; }
+body { padding-top: var(--header-h); }
 
 /* ===============================
   ② カード：ホバーで浮かせる
@@ -2663,4 +2671,340 @@ body { padding-top: 86px; }
     transition: none !important;
     animation: none !important;
   }
+}
+
+
+/* ============================================================
+   デザイン刷新（派手化）：ヒーロー全画面化・濃色セクション・
+   スクロール演出の多様化・カードの光沢ホバー
+   ロゴ由来の --color-ink（ディープネイビー）で全体を引き締める
+   ============================================================ */
+
+/* ---- ヒーロー：全画面 ---- */
+.hero--full .hero-banner {
+    /* body の padding-top（ヘッダー分）を差し引かないと、画面下に
+       ヘッダー高さぶんはみ出して「1画面に収まらない」状態になる */
+    min-height: calc(100vh - var(--header-h));
+    min-height: calc(100svh - var(--header-h)); /* iOS のアドレスバー分を考慮 */
+}
+
+/* 画像をゆっくり寄っていく（Ken Burns）。人物は右寄りなので原点も右に置く */
+.hero--full .hero-bg {
+    transform-origin: 72% 50%;
+    animation: heroKenBurns 26s ease-in-out infinite alternate;
+    will-change: transform;
+}
+@keyframes heroKenBurns {
+    from { transform: scale(1.03); }
+    to   { transform: scale(1.13); }
+}
+
+/* スクリムを二層に。左のクリームで可読性を確保しつつ、
+   下端にネイビーの陰を落として画面を締める */
+/* 下端のネイビーの陰影のみ。左側の可読性はベースのスクリムが担うので、
+   ここでクリームを重ねると写真全体が乳白色に霞む */
+.hero--full .hero-scrim::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(21, 29, 59, 0.34) 0%, rgba(21, 29, 59, 0.06) 26%, rgba(21, 29, 59, 0) 44%);
+}
+
+/* ---- 背景で漂う光のオーブ ---- */
+.hero-orbs {
+    position: absolute;
+    inset: 0;
+    /* スクリム(z-index:1)より下に置く。前面に出すと画面全体が霞んで
+       見出しのコントラストが落ちるため、必ず画像とスクリムの間に挟む */
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.hero-orbs .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.55;
+    will-change: transform;
+}
+.hero-orbs .orb-1 {
+    width: 460px; height: 460px; left: -10%; top: 4%;
+    background: radial-gradient(circle, rgba(174, 159, 196, 0.55) 0%, rgba(174, 159, 196, 0) 70%);
+    animation: orbFloat1 20s ease-in-out infinite;
+}
+.hero-orbs .orb-2 {
+    width: 380px; height: 380px; left: 22%; bottom: -12%;
+    background: radial-gradient(circle, rgba(232, 191, 200, 0.5) 0%, rgba(232, 191, 200, 0) 70%);
+    animation: orbFloat2 26s ease-in-out infinite;
+}
+.hero-orbs .orb-3 {
+    width: 300px; height: 300px; left: 40%; top: 10%;
+    background: radial-gradient(circle, rgba(92, 124, 111, 0.3) 0%, rgba(92, 124, 111, 0) 70%);
+    animation: orbFloat3 30s ease-in-out infinite;
+}
+@keyframes orbFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(60px, 40px) scale(1.12); }
+}
+@keyframes orbFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(-50px, -60px) scale(1.18); }
+}
+@keyframes orbFloat3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(40px, 50px) scale(0.9); }
+}
+
+/* ---- 見出しを1行ずつ立ち上げる ---- */
+.hero--full .hero-text > h1 { animation: none; }
+.hero--full .hero-line {
+    display: block;
+    animation: heroReveal 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero--full .hero-line:nth-child(1) { animation-delay: 0.15s; }
+.hero--full .hero-line:nth-child(2) { animation-delay: 0.38s; }
+.hero--full .hero-text > p            { animation-delay: 0.62s; }
+.hero--full .hero-text > .hero-buttons{ animation-delay: 0.80s; }
+
+/* ---- スクロール誘導 ---- */
+.hero-scroll {
+    position: absolute;
+    left: 50%; bottom: 30px;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    text-decoration: none;
+    color: var(--color-ink);
+    font-size: 0.68rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    font-weight: 700;
+    /* heroReveal は transform を translateY だけに上書きしてしまい
+       translateX(-50%) の中央寄せが外れるため、専用のkeyframesを使う */
+    animation: heroScrollReveal 0.9s ease 1.05s both;
+}
+@keyframes heroScrollReveal {
+    from { opacity: 0; transform: translateX(-50%) translateY(18px); }
+    to   { opacity: 1; transform: translateX(-50%); }
+}
+.hero-scroll-line {
+    width: 1px; height: 56px;
+    background: rgba(31, 42, 84, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.hero-scroll-line::after {
+    content: '';
+    position: absolute;
+    left: 0; top: -56px;
+    width: 1px; height: 56px;
+    background: linear-gradient(to bottom, rgba(31, 42, 84, 0), var(--color-ink));
+    animation: scrollTrail 2.1s ease-in-out infinite;
+}
+@keyframes scrollTrail {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(112px); }
+}
+
+@media (max-width: 768px) {
+    /* 全画面だとスマホで見出しが窮屈になるため少し余裕を持たせる */
+    .hero--full .hero-banner { align-items: center; padding-top: 0; }
+    .hero-scroll { bottom: 18px; }
+    .hero-orbs .orb-1 { width: 300px; height: 300px; }
+    .hero-orbs .orb-2 { width: 260px; height: 260px; }
+    .hero-orbs .orb-3 { display: none; }
+}
+
+/* ---- セクション境界：斜めの切り替え ----
+   --diag-from に「ひとつ前のセクションの背景色」を指定して使う */
+.sec-diag { position: relative; }
+.sec-diag::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: clamp(38px, 5.5vw, 86px);
+    background: var(--diag-from, #FFFFFF);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    z-index: 1;
+}
+.sec-diag > .container { position: relative; z-index: 2; }
+
+/* ---- 数字セクション：濃色で大きく見せる ---- */
+.stats-section {
+    background: linear-gradient(140deg, var(--color-ink-deep) 0%, var(--color-ink) 55%, #35306B 100%);
+    position: relative;
+    overflow: hidden;
+}
+/* 濃色面に淡い光を1枚重ねて、のっぺりさせない */
+.stats-section::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(60% 70% at 15% 20%, rgba(174, 159, 196, 0.3) 0%, rgba(174, 159, 196, 0) 65%),
+        radial-gradient(50% 60% at 85% 80%, rgba(232, 191, 200, 0.22) 0%, rgba(232, 191, 200, 0) 65%);
+    pointer-events: none;
+}
+.stats-section .label { color: var(--color-accent); }
+.stats-section h2,
+.stats-section .note { color: #FFFFFF; }
+.stats-section .note { opacity: 0.65; }
+
+.stats-section .stat-item {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(6px);
+    box-shadow: none;
+    transition: transform 0.35s ease, background 0.35s ease;
+}
+.stats-section .stat-item:hover {
+    transform: translateY(-6px);
+    background: rgba(255, 255, 255, 0.12);
+}
+.stats-section .stat-value {
+    font-size: clamp(2.8rem, 6vw, 4.4rem);
+    color: #FFFFFF;
+}
+.stats-section .stat-num--pending {
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    color: rgba(255, 255, 255, 0.55);
+}
+.stats-section .stat-label {
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 0.04em;
+}
+
+/* ---- カード：グラデーション枠 + 光沢スイープ ---- */
+.card { position: relative; }
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent) 45%, var(--color-ink));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 3;
+}
+.card:hover::before { opacity: 1; }
+
+/* 斜めに走る光沢。overflow:hidden の内側を横切る */
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 45%; height: 100%;
+    background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-18deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+.card:hover::after {
+    animation: cardSheen 0.85s ease-out;
+}
+@keyframes cardSheen {
+    from { left: -60%; opacity: 1; }
+    to   { left: 120%; opacity: 0; }
+}
+.card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* ---- スクロール演出のバリエーション ---- */
+.reveal-left, .reveal-right, .reveal-scale {
+    opacity: 0;
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-left  { transform: translateX(-46px); }
+.reveal-right { transform: translateX(46px); }
+.reveal-scale { transform: scale(0.92); }
+.reveal-left.is-in,
+.reveal-right.is-in,
+.reveal-scale.is-in {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero--full .hero-bg,
+    .hero-orbs .orb,
+    .hero-scroll-line::after { animation: none; }
+    .hero--full .hero-line { animation: none; }
+    /* 中央寄せを保ったまま静止させる */
+    .hero-scroll { animation: none; opacity: 1; transform: translateX(-50%); }
+    .card:hover::after { animation: none; }
+    .reveal-left, .reveal-right, .reveal-scale {
+        opacity: 1; transform: none; transition: none;
+    }
+}
+
+/* ---- 見出し・ラベルをロゴのネイビーに寄せて締める ---- */
+.section h2 { color: var(--color-ink); }
+.label {
+    color: var(--color-primary);
+    font-weight: 700;
+    opacity: 0.9;
+}
+/* 濃色セクション側は上のルールを打ち消す（既に白指定があるため順序で解決） */
+.stats-section h2 { color: #FFFFFF; }
+.stats-section .label { color: var(--color-accent); opacity: 1; }
+
+/* セカンダリボタンをネイビー主体にして、主従のコントラストを付ける */
+.btn-secondary {
+    color: var(--color-ink);
+    border-color: var(--color-ink);
+}
+.btn-secondary:hover {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: #FFFFFF;
+    box-shadow: 0 10px 28px rgba(31, 42, 84, 0.28);
+}
+
+/* ---- ヒーロー見出しのコントラストを上げる ----
+   淡い紫だけだと画像に負けるため、1行目をネイビーで置いて土台を作り、
+   2行目のグラデーションを引き立てる */
+.hero--full .hero-text h1 {
+    color: var(--color-ink);
+    font-weight: 600;
+    text-shadow: 0 1px 20px rgba(250, 247, 242, 0.85);
+}
+.hero--full .hero-text h1 span {
+    /* グラデーション文字は text-shadow が乗らないので個別に解除 */
+    text-shadow: none;
+}
+.hero--full .hero-text p {
+    color: var(--color-ink-soft);
+    font-weight: 500;
+}
+/* 左側スクリムを少し濃くして、文字の下地を確実に確保 */
+.hero--full .hero-scrim {
+    background: linear-gradient(
+        90deg,
+        rgba(250, 247, 242, 0.97) 0%,
+        rgba(250, 247, 242, 0.9) 30%,
+        rgba(250, 247, 242, 0.12) 54%,
+        rgba(250, 247, 242, 0) 66%
+    );
+}
+
+/* ---- 濃色セクション上の「集計中」ローリング数字 ----
+   淡い紫のままだとネイビーに沈むため、明度を上げて主役にする */
+.stats-section .stat-num--tally {
+    color: #EDE7F7;
+    text-shadow: 0 0 34px rgba(174, 159, 196, 0.55);
+}
+.stats-section .stat-suffix { color: rgba(255, 255, 255, 0.8); }
+.stats-section .stat-tally-note {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
 }
