@@ -7,6 +7,8 @@
   "engines": { "node": ">=22.5.0" },
   "scripts": {
     "fetch": "node --no-warnings src/ingest/fetch.mjs",
+    "fetch:extra": "node --no-warnings src/ingest/extra/fetch.mjs",
+    "fetch:all": "npm run fetch -- --all && npm run fetch:extra",
     "build": "node --no-warnings src/db/build.mjs",
     "start": "node --no-warnings src/server.mjs",
     "test": "node --no-warnings --test test/*.test.mjs"

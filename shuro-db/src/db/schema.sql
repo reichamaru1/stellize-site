@@ -103,3 +103,69 @@ CREATE TABLE IF NOT EXISTS quality_metrics (
   detail   TEXT,
   PRIMARY KEY (period, metric)
 );
+
+-- ============================================================
+-- 工賃（賃金）実績
+-- 国は事業所別に一括公表しておらず、都道府県ごとに様式が異なる。
+-- 事業所番号を持たないソースが多いため、突合方法と確度を必ず記録する。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS wages (
+  id            INTEGER PRIMARY KEY,
+  facility_key  TEXT REFERENCES facilities(facility_key),  -- 突合できなければ NULL
+  prefecture    TEXT NOT NULL,
+  fiscal_year   INTEGER NOT NULL,
+  service_type  TEXT NOT NULL,
+  facility_name TEXT NOT NULL,      -- ソース側の表記（原文）
+  corp_name     TEXT,
+  corp_no       TEXT,
+  office_no     TEXT,
+  city          TEXT,
+  capacity      INTEGER,
+  users         INTEGER,            -- 対象者・利用者延人数
+  total_paid    INTEGER,            -- 工賃支払総額（年額）
+  avg_monthly   INTEGER NOT NULL,   -- 平均工賃月額
+  match_method  TEXT,               -- office_no | corp_no+name | pref+name | pref+city+name | unmatched
+  source_url    TEXT NOT NULL,
+  source_page   TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_wage_fac  ON wages(facility_key);
+CREATE INDEX IF NOT EXISTS idx_wage_pref ON wages(prefecture, fiscal_year);
+CREATE INDEX IF NOT EXISTS idx_wage_avg  ON wages(avg_monthly);
+
+-- ============================================================
+-- 生産活動
+-- 出所は published（公表データ由来）のみ。推測では入れない。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS activities (
+  id            INTEGER PRIMARY KEY,
+  facility_key  TEXT REFERENCES facilities(facility_key),
+  prefecture    TEXT NOT NULL,
+  facility_name TEXT NOT NULL,
+  category      TEXT NOT NULL,      -- 統一分類
+  raw_label     TEXT NOT NULL,      -- ソース側の原表記
+  detail        TEXT,               -- 製品・サービスの内容（東京都のみ）
+  origin        TEXT NOT NULL,      -- 'published'
+  match_method  TEXT,
+  source_name   TEXT,
+  source_url    TEXT NOT NULL,
+  source_page   TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_act_fac  ON activities(facility_key);
+CREATE INDEX IF NOT EXISTS idx_act_cat  ON activities(category);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_act_uniq ON activities(facility_key, category, source_url)
+  WHERE facility_key IS NOT NULL;
+
+-- 取り込んだ工賃・生産活動ソースの記録（どの県のいつのデータが入っているか）
+CREATE TABLE IF NOT EXISTS extra_sources (
+  id          INTEGER PRIMARY KEY,
+  kind        TEXT NOT NULL,        -- 'wage' | 'activity'
+  prefecture  TEXT NOT NULL,
+  fiscal_year INTEGER,
+  service_type TEXT,
+  format      TEXT NOT NULL,
+  rows        INTEGER NOT NULL,
+  matched     INTEGER NOT NULL,
+  source_url  TEXT NOT NULL,
+  source_page TEXT,
+  note        TEXT
+);

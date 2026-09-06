@@ -10,13 +10,24 @@ const fmt = (v, fallback = '未公表') => (v == null || v === '' ? fallback : v
 
 const state = { page: 1, meta: null, items: [], total: 0, pages: 0, view: 'list' };
 
+/* 工賃・生産活動をこの事業所に結び付けた根拠。利用者が確からしさを判断できるように出す。 */
+const MATCH_LABEL = {
+  'office_no': '事業所番号が一致',
+  'office_no+name': '事業所番号と事業所名が一致',
+  'corp_no+name': '法人番号と事業所名が一致',
+  'pref+city+name': '都道府県・市区町村・事業所名が一致',
+  'pref+name': '都道府県と事業所名が一致',
+  'pref+name+corp': '都道府県・事業所名・法人名が一致',
+};
+
 /* ---------- クエリ組み立て ---------- */
 function currentParams() {
   const p = new URLSearchParams();
   const q = $('#q').value.trim();
   if (q) p.set('q', q);
   for (const cb of document.querySelectorAll('#service-types input:checked')) p.append('service', cb.value);
-  for (const id of ['pref', 'city', 'capacity_min', 'capacity_max', 'status', 'sort']) {
+  for (const cb of document.querySelectorAll('#activity-cats input:checked')) p.append('activity', cb.value);
+  for (const id of ['pref', 'city', 'capacity_min', 'capacity_max', 'wage_min', 'wage_max', 'status', 'sort']) {
     const v = $('#' + id).value;
     if (v) p.set(id, v);
   }
@@ -32,11 +43,13 @@ function syncUrl(p) {
 function restoreFromUrl() {
   const p = new URLSearchParams(location.search);
   $('#q').value = p.get('q') ?? '';
-  for (const id of ['pref', 'capacity_min', 'capacity_max', 'status', 'sort']) {
+  for (const id of ['pref', 'capacity_min', 'capacity_max', 'wage_min', 'wage_max', 'status', 'sort']) {
     if (p.get(id)) $('#' + id).value = p.get(id);
   }
   const services = new Set(p.getAll('service'));
   for (const cb of document.querySelectorAll('#service-types input')) cb.checked = services.has(cb.value);
+  const acts = new Set(p.getAll('activity'));
+  for (const cb of document.querySelectorAll('#activity-cats input')) cb.checked = acts.has(cb.value);
   return p;
 }
 
@@ -60,7 +73,57 @@ async function loadMeta() {
   $('#pref').append(...m.prefectures.map((p) =>
     el('option', { value: p.prefecture, textContent: `${p.prefecture}（${p.c.toLocaleString()}）` })));
 
+  const acts = $('#activity-cats');
+  acts.replaceChildren(...m.activityCategories.map((a) => {
+    const id = `act-${a.category}`;
+    return el('label', { htmlFor: id }, [
+      el('input', { type: 'checkbox', id, value: a.category, name: 'activity' }),
+      el('span', {}, [a.category, ' ', el('span', { className: 'n', textContent: `(${a.c.toLocaleString()})` })]),
+    ]);
+  }));
+
+  // どの都道府県のデータが入っているかを、隠さず明示する
+  const actPrefs = [...new Set(m.extraSources.filter((s) => s.kind === 'activity' && s.matched > 0).map((s) => s.prefecture))];
+  const wagePrefs = [...new Set(m.extraSources.filter((s) => s.kind === 'wage' && s.matched > 0).map((s) => s.prefecture))];
+  // 工賃実績に「主な作業内容」が含まれる県も生産活動のソースになる
+  const actFromWage = [...new Set(m.extraSources.filter((s) => s.kind === 'wage' && s.prefecture === '北海道').map((s) => s.prefecture))];
+  const allActPrefs = [...new Set([...actPrefs, ...actFromWage])];
+  $('#activity-coverage').textContent = allActPrefs.length ? allActPrefs.join('・') : '（未取得）';
+  $('#wage-coverage').textContent = wagePrefs.length
+    ? `工賃を取り込んでいるのは ${wagePrefs.join('・')} です。年度は都道府県ごとに異なります。指定すると、それ以外の事業所は結果から外れます。`
+    : '工賃データは未取得です。';
+
+  renderExtraSources(m.extraSources);
   renderQuality(m.quality);
+}
+
+function renderExtraSources(rows) {
+  const box = $('#extra-source-list');
+  if (!box) return;
+  if (!rows?.length) { box.replaceChildren(el('p', { className: 'hint', textContent: '工賃・生産活動のソースは未取得です。' })); return; }
+  const table = el('table', { className: 'q-table' }, [
+    el('thead', {}, el('tr', {}, [
+      el('th', { textContent: '種類' }), el('th', { textContent: '都道府県' }), el('th', { textContent: '年度' }),
+      el('th', { textContent: '対象' }), el('th', { textContent: '形式' }),
+      el('th', { textContent: '件数' }), el('th', { textContent: '突合' }), el('th', { textContent: '出典' }),
+    ])),
+    el('tbody', {}, rows.map((r) => el('tr', {}, [
+      el('td', { textContent: r.kind === 'wage' ? '工賃' : '生産活動' }),
+      el('td', { textContent: r.prefecture }),
+      el('td', { textContent: r.fiscal_year ? `${r.fiscal_year}年度` : '—' }),
+      el('td', { textContent: r.service_type ?? 'A型・B型' }),
+      el('td', { textContent: r.format.toUpperCase() }),
+      el('td', { textContent: r.rows.toLocaleString() }),
+      el('td', { textContent: r.rows ? `${r.matched.toLocaleString()}（${Math.round((r.matched / r.rows) * 100)}%）` : '—' }),
+      el('td', {}, el('a', { href: r.source_page ?? r.source_url, rel: 'noopener', target: '_blank', textContent: '公表元' })),
+    ]))),
+  ]);
+  const note = el('p', { className: 'hint' }, [
+    '「突合」は、この一覧の事業所と結び付けられた件数です。事業所番号を持たない資料が多く、',
+    '事業所名と所在地で照合しているため、同名の事業所が複数ある場合など、結び付けられないものが残ります。',
+    '誤って別の事業所に結び付けるより、結び付けない方を選んでいます。',
+  ]);
+  box.replaceChildren(table, note);
 }
 
 function renderQuality(rows) {
@@ -122,9 +185,20 @@ function statusBadge(f) {
   return el('span', { className: 'badge', textContent: `最新データに掲載なし（${f.last_seen.slice(0, 4)}年${Number(f.last_seen.slice(4))}月が最後）` });
 }
 
+function wageBadge(f) {
+  if (!f.wage) return null;
+  return el('p', { className: 'wage' }, [
+    el('span', { className: 'wage-amount', textContent: `平均工賃 月額 ${f.wage.avg_monthly.toLocaleString()}円` }),
+    el('span', { className: 'wage-year', textContent: `（${f.wage.fiscal_year}年度・${f.wage.prefecture}公表）` }),
+  ]);
+}
+
 function card(f) {
   const services = el('ul', { className: 'tags' }, f.services.map((s) =>
     el('li', { className: 'tag', textContent: s.capacity == null ? s.service_type : `${s.service_type}・定員${s.capacity}` })));
+  const activities = f.activities?.length
+    ? el('ul', { className: 'tags' }, f.activities.map((a) => el('li', { className: 'tag tag-act', textContent: a })))
+    : null;
 
   const dl = el('dl', {}, [
     el('dt', { textContent: '所在地' }), el('dd', { textContent: f.address_full }),
@@ -140,7 +214,7 @@ function card(f) {
     statusBadge(f),
     el('h3', {}, title),
     f.name_kana ? el('p', { className: 'kana', textContent: f.name_kana }) : null,
-    services, dl,
+    services, activities, wageBadge(f), dl,
   ]);
 }
 
@@ -212,6 +286,51 @@ async function openDetail(key) {
       ])),
       s.hours_note ? el('p', { className: 'hint', textContent: `備考：${s.hours_note}` }) : null,
     );
+  }
+
+  // --- 生産活動 ---
+  if (f.activities?.length) {
+    const byCat = new Map();
+    for (const a of f.activities) {
+      if (!byCat.has(a.category)) byCat.set(a.category, { details: new Set(), src: a });
+      if (a.detail) byCat.get(a.category).details.add(a.detail);
+    }
+    body.append(el('h3', { textContent: '生産活動' }));
+    body.append(el('ul', { className: 'tags' }, [...byCat.keys()].map((c) =>
+      el('li', { className: 'tag tag-act', textContent: c }))));
+    const withDetail = [...byCat.entries()].filter(([, v]) => v.details.size);
+    if (withDetail.length) {
+      body.append(el('dl', {}, withDetail.flatMap(([c, v]) => [
+        el('dt', { textContent: c }),
+        el('dd', { textContent: [...v.details].join('／') }),
+      ])));
+    }
+    const src = f.activities[0];
+    body.append(el('p', { className: 'hint' }, [
+      `出典：${src.source_name ?? '公表資料'}　`,
+      el('a', { href: src.source_page ?? src.source_url, rel: 'noopener', target: '_blank', textContent: '公表元を開く' }),
+    ]));
+  }
+
+  // --- 工賃 ---
+  if (f.wages?.length) {
+    body.append(el('h3', { textContent: '平均工賃（月額）' }));
+    body.append(el('div', { className: 'table-scroll' }, el('table', {}, [
+      el('thead', {}, el('tr', {}, ['年度', 'サービス', '平均工賃月額', '支払総額', '対象延人数'].map((h) => el('th', { textContent: h })))),
+      el('tbody', {}, f.wages.map((w) => el('tr', {}, [
+        el('td', { textContent: `${w.fiscal_year}年度` }),
+        el('td', { textContent: w.service_type }),
+        el('td', { textContent: `${w.avg_monthly.toLocaleString()}円` }),
+        el('td', { textContent: w.total_paid == null ? '—' : `${w.total_paid.toLocaleString()}円` }),
+        el('td', { textContent: w.users == null ? '—' : `${w.users.toLocaleString()}人` }),
+      ]))),
+    ])));
+    const w0 = f.wages[0];
+    body.append(el('p', { className: 'hint' }, [
+      `出典：${w0.prefecture}の公表資料　`,
+      el('a', { href: w0.source_page ?? w0.source_url, rel: 'noopener', target: '_blank', textContent: '公表元を開く' }),
+      `　／　この事業所との突合方法：${MATCH_LABEL[w0.match_method] ?? w0.match_method}`,
+    ]));
   }
 
   if (f.candidates?.length) {

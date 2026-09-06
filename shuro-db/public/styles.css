@@ -231,3 +231,20 @@ dialog::backdrop { background: rgb(0 0 0 / .5); }
 
 /* 詳細内のリンク集はボタンが並ぶので行頭記号を出さない */
 #detail-body ul { list-style: none; padding: 0; margin: 8px 0 0; }
+
+/* --- 工賃・生産活動 --- */
+.tag-act {
+  background: var(--tag-act-bg, rgba(120, 160, 255, .16));
+  border-color: var(--tag-act-border, rgba(120, 160, 255, .4));
+}
+.wage {
+  margin: 8px 0 0;
+  display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline;
+}
+.wage-amount { font-weight: 700; }
+.wage-year { font-size: .82rem; color: var(--muted); }
+
+/* 表は縦に潰さず、横スクロールさせる（狭い画面で1文字ずつ折り返さないように） */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll table { min-width: max-content; }
+.table-scroll th, .table-scroll td { white-space: nowrap; }

@@ -13,6 +13,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readCsvFromZip } from '../ingest/unzip.mjs';
 import { parseCsvObjects } from '../ingest/csv.mjs';
 import { TARGET_SERVICE_TYPES, WAMNET_INDEX } from '../ingest/sources.mjs';
+import { ingestExtras } from './build-extra.mjs';
 import {
   normalizeText, normalizeCorpName, splitAddress,
   normalizePhone, parseCapacity, parseLatLng, normalizeUrl, PREF_BY_CODE,
@@ -212,6 +213,10 @@ export async function build({ dbPath = DB_PATH, verbose = true } = {}) {
   db.exec('COMMIT');
 
   const candidates = writeMergeCandidates(db);
+
+  log('\n工賃・生産活動の取り込み');
+  const extras = await ingestExtras(db, log);
+
   writeQualityMetrics(db, latest);
 
   const stats = {
@@ -225,6 +230,12 @@ export async function build({ dbPath = DB_PATH, verbose = true } = {}) {
   log(`\n施設 ${stats.facilities}件（稼働 ${stats.active} / 掲載なし ${stats.closed}）`);
   log(`名寄せ候補（自動統合せず要確認）: ${candidates}件`);
   log(`サービス ${stats.services}件`);
+  if (extras.wages || extras.activities) {
+    const wm = db.prepare("SELECT count(*) c FROM wages WHERE facility_key IS NOT NULL").get().c;
+    const am = db.prepare("SELECT count(DISTINCT facility_key) c FROM activities WHERE facility_key IS NOT NULL").get().c;
+    log(`工賃 ${extras.wages}件（うち事業所に紐付いたもの ${wm}件）`);
+    log(`生産活動 ${extras.activities}件（${am}事業所に紐付け）`);
+  }
   if (periods.length > 1) {
     const added = db.prepare(`SELECT count(*) c FROM changes WHERE change='added' AND period=?`).get(latest).c;
     const gone = db.prepare(`SELECT count(*) c FROM changes WHERE change='disappeared' AND period=?`).get(latest).c;

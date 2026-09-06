@@ -144,12 +144,15 @@
     .issue-close b { color: var(--wa-blue); font-size: 1.2rem; }
 
     /* ===== 3. ビジョン（価値が循環するオービット図） ===== */
-    .vision-sec { background: #fff; position: relative; overflow: hidden; }
-    /* 背景のやわらかな光（循環の余韻） */
+    .vision-sec {
+      position: relative; overflow: hidden;
+      /* 四隅に水彩装飾がある画像なので、セクション全体に引き伸ばして角に配置 */
+      background: #fff url("assets/images/wa-vision-bg.jpg") center / 100% 100% no-repeat;
+    }
+    /* 背景の上に白ヴェールを重ね、文字の可読性を確保 */
     .vision-sec::before {
-      content: ""; position: absolute; left: 50%; top: 46%; transform: translate(-50%,-50%);
-      width: min(1100px, 120vw); aspect-ratio: 1/1; border-radius: 50%; pointer-events: none;
-      background: radial-gradient(circle, rgba(18,160,147,.07) 0%, rgba(27,74,158,.05) 45%, transparent 68%);
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,.93) 0%, rgba(255,255,255,.80) 52%, rgba(255,255,255,.45) 100%);
     }
     .vision-sec .container { position: relative; z-index: 1; }
     .vision-copy { max-width: 800px; margin: 0 auto 20px; text-align: center; font-size: 1.08rem; line-height: 2.05; color: var(--wa-muted); }
@@ -169,6 +172,18 @@
       border-radius: 20px; padding: 26px 20px; text-align: center; margin-bottom: 34px;
       position: relative; box-shadow: 0 14px 34px rgba(27,74,158,.24);
     }
+    .orbit-hub { position: relative; overflow: hidden; }
+    .orbit-hub .hub-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; border-radius: inherit; margin: 0; z-index: 0;
+    }
+    /* イラストを活かしつつ、中心の文字を読みやすく */
+    .orbit-hub::before {
+      content: ""; position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(circle, rgba(20,58,125,.90) 0%, rgba(27,74,158,.78) 48%, rgba(18,160,147,.56) 100%);
+      z-index: 1;
+    }
+    .orbit-hub b, .orbit-hub span { position: relative; z-index: 2; }
     .orbit-hub b { display: block; font-size: 1.16rem; letter-spacing: .01em; }
     .orbit-hub span { display: block; font-size: .82rem; line-height: 1.7; color: #DCEFF2; margin-top: 8px; }
     .orbit-hub::after {
@@ -188,10 +203,10 @@
     }
     .orbit-node:last-of-type::after { content: none; }
     .orbit-node .oicon {
-      width: 46px; height: 46px; border-radius: 50%; background: var(--nb, var(--wa-blue-l));
-      display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+      width: 76px; height: 76px; margin: 0 auto 8px;
+      display: flex; align-items: center; justify-content: center;
     }
-    .orbit-node .oicon .icon { width: 1.4em; height: 1.4em; margin: 0; color: var(--nc, var(--wa-blue)); }
+    .orbit-node .oicon img { width: 100%; height: 100%; object-fit: contain; }
     .orbit-node h3 { font-size: 1.06rem; color: var(--nc, var(--wa-blue)); margin-bottom: 6px; }
     .orbit-node .olead { font-size: .8rem; font-weight: 700; color: var(--wa-text); line-height: 1.6; margin-bottom: 6px; }
     .orbit-node p { font-size: .77rem; line-height: 1.7; color: var(--wa-muted); margin: 0; }
@@ -219,6 +234,7 @@
         display: flex; flex-direction: column; align-items: center; justify-content: center;
       }
       .orbit-hub::after { content: none; }
+
       .orbit-node {
         position: absolute; transform: translate(-50%,-50%);
         width: 26%; margin: 0;
@@ -581,42 +597,43 @@
           </svg>
 
           <div class="orbit-hub">
+            <img class="hub-img" src="assets/images/wa-hub.jpg" alt="車いすの若者・タブレットを持つ女性・スタッフ・高齢者が輪になって語り合い、その周りを光のリボンがめぐる水彩イラスト" width="900" height="900" loading="lazy" decoding="async" />
             <b>WelfareAI</b>
             <span>仕事・学び・相談・つながりが<br>めぐり続ける</span>
           </div>
 
         <div class="orbit-node n1">
-          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sprout"/></svg></div>
+          <div class="oicon"><img src="assets/images/wa-icon-support.png" alt="両手で若葉をそっと包み込む水彩イラスト" width="320" height="320" loading="lazy" decoding="async" /></div>
           <h3>支える</h3>
           <p class="olead">利用者の可能性を見つけ、育てる</p>
           <p>一人ひとりの「やってみたい」を大切にし、未来の選択肢を広げます。</p>
         </div>
         <div class="orbit-node n2">
-          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg></div>
+          <div class="oicon"><img src="assets/images/wa-icon-learn.png" alt="開いた本から青葉が舞い上がる水彩イラスト" width="320" height="320" loading="lazy" decoding="async" /></div>
           <h3>学ぶ</h3>
           <p class="olead">スキルと知識をいつでも身につける</p>
           <p>動画やコンテンツで、楽しく学び、成長を後押しします。</p>
         </div>
         <div class="orbit-node n3">
-          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></div>
+          <div class="oicon"><img src="assets/images/wa-icon-ai.png" alt="吹き出しの中で微笑むAIロボットの水彩イラスト" width="320" height="320" loading="lazy" decoding="async" /></div>
           <h3>活用する</h3>
           <p class="olead">AIで相談・支援をもっと身近に</p>
           <p>AIカウンセラーや業務支援で、支援の質と効率を高めます。</p>
         </div>
         <div class="orbit-node n4">
-          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-rocket"/></svg></div>
+          <div class="oicon"><img src="assets/images/wa-icon-spread.png" alt="紙飛行機が街へ向かって飛んでいく水彩イラスト" width="320" height="320" loading="lazy" decoding="async" /></div>
           <h3>広げる</h3>
           <p class="olead">情報や機会を地域と未来へ</p>
           <p>イベントやお知らせを通じて、つながりと挑戦の機会を広げます。</p>
         </div>
         <div class="orbit-node n5">
-          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg></div>
+          <div class="oicon"><img src="assets/images/wa-icon-connect.png" alt="3人の人物が一本の線でつながる水彩イラスト" width="320" height="320" loading="lazy" decoding="async" /></div>
           <h3>つながる</h3>
           <p class="olead">人・地域・企業をつなぐハブに</p>
           <p>多様な主体と連携し、共に支え合う地域社会をつくります。</p>
         </div>
         <div class="orbit-node n6">
-          <div class="oicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chart"/></svg></div>
+          <div class="oicon"><img src="assets/images/wa-icon-create.png" alt="棒グラフから若葉が伸びる水彩イラスト" width="320" height="320" loading="lazy" decoding="async" /></div>
           <h3>生み出す</h3>
           <p class="olead">データとAIで新しい価値を共創</p>
           <p>データを活用し、エビデンスに基づいた新しい価値を生み出します。</p>

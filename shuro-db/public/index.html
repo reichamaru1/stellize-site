@@ -37,6 +37,28 @@
       <div id="service-types" class="checks"></div>
     </fieldset>
 
+    <fieldset class="field">
+      <legend>生産活動</legend>
+      <div id="activity-cats" class="checks"></div>
+      <p class="hint">
+        生産活動は全国一括で公開されていません。現在データがあるのは
+        <strong id="activity-coverage">一部の都道府県</strong>のみで、
+        条件に指定すると、それ以外の事業所は結果から外れます。
+      </p>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>平均工賃（月額）</legend>
+      <div class="range">
+        <label class="sr-only" for="wage_min">平均工賃の下限（円）</label>
+        <input type="number" id="wage_min" name="wage_min" min="0" step="1000" placeholder="下限（円）" inputmode="numeric">
+        <span aria-hidden="true">〜</span>
+        <label class="sr-only" for="wage_max">平均工賃の上限（円）</label>
+        <input type="number" id="wage_max" name="wage_max" min="0" step="1000" placeholder="上限（円）" inputmode="numeric">
+      </div>
+      <p class="hint" id="wage-coverage">工賃は都道府県ごとの公表資料から取り込んでいます。</p>
+    </fieldset>
+
     <div class="field">
       <label for="pref">都道府県</label>
       <select id="pref" name="pref"><option value="">すべて</option></select>
@@ -74,6 +96,8 @@
         <option value="pref">所在地順</option>
         <option value="name">事業所名順</option>
         <option value="newest">新しく掲載された順</option>
+        <option value="wage_desc">平均工賃が高い順</option>
+        <option value="wage_asc">平均工賃が低い順</option>
       </select>
     </div>
 
@@ -129,10 +153,18 @@
       利用前に必ず各事業所へ直接ご確認ください。
     </p>
     <p class="disclaimer">
+      工賃と生産活動は、この一次データには含まれていません。都道府県が別に公表している
+      工賃実績資料と、東京都の物品・役務リストから取り込んでいます（<a href="#extra-sources">取り込み済みのソース</a>）。
+      掲載のない都道府県の事業所には工賃・生産活動は表示されません。
       「最新データに掲載なし」は、過去のデータに掲載され最新データに掲載がないことを示すもので、
       実際の廃止・休止を確認したものではありません。事業所番号の変更・改称・移転でもこの状態になります。
       同一施設の可能性がある記録は、詳細画面に候補として表示します（自動統合はしていません）。
     </p>
+    <details id="extra-sources">
+      <summary>工賃・生産活動の取り込み状況を見る</summary>
+      <div id="extra-source-list"></div>
+    </details>
+
     <details id="quality">
       <summary>データの欠損状況を見る</summary>
       <div id="quality-body"></div>
