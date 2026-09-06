@@ -175,12 +175,39 @@ async function loadCities(pref, preselect) {
 }
 
 /* ---------- 検索 ---------- */
+/** 現在地を設定して画面に反映する */
+function setNear(pos, label) {
+  state.near = pos;
+  $('#clear-location').hidden = false;
+  $('#near-status').textContent = `${label}から ${$('#radius_km').value}km 以内で絞り込んでいます。`;
+}
+
+/**
+ * 場所の指定は「現在地から」と「地名・都道府県・市区町村」のどちらか一方だけにする。
+ * 両方が同時に効くと、東京駅5km圏かつ横浜市中区、のように必ず0件になるため。
+ */
+function useAreaFilter() {
+  if (state.near) { clearNear(); $('#near-status').textContent = '地名で絞り込んだため、現在地からの絞り込みを解除しました。'; }
+}
+function useNearFilter() {
+  const had = $('#pref').value || $('#city').value || $('#place').value;
+  $('#place').value = '';
+  $('#pref').value = '';
+  loadCities('');
+  return Boolean(had);
+}
+
+function clearNear() {
+  state.near = null;
+  $('#clear-location').hidden = true;
+  $('#near-status').textContent = '';
+}
+
 async function runSearch({ resetPage = true, focus = false } = {}) {
   if (resetPage) state.page = 1;
   const p = currentParams();
   syncUrl(p);
   p.set('page', state.page);
-  p.set('per', '20');
 
   $('#count').textContent = '検索しています…';
   const data = await (await fetch(`/api/facilities?${p}`)).json();
@@ -234,7 +261,9 @@ function renderResults() {
   const { total, items, page, pages } = state;
   $('#count').replaceChildren(
     total === 0 ? '条件に合う事業所は見つかりませんでした。' : el('span', {}, [
-      el('span', { className: 'num', textContent: total.toLocaleString() }), ` 件中 ${(page - 1) * 20 + 1}〜${Math.min(page * 20, total)} 件を表示`,
+      el('span', { className: 'num', textContent: total.toLocaleString() }),
+      ` 件中 ${((page - 1) * state.per + 1).toLocaleString()}〜${Math.min(page * state.per, total).toLocaleString()} 件を表示`,
+      state.near ? '（現在地から近い順）' : '',
     ]),
   );
 
@@ -248,7 +277,12 @@ function renderResults() {
   $('#pager').hidden = pages <= 1;
   $('#pageinfo').textContent = `${page} / ${pages} ページ`;
   $('#prev').disabled = page <= 1;
+  $('#first').disabled = page <= 1;
   $('#next').disabled = page >= pages;
+  $('#last').disabled = page >= pages;
+  const pi = $('#page-input');
+  pi.max = String(pages);
+  pi.value = String(page);
 
   if (state.view === 'map') drawMap();
 }
@@ -412,11 +446,23 @@ async function drawMap() {
   catch (e) { $('#map').textContent = `${e.message} 一覧表示をご利用ください。`; return; }
   for (const mk of markers) mk.remove();
   markers = [];
-  const pts = state.items.filter((f) => f.lat != null);
+
+  // 一覧のページ分だけでなく、条件に合う全件を地図に出す
+  const p = currentParams();
+  p.delete('page'); p.delete('per');
+  let data;
+  try { data = await (await fetch(`/api/map?${p}`)).json(); }
+  catch { data = { points: state.items.filter((f) => f.lat != null), truncated: false }; }
+  const pts = data.points ?? [];
+  $('#map-note').textContent = pts.length === 0
+    ? '座標のある事業所がありません。'
+    : data.truncated
+      ? `件数が多いため、地図には先頭 ${data.cap.toLocaleString()} 件のみ表示しています。条件を絞ると全件表示できます。`
+      : `条件に合う ${pts.length.toLocaleString()} 件すべてを表示しています。`;
   if (pts.length === 0) return;
   const b = new maplibregl.LngLatBounds();
   for (const f of pts) {
-    const popup = new maplibregl.Popup({ offset: 20 }).setText(`${f.name}（${f.address_full}）`);
+    const popup = new maplibregl.Popup({ offset: 20 }).setText(`${f.name}（${f.prefecture ?? ''}${f.city ?? ''}）`);
     markers.push(new maplibregl.Marker().setLngLat([f.lng, f.lat]).setPopup(popup).addTo(m));
     b.extend([f.lng, f.lat]);
   }
@@ -431,11 +477,66 @@ async function drawMap() {
   if (p.get('pref')) await loadCities(p.get('pref'), p.get('city'));
 
   $('#filters').addEventListener('submit', (e) => { e.preventDefault(); runSearch({ focus: true }); });
-  $('#filters').addEventListener('reset', () => setTimeout(() => { loadCities(''); runSearch(); }, 0));
-  $('#pref').addEventListener('change', async (e) => { await loadCities(e.target.value); runSearch(); });
-  $('#city').addEventListener('change', () => runSearch());
+  $('#filters').addEventListener('reset', () => setTimeout(() => { clearNear(); $('#place').value = ''; loadCities(''); runSearch(); }, 0));
+  $('#pref').addEventListener('change', async (e) => { useAreaFilter(); $('#place').value = ''; await loadCities(e.target.value); runSearch(); });
+  $('#city').addEventListener('change', () => { useAreaFilter(); runSearch(); });
   for (const id of ['status', 'sort']) $('#' + id).addEventListener('change', () => runSearch());
   $('#service-types').addEventListener('change', () => runSearch());
+
+  const goto = (n) => { state.page = Math.min(Math.max(1, n), Math.max(1, state.pages)); runSearch({ resetPage: false, focus: true }); };
+  $('#first').addEventListener('click', () => goto(1));
+  $('#last').addEventListener('click', () => goto(state.pages));
+  $('#go').addEventListener('click', () => goto(Number($('#page-input').value)));
+  $('#page-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); goto(Number($('#page-input').value)); }
+  });
+  $('#per').addEventListener('change', () => runSearch());
+
+  /* --- 地名でしぼる --- */
+  let placeTimer;
+  $('#place').addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    clearTimeout(placeTimer);
+    if (q.length < 2) return;
+    placeTimer = setTimeout(async () => {
+      const rows = await (await fetch(`/api/places?q=${encodeURIComponent(q)}`)).json();
+      $('#place-list').replaceChildren(...rows.map((r) =>
+        el('option', { value: `${r.prefecture}${r.city}`, label: `${r.c}件` })));
+    }, 200);
+  });
+  $('#place').addEventListener('change', async (e) => {
+    const v = e.target.value.trim();
+    if (!v) return;
+    const rows = await (await fetch(`/api/places?q=${encodeURIComponent(v)}`)).json();
+    const hit = rows.find((r) => `${r.prefecture}${r.city}` === v) ?? rows[0];
+    if (!hit) { $('#near-status').textContent = `「${v}」に該当する市区町村が見つかりませんでした。`; return; }
+    useAreaFilter();
+    $('#pref').value = hit.prefecture;
+    await loadCities(hit.prefecture, hit.city);
+    runSearch({ focus: true });
+  });
+
+  /* --- 現在地から探す --- */
+  $('#use-location').addEventListener('click', () => {
+    if (!navigator.geolocation) { $('#near-status').textContent = 'この端末では現在地を取得できません。地名でしぼる方をお使いください。'; return; }
+    $('#near-status').textContent = '現在地を取得しています…';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const cleared = useNearFilter();
+        setNear({ lat: pos.coords.latitude, lng: pos.coords.longitude }, '現在地');
+        if (cleared) $('#near-status').textContent += '（地名・都道府県の指定は解除しました）';
+        runSearch({ focus: true });
+      },
+      (err) => {
+        $('#near-status').textContent = err.code === err.PERMISSION_DENIED
+          ? '位置情報の利用が許可されませんでした。地名でしぼる方をお使いください。'
+          : '現在地を取得できませんでした。地名でしぼる方をお使いください。';
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+    );
+  });
+  $('#clear-location').addEventListener('click', () => { clearNear(); runSearch(); });
+  $('#radius_km').addEventListener('change', () => { if (state.near) { setNear(state.near, '現在地'); runSearch(); } });
 
   $('#prev').addEventListener('click', () => { state.page--; runSearch({ resetPage: false, focus: true }); });
   $('#next').addEventListener('click', () => { state.page++; runSearch({ resetPage: false, focus: true }); });

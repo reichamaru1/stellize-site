@@ -266,6 +266,8 @@ data/
 | `GET /api/facilities` | 検索（`q` `pref` `city` `service` `capacity_min` `capacity_max` `status` `sort` `page` `per`） |
 | `GET /api/facilities/:key` | 詳細（提供サービス、関連事業所、名寄せ候補、履歴） |
 | `GET /api/cities?pref=` | 市区町村一覧 |
+| `GET /api/places?q=` | 地名（都道府県＋市区町村）の候補。市区町村を全国から直接選ぶため |
+| `GET /api/map` | 検索条件に合う全件の座標（上限3,000件）。地図がページ内20件に縛られないため |
 | `GET /api/trend` | 期ごとの掲載件数と新規・消失 |
 | `GET /api/export.csv` | 検索条件と同じパラメータでCSV出力（BOM付き） |
 
@@ -300,4 +302,4 @@ data/
   オープンデータの基準日より新しい情報を持つ場合があります。
 - 工賃・賃金実績は未取り込みです。
 - 名寄せ候補の判定結果を人が確定させる管理画面はまだありません（DBには残しています）。
-- 現在地からの距離順ソート、修正報告フォームは未実装です。
+- 修正報告フォームは未実装です。
