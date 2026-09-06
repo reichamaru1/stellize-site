@@ -2,3 +2,6 @@
 .claude/
 .claire/
 Thumbs.db
+
+# 検証用の一時ページ（自動コミットに巻き込まれないように）
+__v*.html
