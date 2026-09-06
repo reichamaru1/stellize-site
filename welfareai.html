@@ -268,8 +268,49 @@
 
     /* ===== 5. 支援の循環モデル ===== */
     .cycle-sec { background: #fff; }
-    .steps6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; max-width: 1080px; margin: 0 auto; }
-    .step6 { background: var(--wa-cream); border: 1px solid var(--wa-line); border-radius: 16px; padding: 22px 16px; text-align: center; position: relative; }
+    .cycle-flow { max-width: 1120px; margin: 0 auto; }
+    /* モバイル優先：縦に流れて、最後にひと巡り */
+    .steps6 { display: grid; grid-template-columns: 1fr; gap: 32px; }
+    .step6 { background: var(--wa-cream); border: 1px solid var(--wa-line); border-top: 4px solid var(--sc, var(--wa-blue)); border-radius: 16px; padding: 22px 16px; text-align: center; position: relative; }
+    .step6::after {
+      content: "↓"; position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%);
+      color: var(--wa-teal); font-size: 1.25rem; font-weight: 700; line-height: 1;
+    }
+    .step6:last-child::after { content: none; }
+
+    /* 一巡して最初へ戻るループ（モバイル＝ピル／PC＝Uターンの矢印） */
+    .cycle-loop {
+      position: relative; max-width: 640px; margin: 32px auto 0; text-align: center;
+      padding: 16px 22px; border-radius: 50px;
+      background: linear-gradient(135deg, var(--wa-blue-l), var(--wa-teal-l));
+      color: var(--wa-blue); font-weight: 700; font-size: 1rem; line-height: 1.8;
+    }
+    .cycle-loop .rot { color: var(--wa-teal-d); margin-right: 6px; }
+
+    @media (min-width: 1000px) {
+      .steps6 { grid-template-columns: repeat(6, 1fr); gap: 16px; }
+      /* 横並びでは右向きの矢印でつなぐ */
+      .step6::after {
+        content: "→"; left: auto; right: -14px; bottom: auto; top: 50%;
+        transform: translateY(-50%); font-size: 1.15rem;
+      }
+      .step6:last-child::after { content: none; }
+      /* 最後のステップから最初へ戻るUターン */
+      .cycle-loop {
+        max-width: none; margin: 0 34px; padding: 0; height: 78px;
+        background: none; border: 2px dashed var(--wa-teal); border-top: none;
+        border-radius: 0 0 30px 30px; opacity: .9;
+      }
+      .cycle-loop::before {
+        content: ""; position: absolute; left: -7px; top: -8px;
+        border: 8px solid transparent; border-bottom-color: var(--wa-teal);
+      }
+      .cycle-loop .cl-text {
+        position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+        background: #fff; padding: 6px 22px; white-space: nowrap;
+        color: var(--wa-teal-d); font-size: 1rem;
+      }
+    }
     .step6 .snum { display: inline-block; font-size: .72rem; font-weight: 700; color: #fff; background: var(--sc, var(--wa-blue)); border-radius: 50px; padding: 3px 12px; margin-bottom: 12px; }
     .step6 .sicon { width: 46px; height: 46px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
     .step6 .sicon .icon { width: 1.35em; height: 1.35em; margin: 0; color: var(--sc, var(--wa-blue)); }
@@ -733,43 +774,47 @@
         支援の質と運営の効率が、同時に高まっていきます。
       </p>
 
-      <div class="steps6 stagger">
-        <div class="step6">
+      <div class="cycle-flow reveal">
+        <div class="steps6">
+          <div class="step6">
           <span class="snum">STEP 01</span>
           <div class="sicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-lightbulb"/></svg></div>
           <h3>気づく・知る</h3>
           <p>利用者の興味や「やってみたい」を発見します。</p>
         </div>
-        <div class="step6">
+          <div class="step6">
           <span class="snum">STEP 02</span>
           <div class="sicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-chat"/></svg></div>
           <h3>相談する</h3>
           <p>AIカウンセラーやスタッフに気軽に相談できます。</p>
         </div>
-        <div class="step6">
+          <div class="step6">
           <span class="snum">STEP 03</span>
           <div class="sicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-book"/></svg></div>
           <h3>学ぶ・準備する</h3>
           <p>学習コンテンツでスキルを身につけ、自信を育みます。</p>
         </div>
-        <div class="step6">
+          <div class="step6">
           <span class="snum">STEP 04</span>
           <div class="sicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-briefcase"/></svg></div>
           <h3>取り組む・働く</h3>
           <p>生産活動やお仕事にチャレンジし、経験を積み重ねます。</p>
         </div>
-        <div class="step6">
+          <div class="step6">
           <span class="snum">STEP 05</span>
           <div class="sicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-users"/></svg></div>
           <h3>つながる・広がる</h3>
           <p>地域・企業・他施設とつながり、活躍の場を広げていきます。</p>
         </div>
-        <div class="step6">
+          <div class="step6">
           <span class="snum">STEP 06</span>
           <div class="sicon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg?v=20260711#i-sparkle"/></svg></div>
           <h3>成長する・価値が高まる</h3>
           <p>利用者の可能性が広がり、施設の価値向上と社会への貢献につながります。</p>
+          </div>
         </div>
+
+          <p class="cycle-loop"><span class="cl-text"><span class="rot" aria-hidden="true">↻</span>くり返すほど、可能性が広がる</span></p>
       </div>
 
       <p class="cycle-close reveal">
