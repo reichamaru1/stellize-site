@@ -32,12 +32,16 @@ export function toCsv(header, rows) {
 
 const SERVICE_COLS = ['就労移行支援', '就労継続支援Ａ型', '就労継続支援Ｂ型', '就労定着支援', '就労選択支援'];
 
-export function buildTables(db) {
+function buildAll(db, only = null) {
+  const want = (n) => only === null || only === n;
   const latest = db.prepare('SELECT period, label FROM snapshots ORDER BY period DESC LIMIT 1').get();
   const basis = latest?.label ?? '不明';
   const SRC = 'WAM NET 障害福祉サービス等情報公表システム オープンデータ';
 
+  const out = {};
+
   /* ---- 1. 事業所一覧（1行 = 1事業所） ---- */
+  if (want('01_事業所一覧.csv')) {
   const facilities = db.prepare(`
     SELECT f.*,
       (SELECT group_concat(s.service_type, ' / ') FROM services s
@@ -85,8 +89,11 @@ export function buildTables(db) {
       f.designator, basis, SRC, f.facility_key,
     ];
   });
+  out['01_事業所一覧.csv'] = toCsv(facHeader, facRows);
+  }
 
   /* ---- 2. サービス（1行 = 1サービス） ---- */
+  if (want('02_サービス.csv')) {
   const services = db.prepare(`
     SELECT f.office_no, f.name, f.prefecture, f.city, s.*
     FROM services s JOIN facilities f ON f.facility_key = s.facility_key
@@ -99,8 +106,11 @@ export function buildTables(db) {
     s.hours_weekday, s.hours_sat, s.hours_sun, s.hours_holiday, s.closed_days, s.hours_note,
     s.status === 'active' ? '掲載あり' : '掲載なし', s.first_seen, s.last_seen, s.facility_key,
   ]);
+  out['02_サービス.csv'] = toCsv(svcHeader, svcRows);
+  }
 
   /* ---- 3. 工賃（1行 = 1レコード） ---- */
+  if (want('03_工賃.csv')) {
   const wages = db.prepare(`
     SELECT w.*, f.name AS matched_name, f.city AS matched_city
     FROM wages w LEFT JOIN facilities f ON f.facility_key = w.facility_key
@@ -115,8 +125,11 @@ export function buildTables(db) {
     w.facility_key ? '突合済み' : '未突合', w.match_method, w.matched_name, w.matched_city,
     w.source_page ?? w.source_url, w.facility_key,
   ]);
+  out['03_工賃.csv'] = toCsv(wageHeader, wageRows);
+  }
 
   /* ---- 4. 生産活動（1行 = 1レコード） ---- */
+  if (want('04_生産活動.csv')) {
   const acts = db.prepare(`
     SELECT a.*, f.office_no, f.name AS matched_name, f.city AS matched_city
     FROM activities a LEFT JOIN facilities f ON f.facility_key = a.facility_key
@@ -129,8 +142,11 @@ export function buildTables(db) {
     a.office_no, a.facility_key ? '突合済み' : '未突合', a.match_method, a.matched_name, a.matched_city,
     a.origin === 'published' ? '公表データ' : a.origin, a.source_name, a.source_page ?? a.source_url, a.facility_key,
   ]);
+  out['04_生産活動.csv'] = toCsv(actHeader, actRows);
+  }
 
   /* ---- 5. データソース ---- */
+  if (want('05_データソース.csv')) {
   const sources = db.prepare('SELECT * FROM extra_sources ORDER BY kind, prefecture, fiscal_year DESC').all();
   const srcHeader = ['種類', '都道府県', '年度', '対象サービス', '形式', '資料の件数', '突合できた件数', '突合率', '出典ページ', 'ファイルURL', '備考'];
   const srcRows = [
@@ -143,8 +159,11 @@ export function buildTables(db) {
       s.rows ? `${Math.round((s.matched / s.rows) * 100)}%` : '', s.source_page, s.source_url, s.note,
     ]),
   ];
+  out['05_データソース.csv'] = toCsv(srcHeader, srcRows);
+  }
 
   /* ---- 0. 列と精度の説明 ---- */
+  if (want('00_はじめに.csv')) {
   const notes = [
     ['シート', '説明'],
     ['01_事業所一覧', '1行 = 1事業所。サービスごとの定員を列に展開してあるので、そのままピボットできます。'],
@@ -165,14 +184,28 @@ export function buildTables(db) {
     ['注意', '公開データを基にしたものであり、最新性・正確性を保証しません。利用前に各事業所へ直接ご確認ください。'],
   ];
 
-  return {
-    '00_はじめに.csv': toCsv(notes[0], notes.slice(1)),
-    '01_事業所一覧.csv': toCsv(facHeader, facRows),
-    '02_サービス.csv': toCsv(svcHeader, svcRows),
-    '03_工賃.csv': toCsv(wageHeader, wageRows),
-    '04_生産活動.csv': toCsv(actHeader, actRows),
-    '05_データソース.csv': toCsv(srcHeader, srcRows),
-  };
+  out['00_はじめに.csv'] = toCsv(notes[0], notes.slice(1));
+  }
+
+  return out;
+}
+
+/** 書き出せるファイル名（順序つき） */
+export const TABLE_NAMES = [
+  '00_はじめに.csv', '01_事業所一覧.csv', '02_サービス.csv',
+  '03_工賃.csv', '04_生産活動.csv', '05_データソース.csv',
+];
+
+/** 1つだけ作る。API から1ファイル取るときに全部を組み立てないため。 */
+export function buildTable(db, name) {
+  if (!TABLE_NAMES.includes(name)) return null;
+  return buildAll(db, name)[name] ?? null;
+}
+
+/** 全部作る（CLI 用） */
+export function buildTables(db) {
+  const all = buildAll(db);
+  return Object.fromEntries(TABLE_NAMES.map((n) => [n, all[n]]).filter(([, v]) => v != null));
 }
 
 export async function run(argv = []) {
