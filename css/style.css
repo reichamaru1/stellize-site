@@ -3273,3 +3273,188 @@ body { padding-top: var(--header-h); }
     .mission-item .mission-illust .sp { transition: none; }
     .mission-item:hover .mission-illust .sp { transform: none; }
 }
+
+
+/* ============================================================
+   事業紹介LP（course / training / welfareai）洗練レイヤー
+   各ページ固有の配色（緑／青）は残したまま、トップと同じ
+   ネイビー＋ゴールドの共通言語を重ねてサイト全体の統一感を出す。
+   各ページのインライン<style>より詳細度を上げるため body.lp-refined で修飾する
+   ============================================================ */
+
+/* ---- ヒーロー：全画面 ---- */
+body.lp-refined .lp-hero--photo {
+    min-height: calc(100vh - var(--header-h));
+    min-height: calc(100svh - var(--header-h));
+    padding: 96px 0 92px;
+    align-items: center;
+}
+body.lp-refined .lp-hero--photo .lp-hero-bg {
+    transform-origin: 72% 50%;
+    animation: heroKenBurns 26s ease-in-out infinite alternate;
+    will-change: transform;
+}
+/* 下端にネイビーの陰を落として画面を締める */
+body.lp-refined .lp-hero--photo .lp-hero-scrim::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(21, 29, 59, 0.32) 0%, rgba(21, 29, 59, 0.05) 28%, rgba(21, 29, 59, 0) 46%);
+}
+/* オーブはマークアップを増やさず疑似要素で2つ。画像とスクリムの間(z-index:0)に置く */
+body.lp-refined .lp-hero--photo::before,
+body.lp-refined .lp-hero--photo::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+body.lp-refined .lp-hero--photo::before {
+    width: 420px; height: 420px; left: -8%; top: 6%;
+    background: radial-gradient(circle, rgba(174, 159, 196, 0.55) 0%, rgba(174, 159, 196, 0) 70%);
+    animation: orbFloat1 20s ease-in-out infinite;
+}
+body.lp-refined .lp-hero--photo::after {
+    width: 340px; height: 340px; left: 26%; bottom: -10%;
+    background: radial-gradient(circle, rgba(232, 191, 200, 0.5) 0%, rgba(232, 191, 200, 0) 70%);
+    animation: orbFloat2 26s ease-in-out infinite;
+}
+
+/* ---- スクロール誘導 ---- */
+body.lp-refined .lp-hero--photo .hero-scroll { color: var(--color-ink); }
+
+/* ---- ラベル：金＋ヘアライン（inline-flexで親の揃えを尊重する） ---- */
+body.lp-refined .lp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-gold-deep);
+    letter-spacing: 0.26em;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+body.lp-refined .lp-eyebrow::before,
+body.lp-refined .lp-eyebrow::after {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+}
+body.lp-refined .lp-eyebrow::after {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+}
+
+/* ---- 見出し：ネイビー＋金の細罫（葉の飾りから差し替え） ---- */
+body.lp-refined .section h2 { color: var(--color-ink); }
+body.lp-refined .section h2::after {
+    width: 72px;
+    height: 1.5px;
+    margin: 20px auto 0;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+/* ---- 濃色メッセージ面をネイビーへ（welfareaiは自ブランドの青を維持） ---- */
+body.lp-refined .message-section {
+    background: linear-gradient(140deg, var(--color-ink-deep) 0%, var(--color-ink) 55%, #35306B 100%);
+}
+body.lp-refined .message-wrap .lp-eyebrow { color: var(--color-gold-light); }
+body.lp-refined .message-wrap .lp-eyebrow::before { background: linear-gradient(90deg, transparent, var(--color-gold-light)); }
+body.lp-refined .message-wrap .lp-eyebrow::after  { background: linear-gradient(90deg, var(--color-gold-light), transparent); }
+body.lp-refined .message-section h2 { color: #fff; }
+body.lp-refined .message-section h2::after {
+    background: linear-gradient(90deg, transparent, var(--color-gold-light), transparent);
+}
+
+/* welfareai の濃色メッセージ面はクラス名が .msg-sec / .msg-wrap。
+   自ブランドの青は維持しつつ、見出し・ラベルが沈まないよう明色に戻す
+   （上のネイビー化・金ラベル指定を打ち消す） */
+body.lp-refined .msg-sec h2,
+body.lp-refined .msg-wrap h2 { color: #fff; }
+body.lp-refined .msg-sec h2::after,
+body.lp-refined .msg-wrap h2::after {
+    background: linear-gradient(90deg, transparent, var(--color-gold-light), transparent);
+}
+body.lp-refined .msg-wrap .lp-eyebrow { color: var(--color-gold-light); }
+body.lp-refined .msg-wrap .lp-eyebrow::before { background: linear-gradient(90deg, transparent, var(--color-gold-light)); }
+body.lp-refined .msg-wrap .lp-eyebrow::after  { background: linear-gradient(90deg, var(--color-gold-light), transparent); }
+
+/* ---- カード：金枠＋光沢スイープ（各LP固有のカードクラスに適用） ---- */
+body.lp-refined .point-card,
+body.lp-refined .reason-card,
+body.lp-refined .value-card,
+body.lp-refined .case-card,
+body.lp-refined .type-card,
+body.lp-refined .feat-card,
+body.lp-refined .issue-card,
+body.lp-refined .who-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+body.lp-refined .point-card::before,
+body.lp-refined .reason-card::before,
+body.lp-refined .value-card::before,
+body.lp-refined .case-card::before,
+body.lp-refined .type-card::before,
+body.lp-refined .feat-card::before,
+body.lp-refined .issue-card::before,
+body.lp-refined .who-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold) 45%, var(--color-ink));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 3;
+}
+body.lp-refined .point-card:hover,
+body.lp-refined .reason-card:hover,
+body.lp-refined .value-card:hover,
+body.lp-refined .case-card:hover,
+body.lp-refined .type-card:hover,
+body.lp-refined .feat-card:hover,
+body.lp-refined .issue-card:hover,
+body.lp-refined .who-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+}
+body.lp-refined .point-card:hover::before,
+body.lp-refined .reason-card:hover::before,
+body.lp-refined .value-card:hover::before,
+body.lp-refined .case-card:hover::before,
+body.lp-refined .type-card:hover::before,
+body.lp-refined .feat-card:hover::before,
+body.lp-refined .issue-card:hover::before,
+body.lp-refined .who-card:hover::before { opacity: 1; }
+
+@media (max-width: 820px) {
+    body.lp-refined .lp-hero--photo {
+        padding: 76px 0 60px;
+        align-items: center;
+    }
+    body.lp-refined .lp-hero--photo::before { width: 280px; height: 280px; }
+    body.lp-refined .lp-hero--photo::after  { width: 240px; height: 240px; }
+}
+
+/* スマホではスクロール誘導を出さない。
+   ページによってヒーローの中身の量が違い、1画面に収まらないと
+   誘導そのものが画面外に取り残されて用をなさないため */
+@media (max-width: 820px) {
+    .hero-scroll { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.lp-refined .lp-hero--photo .lp-hero-bg,
+    body.lp-refined .lp-hero--photo::before,
+    body.lp-refined .lp-hero--photo::after { animation: none; }
+}
