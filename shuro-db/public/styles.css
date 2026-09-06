@@ -248,3 +248,22 @@ dialog::backdrop { background: rgb(0 0 0 / .5); }
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-scroll table { min-width: max-content; }
 .table-scroll th, .table-scroll td { white-space: nowrap; }
+
+/* --- 場所の絞り込み --- */
+.near { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+#near-status:empty { display: none; }
+.dist {
+  font-size: .82rem; font-weight: 700;
+  color: var(--accent-text, inherit);
+}
+
+/* --- ページ送り --- */
+.pager { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; margin-top: 20px; }
+.pager .jump { display: inline-flex; gap: 6px; align-items: center; }
+.pager .jump label { font-size: .82rem; color: var(--muted); }
+.pager .jump input { width: 6em; }
+#pageinfo { font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) {
+  .pager { gap: 6px; }
+  .pager .jump { width: 100%; justify-content: center; }
+}

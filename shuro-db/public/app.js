@@ -8,7 +8,7 @@ const el = (tag, props = {}, children = []) => {
 };
 const fmt = (v, fallback = '未公表') => (v == null || v === '' ? fallback : v);
 
-const state = { page: 1, meta: null, items: [], total: 0, pages: 0, view: 'list' };
+const state = { page: 1, meta: null, items: [], total: 0, pages: 0, view: 'list', near: null };
 
 /* 工賃・生産活動をこの事業所に結び付けた根拠。利用者が確からしさを判断できるように出す。 */
 const MATCH_LABEL = {
@@ -27,9 +27,13 @@ function currentParams() {
   if (q) p.set('q', q);
   for (const cb of document.querySelectorAll('#service-types input:checked')) p.append('service', cb.value);
   for (const cb of document.querySelectorAll('#activity-cats input:checked')) p.append('activity', cb.value);
-  for (const id of ['pref', 'city', 'capacity_min', 'capacity_max', 'wage_min', 'wage_max', 'status', 'sort']) {
+  for (const id of ['pref', 'city', 'capacity_min', 'capacity_max', 'wage_min', 'wage_max', 'status', 'sort', 'per']) {
     const v = $('#' + id).value;
     if (v) p.set(id, v);
+  }
+  if (state.near) {
+    p.set('near', `${state.near.lat.toFixed(5)},${state.near.lng.toFixed(5)}`);
+    p.set('radius_km', $('#radius_km').value);
   }
   return p;
 }
@@ -43,8 +47,13 @@ function syncUrl(p) {
 function restoreFromUrl() {
   const p = new URLSearchParams(location.search);
   $('#q').value = p.get('q') ?? '';
-  for (const id of ['pref', 'capacity_min', 'capacity_max', 'wage_min', 'wage_max', 'status', 'sort']) {
+  for (const id of ['pref', 'capacity_min', 'capacity_max', 'wage_min', 'wage_max', 'status', 'sort', 'per', 'radius_km']) {
     if (p.get(id)) $('#' + id).value = p.get(id);
+  }
+  const near = p.get('near');
+  if (near) {
+    const [lat, lng] = near.split(',').map(Number);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) setNear({ lat, lng }, '共有されたリンクの地点');
   }
   const services = new Set(p.getAll('service'));
   for (const cb of document.querySelectorAll('#service-types input')) cb.checked = services.has(cb.value);
@@ -212,6 +221,9 @@ function card(f) {
 
   return el('li', { className: 'card' }, [
     statusBadge(f),
+    f.distance_km != null
+      ? el('p', { className: 'dist', textContent: `現在地から約 ${f.distance_km < 1 ? `${Math.round(f.distance_km * 1000)}m` : `${f.distance_km.toFixed(1)}km`}` })
+      : null,
     el('h3', {}, title),
     f.name_kana ? el('p', { className: 'kana', textContent: f.name_kana }) : null,
     services, activities, wageBadge(f), dl,

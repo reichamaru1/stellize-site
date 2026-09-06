@@ -59,15 +59,35 @@
       <p class="hint" id="wage-coverage">工賃は都道府県ごとの公表資料から取り込んでいます。</p>
     </fieldset>
 
-    <div class="field">
+    <fieldset class="field">
+      <legend>場所</legend>
+
+      <label for="place">地名でしぼる</label>
+      <input type="search" id="place" list="place-list" autocomplete="off"
+             placeholder="横浜市中区・渋谷区・札幌 など">
+      <datalist id="place-list"></datalist>
+      <p class="hint">市区町村名を入れると、都道府県を選ばなくてもそこだけに絞れます。</p>
+
       <label for="pref">都道府県</label>
       <select id="pref" name="pref"><option value="">すべて</option></select>
-    </div>
 
-    <div class="field">
       <label for="city">市区町村</label>
-      <select id="city" name="city" disabled><option value="">都道府県を先に選んでください</option></select>
-    </div>
+      <select id="city" name="city" disabled><option value="">都道府県を選ぶか、上の地名検索を使ってください</option></select>
+
+      <div class="near">
+        <button type="button" class="btn" id="use-location">現在地から探す</button>
+        <label class="sr-only" for="radius_km">距離</label>
+        <select id="radius_km" name="radius_km">
+          <option value="2">2km以内</option>
+          <option value="5">5km以内</option>
+          <option value="10" selected>10km以内</option>
+          <option value="20">20km以内</option>
+          <option value="50">50km以内</option>
+        </select>
+        <button type="button" class="btn" id="clear-location" hidden>現在地を解除</button>
+      </div>
+      <p class="hint" id="near-status" role="status"></p>
+    </fieldset>
 
     <fieldset class="field">
       <legend>定員</legend>
@@ -101,6 +121,15 @@
       </select>
     </div>
 
+    <div class="field">
+      <label for="per">1ページの表示件数</label>
+      <select id="per" name="per">
+        <option value="20">20件</option>
+        <option value="50">50件</option>
+        <option value="100">100件</option>
+      </select>
+    </div>
+
     <div class="actions">
       <button type="submit" class="btn primary">検索する</button>
       <button type="reset" class="btn">条件をクリア</button>
@@ -126,9 +155,16 @@
     <ol class="cards" id="cards"></ol>
 
     <nav class="pager" id="pager" aria-label="ページ送り" hidden>
-      <button type="button" class="btn" id="prev">前のページ</button>
+      <button type="button" class="btn" id="first">最初</button>
+      <button type="button" class="btn" id="prev">前へ</button>
       <span id="pageinfo"></span>
-      <button type="button" class="btn" id="next">次のページ</button>
+      <span class="jump">
+        <label for="page-input">ページ番号</label>
+        <input type="number" id="page-input" min="1" step="1" inputmode="numeric">
+        <button type="button" class="btn" id="go">移動</button>
+      </span>
+      <button type="button" class="btn" id="next">次へ</button>
+      <button type="button" class="btn" id="last">最後</button>
     </nav>
   </main>
 </div>

@@ -70,6 +70,16 @@ function buildWhere(sp) {
   const hasGeo = sp.get('has_geo');
   if (hasGeo === '1') where.push('f.lat IS NOT NULL');
 
+  // 現在地からの距離で絞る。まず外接矩形でSQLを絞り、正確な距離はJS側で出す
+  // （SQLiteの数学関数の有無に依存させないため）。
+  const near = parseNear(sp);
+  if (near) {
+    const dLat = near.radiusKm / 111.32;
+    const dLng = near.radiusKm / (111.32 * Math.max(0.1, Math.cos((near.lat * Math.PI) / 180)));
+    where.push('f.lat IS NOT NULL AND f.lat BETWEEN ? AND ? AND f.lng BETWEEN ? AND ?');
+    params.push(near.lat - dLat, near.lat + dLat, near.lng - dLng, near.lng + dLng);
+  }
+
   // 生産活動（統一分類）。公表データがある事業所のみが対象。
   const activities = sp.getAll('activity').filter(Boolean);
   if (activities.length) {
@@ -92,6 +102,28 @@ function buildWhere(sp) {
   }
 
   return { sql: where.length ? `WHERE ${where.join(' AND ')}` : '', params };
+}
+
+/** 2点間の距離（km）。ヒュベニの簡易式ではなく素直なハーバサイン。 */
+function distanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+/** `near=緯度,経度` と `radius_km` を読む。中心が不正なら null。 */
+function parseNear(sp) {
+  const raw = (sp.get('near') ?? '').trim();
+  if (!raw) return null;
+  const [latS, lngS] = raw.split(',');
+  const lat = Number(latS), lng = Number(lngS);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat < 20 || lat > 46 || lng < 122 || lng > 154) return null;
+  const radiusKm = Math.min(Math.max(Number(sp.get('radius_km') ?? 10), 0.5), 200);
+  return { lat, lng, radiusKm };
 }
 
 const SORTS = {
@@ -145,20 +177,67 @@ function attachServices(rows) {
   }));
 }
 
+const COLS = `f.facility_key, f.office_no, f.name, f.name_kana, f.corp_name, f.prefecture, f.city,
+              f.address_full, f.phone, f.url, f.lat, f.lng, f.status, f.first_seen, f.last_seen`;
+
 function search(sp) {
   const { sql, params } = buildWhere(sp);
   const per = Math.min(Math.max(Number(sp.get('per') ?? 20), 1), 200);
   const page = Math.max(Number(sp.get('page') ?? 1), 1);
+  const near = parseNear(sp);
+
+  // 距離で絞る場合は、矩形で絞ったうえで正確な距離を計算し、円の外を落としてから並べ替える
+  if (near) {
+    const all = db.prepare(`SELECT ${COLS} FROM facilities f ${sql}`).all(...params)
+      .map((r) => ({ ...r, distance_km: distanceKm(near.lat, near.lng, r.lat, r.lng) }))
+      .filter((r) => r.distance_km <= near.radiusKm)
+      .sort((a, b) => a.distance_km - b.distance_km);
+    const slice = all.slice((page - 1) * per, page * per);
+    return {
+      total: all.length, page, per, pages: Math.ceil(all.length / per),
+      near: { ...near }, items: attachServices(slice),
+    };
+  }
+
   const sort = SORTS[sp.get('sort') ?? 'pref'] ?? SORTS.pref;
-
   const total = db.prepare(`SELECT count(*) c FROM facilities f ${sql}`).get(...params).c;
-  const rows = db.prepare(
-    `SELECT f.facility_key, f.office_no, f.name, f.name_kana, f.corp_name, f.prefecture, f.city,
-            f.address_full, f.phone, f.url, f.lat, f.lng, f.status, f.first_seen, f.last_seen
-     FROM facilities f ${sql} ORDER BY ${sort} LIMIT ? OFFSET ?`,
-  ).all(...params, per, (page - 1) * per);
-
+  const rows = db.prepare(`SELECT ${COLS} FROM facilities f ${sql} ORDER BY ${sort} LIMIT ? OFFSET ?`)
+    .all(...params, per, (page - 1) * per);
   return { total, page, per, pages: Math.ceil(total / per), items: attachServices(rows) };
+}
+
+/**
+ * 地図用。ページに関係なく、条件に合う全件の座標を返す（上限あり）。
+ * 一覧が数千件あるのに地図へ20件しか出ないのを避けるため。
+ */
+function mapPoints(sp) {
+  const { sql, params } = buildWhere(sp);
+  const CAP = 3000;
+  const near = parseNear(sp);
+  // buildWhere が WHERE を返すかどうかで繋ぎ方が変わる
+  const geo = sql ? `${sql} AND f.lat IS NOT NULL` : 'WHERE f.lat IS NOT NULL';
+  let rows = db.prepare(
+    `SELECT f.facility_key, f.name, f.prefecture, f.city, f.lat, f.lng FROM facilities f ${geo} LIMIT ?`,
+  ).all(...params, CAP + 1);
+  if (near) {
+    rows = rows
+      .map((r) => ({ ...r, distance_km: distanceKm(near.lat, near.lng, r.lat, r.lng) }))
+      .filter((r) => r.distance_km <= near.radiusKm)
+      .sort((a, b) => a.distance_km - b.distance_km);
+  }
+  const truncated = rows.length > CAP;
+  return { points: rows.slice(0, CAP), truncated, cap: CAP };
+}
+
+/** 地名（都道府県＋市区町村）の候補。市区町村を全国から直接選べるようにするため。 */
+function places(q) {
+  const t = normalizeText(q ?? '');
+  if (!t) return [];
+  return db.prepare(
+    `SELECT prefecture, city, count(*) c FROM facilities
+     WHERE status='active' AND (replace(prefecture,' ','') || replace(city,' ','')) LIKE ?
+     GROUP BY 1,2 ORDER BY c DESC LIMIT 30`,
+  ).all(`%${q.trim()}%`);
 }
 
 const csvCell = (v) => {
@@ -291,6 +370,8 @@ const server = createServer(async (req, res) => {
     if (p === '/api/meta') return json(res, meta());
     if (p === '/api/trend') return json(res, trend());
     if (p === '/api/cities') return json(res, cities(url.searchParams.get('pref') ?? ''));
+    if (p === '/api/places') return json(res, places(url.searchParams.get('q')));
+    if (p === '/api/map') return json(res, mapPoints(url.searchParams));
     if (p === '/api/facilities') return json(res, search(url.searchParams));
     if (p.startsWith('/api/facilities/')) {
       const d = detail(decodeURIComponent(p.slice('/api/facilities/'.length)));
