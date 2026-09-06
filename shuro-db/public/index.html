@@ -196,6 +196,16 @@
       実際の廃止・休止を確認したものではありません。事業所番号の変更・改称・移転でもこの状態になります。
       同一施設の可能性がある記録は、詳細画面に候補として表示します（自動統合はしていません）。
     </p>
+    <details id="bulk-export">
+      <summary>スプレッドシート用に全件を書き出す</summary>
+      <p class="hint">
+        検索条件に関係なく全件を出力します。BOM付きUTF-8のCSVなので、Excelはそのまま開けます。
+        Googleスプレッドシートは「ファイル &gt; インポート」から読み込んでください。
+        どの行にも出典・データ基準・突合方法を入れてあるので、表計算に移したあとでも根拠を辿れます。
+      </p>
+      <ul id="export-list" class="export-list"></ul>
+    </details>
+
     <details id="extra-sources">
       <summary>工賃・生産活動の取り込み状況を見る</summary>
       <div id="extra-source-list"></div>

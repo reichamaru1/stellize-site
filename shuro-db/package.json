@@ -4,13 +4,17 @@
   "private": true,
   "type": "module",
   "description": "全国就労支援事業所データベース（WAM NET オープンデータ）",
-  "engines": { "node": ">=22.5.0" },
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
     "fetch": "node --no-warnings src/ingest/fetch.mjs",
     "fetch:extra": "node --no-warnings src/ingest/extra/fetch.mjs",
     "fetch:all": "npm run fetch -- --all && npm run fetch:extra",
     "build": "node --no-warnings src/db/build.mjs",
     "start": "node --no-warnings src/server.mjs",
-    "test": "node --no-warnings --test test/*.test.mjs"
+    "test": "node --no-warnings --test test/*.test.mjs",
+    "export": "node --no-warnings src/export.mjs",
+    "audit": "node --no-warnings audit-match.mjs"
   }
 }

@@ -267,3 +267,8 @@ dialog::backdrop { background: rgb(0 0 0 / .5); }
   .pager { gap: 6px; }
   .pager .jump { width: 100%; justify-content: center; }
 }
+
+/* --- 一括書き出し --- */
+.export-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.export-list li { padding: 5px 0; }
+.export-list .hint { display: inline; }

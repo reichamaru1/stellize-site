@@ -8,6 +8,7 @@ import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeText } from './ingest/normalize.mjs';
+import { buildTables } from './export.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DB_PATH = path.join(ROOT, 'data', 'shuro.db');
@@ -376,6 +377,22 @@ const server = createServer(async (req, res) => {
     if (p.startsWith('/api/facilities/')) {
       const d = detail(decodeURIComponent(p.slice('/api/facilities/'.length)));
       return d ? json(res, d) : json(res, { error: '該当する事業所が見つかりません' }, 404);
+    }
+    // スプレッドシート向けの一括書き出し。検索条件に関係なく全件を出す。
+    if (p === '/api/export/list') {
+      return json(res, Object.keys(buildTables(db)).map((n) => ({ name: n, url: `/api/export/${encodeURIComponent(n)}` })));
+    }
+    if (p.startsWith('/api/export/')) {
+      const name = decodeURIComponent(p.slice('/api/export/'.length));
+      const tables = buildTables(db);
+      if (!tables[name]) return json(res, { error: '該当する書き出しがありません' }, 404);
+      const body = Buffer.from(tables[name], 'utf8');
+      res.writeHead(200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(name)}`,
+        'Content-Length': body.length,
+      });
+      return res.end(body);
     }
     if (p === '/api/export.csv') {
       const body = Buffer.from(exportCsv(url.searchParams), 'utf8');

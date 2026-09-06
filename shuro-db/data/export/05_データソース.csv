@@ -1,0 +1,18 @@
+﻿種類,都道府県,年度,対象サービス,形式,資料の件数,突合できた件数,突合率,出典ページ,ファイルURL,備考
+基本情報,全国,2026年3月末,就労移行/A型/B型/就労定着,ZIP(CSV),30693,,,https://www.wam.go.jp/content/wamnet/pcpub/top/sfkopendata/,,年2回（3月末・9月末）更新
+生産活動,東京都,,A型・B型,XLSX,664,456,69%,https://www.fukushi.metro.tokyo.lg.jp/shougai//shougai_shisaku/sokusin/buppin_ekimulist.html,https://www.fukushi.metro.tokyo.lg.jp/documents/d/fukushi/10_buppinkaiireekimuteikyou_zentai,
+工賃,北海道,2024年度,就労継続支援Ｂ型,PDF,1215,900,74%,https://www.pref.hokkaido.lg.jp/hf/shf/ko-chin.html,https://www.pref.hokkaido.lg.jp/fs/1/2/9/0/9/0/1/8/_/%E5%B0%B1%E5%8A%B4%E7%B6%99%E7%B6%9A%E6%94%AF%E6%8F%B4B%E5%9E%8B%20%E5%B7%A5%E8%B3%83%E5%AE%9F%E7%B8%BE%E4%B8%80%E8%A6%A7.pdf,北海道 就労継続支援Ｂ型: 21行を読み取れず除外
+工賃,北海道,2024年度,就労継続支援Ａ型,PDF,177,142,80%,https://www.pref.hokkaido.lg.jp/hf/shf/ko-chin.html,https://www.pref.hokkaido.lg.jp/fs/1/2/9/0/9/0/1/5/_/%E5%B0%B1%E5%8A%B4%E7%B6%99%E7%B6%9A%E6%94%AF%E6%8F%B4A%E5%9E%8B(%E9%9B%87%E7%94%A8%E5%9E%8B)%E8%B3%83%E9%87%91%E5%AE%9F%E7%B8%BE%E4%B8%80%E8%A6%A7.pdf,北海道 就労継続支援Ａ型: 17行を読み取れず除外
+工賃,千葉県,2024年度,A型・B型,XLSX,735,632,86%,https://www.pref.chiba.lg.jp/shoji/service/shuurou/kouchin/index.html,https://www.pref.chiba.lg.jp/shoji/service/shuurou/kouchin/documents/r6kouchin.xlsx,
+工賃,和歌山県,2022年度,A型・B型,XLSX,229,211,92%,https://www.pref.wakayama.lg.jp/prefg/040400/jyusan20/kochinjisseki.html,https://www.pref.wakayama.lg.jp/prefg/040400/jyusan20/kochinjisseki_d/fil/R4koutinitiran.xlsx,
+工賃,大阪府,2024年度,就労継続支援Ｂ型,XLSX,1714,1496,87%,https://www.pref.osaka.lg.jp/o090060/keikakusuishin/jyusan/kouchinjisseki.html,https://www.pref.osaka.lg.jp/documents/23571/r6kouchinjissekib.xlsx,大阪府/平均工賃（時間額）: ヘッダ行を特定できず
+工賃,大阪府,2024年度,就労継続支援Ａ型,XLSX,383,350,91%,https://www.pref.osaka.lg.jp/o090060/keikakusuishin/jyusan/kouchinjisseki.html,https://www.pref.osaka.lg.jp/documents/23571/r6kouchinjissekia.xlsx,大阪府/平均工賃（時間額）: ヘッダ行を特定できず
+工賃,奈良県,2024年度,就労継続支援Ｂ型,PDF,0,0,,https://www.pref.nara.jp/11907.htm,https://www.pref.nara.jp/secure/210805/R6_B.pdf,未取得
+工賃,岡山県,2024年度,A型・B型,XLSX,358,353,99%,https://www.pref.okayama.jp/page/detail-15576.html,https://www.pref.okayama.jp/uploaded/life/945343_9685839_misc.xlsx,岡山県/総括表: ヘッダ行を特定できず
+工賃,愛知県,2024年度,就労継続支援Ｂ型,PDF,1000,966,97%,https://www.pref.aichi.jp/soshiki/shogai/kouchin-jisseki.html,https://www.pref.aichi.jp/uploaded/attachment/585578.pdf,愛知県 就労継続支援Ｂ型: 44行を読み取れず除外
+工賃,愛知県,2024年度,就労継続支援Ａ型,PDF,248,241,97%,https://www.pref.aichi.jp/soshiki/shogai/kouchin-jisseki.html,https://www.pref.aichi.jp/uploaded/attachment/585576.pdf,愛知県 就労継続支援Ａ型: 17行を読み取れず除外
+工賃,新潟県,2024年度,A型・B型,XLSX,335,321,96%,https://www.pref.niigata.lg.jp/sec/shougaifukushi/1281038535306.html,https://www.pref.niigata.lg.jp/uploaded/attachment/461324.xlsx,
+工賃,神奈川県,2023年度,A型・B型,XLSX,812,756,93%,https://www.pref.kanagawa.jp/docs/yv4/kouchin2023.html,https://www.pref.kanagawa.jp/documents/112484/r5kouchin-shisetsu.xlsx,
+工賃,福岡県,2018年度,就労継続支援Ｂ型,PDF,468,436,93%,https://www.pref.fukuoka.lg.jp/contents/shogaishisetsukouchin.html,https://www.pref.fukuoka.lg.jp/uploaded/attachment/113955.pdf,福岡県 就労継続支援Ｂ型: 6行を読み取れず除外
+工賃,福岡県,2018年度,就労継続支援Ａ型,PDF,241,231,96%,https://www.pref.fukuoka.lg.jp/contents/shogaishisetsukouchin.html,https://www.pref.fukuoka.lg.jp/uploaded/attachment/108905.pdf,福岡県 就労継続支援Ａ型: 6行を読み取れず除外
+工賃,静岡県,2024年度,A型・B型,PDF,0,0,,https://www.pref.shizuoka.jp/sangyoshigoto/shuroshien/shuroshien/1040127/1002999/1023636.html,https://www.pref.shizuoka.jp/_res/projects/default_project/_page_/001/023/636/r6koutinjisseki.pdf,静岡県: このPDFに対応するパーサが未実装（集計値のみの資料の可能性）

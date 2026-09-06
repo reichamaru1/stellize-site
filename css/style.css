@@ -31,6 +31,12 @@
     --color-ink: #1F2A54;
     --color-ink-deep: #151D3B;
     --color-ink-soft: #2E3A66;
+
+    /* シャンパンゴールド。ネイビーと組ませると、彩度を上げずに
+       華やかさだけを足せる（上品な派手さの主役） */
+    --color-gold: #C0A16B;
+    --color-gold-light: #E6D3A8;
+    --color-gold-deep: #9A7F4E;
     --shadow-lg: 0 24px 70px rgba(21, 29, 59, 0.18);
 }
 
@@ -3025,4 +3031,113 @@ body { padding-top: var(--header-h); }
 }
 @media (max-width: 768px) {
     .logo img { height: 34px; }
+}
+
+
+/* ============================================================
+   上品な派手さ：シャンパンゴールドのアクセントと、エディトリアルな細部
+   （course/training/welfareai は自前の style ブロックが後勝ちするため
+     独自デザインを維持したまま干渉しない）
+   ============================================================ */
+
+/* ---- ラベル：金＋ヘアラインで小見出しを格上げする ---- */
+.label {
+    color: var(--color-gold-deep);
+    letter-spacing: 0.26em;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+.label::before,
+.label::after {
+    content: '';
+    width: 26px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+}
+.label::after { background: linear-gradient(90deg, var(--color-gold), transparent); }
+
+/* ---- 見出し：金の細い罫線がスッと引かれる ---- */
+.section h2::after {
+    content: '';
+    display: block;
+    width: 72px;
+    height: 1.5px;
+    margin: 20px auto 0;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+}
+.section h2.is-in::after { transform: scaleX(1); }
+/* Observerが動かない環境でも罫線が消えたままにならないように */
+.no-js .section h2::after { transform: scaleX(1); }
+
+/* ---- 数字：箔押し風のゴールドグラデーション ---- */
+.stats-section .stat-num--tally {
+    background: linear-gradient(180deg, #F7EDD6 0%, #D9BE86 42%, #B99A5B 58%, #F2E4C4 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 18px rgba(192, 161, 107, 0.35));
+}
+.stats-section .stat-item {
+    border-color: rgba(230, 211, 168, 0.22);
+}
+.stats-section .stat-item:hover {
+    border-color: rgba(230, 211, 168, 0.45);
+}
+
+/* ---- 斜めの切り替えに金のヘアラインを1本通す ----
+   ただの断ち切りが「意図した装飾」に変わる */
+.sec-diag::after {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: clamp(38px, 5.5vw, 86px);
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom right,
+        transparent calc(50% - 0.6px),
+        var(--color-gold) 50%,
+        transparent calc(50% + 0.6px)
+    );
+    opacity: 0.55;
+}
+
+/* ---- カード：枠を金に、光沢は控えめに ---- */
+.card::before {
+    background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold) 45%, var(--color-ink));
+}
+.card::after {
+    /* 白の強い閃光は下品に見えるので、金を含む淡い帯に落とす */
+    background: linear-gradient(100deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 252, 244, 0.38) 45%,
+        rgba(230, 211, 168, 0.3) 60%,
+        rgba(255, 255, 255, 0) 100%);
+}
+@keyframes cardSheen {
+    from { left: -60%; opacity: 1; }
+    to   { left: 120%; opacity: 0; }
+}
+
+/* ---- ボタン：金の縁で華やかさを足す ---- */
+.btn-primary {
+    position: relative;
+    box-shadow: 0 8px 25px rgba(174, 159, 196, 0.3), inset 0 0 0 1px rgba(230, 211, 168, 0.5);
+}
+.btn-primary:hover {
+    box-shadow: 0 14px 34px rgba(31, 42, 84, 0.22), inset 0 0 0 1px rgba(230, 211, 168, 0.9);
+}
+.btn-secondary:hover {
+    box-shadow: 0 10px 28px rgba(31, 42, 84, 0.28), inset 0 0 0 1px rgba(230, 211, 168, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .section h2::after { transform: scaleX(1); transition: none; }
 }

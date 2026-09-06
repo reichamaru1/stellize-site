@@ -103,7 +103,31 @@ async function loadMeta() {
     : '工賃データは未取得です。';
 
   renderExtraSources(m.extraSources);
+  renderExportLinks();
   renderQuality(m.quality);
+}
+
+const EXPORT_NOTE = {
+  '01_事業所一覧.csv': '1行=1事業所。サービスごとの定員を列に展開済み。まずこれ',
+  '02_サービス.csv': '1行=1サービス。営業時間・定休日つき',
+  '03_工賃.csv': '1行=公表資料の1行。未突合の行も残してあります',
+  '04_生産活動.csv': '1行=公表資料の1項目',
+  '05_データソース.csv': 'どの県のいつのデータをどこから取ったか',
+  '00_はじめに.csv': '各シートの説明と、精度・注意点',
+};
+
+async function renderExportLinks() {
+  const box = $('#export-list');
+  if (!box) return;
+  try {
+    const items = await (await fetch('/api/export/list')).json();
+    box.replaceChildren(...items.map((it) => el('li', {}, [
+      el('a', { href: it.url, download: it.name, textContent: it.name }),
+      el('span', { className: 'hint', textContent: EXPORT_NOTE[it.name] ? `　${EXPORT_NOTE[it.name]}` : '' }),
+    ])));
+  } catch {
+    box.replaceChildren(el('li', { className: 'hint', textContent: '書き出しの一覧を取得できませんでした。' }));
+  }
 }
 
 function renderExtraSources(rows) {
