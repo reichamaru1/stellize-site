@@ -8,7 +8,7 @@ import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeText } from './ingest/normalize.mjs';
-import { buildTable, TABLE_NAMES } from './export.mjs';
+import { buildTable, buildSingleSheet, TABLE_NAMES, SINGLE_SHEET } from './export.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DB_PATH = path.join(ROOT, 'data', 'shuro.db');
@@ -241,27 +241,17 @@ function places(q) {
   ).all(`%${q.trim()}%`);
 }
 
-const csvCell = (v) => {
-  const s = v == null ? '' : String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-};
-
+/**
+ * 検索条件つきの書き出し。列構成は全件書き出しと同じにしてある。
+ * 条件ごとに列が変わると、あとで表計算上でつなげられなくなるため。
+ */
 function exportCsv(sp) {
   const { sql, params } = buildWhere(sp);
-  const rows = db.prepare(
-    `SELECT f.office_no, f.name, f.name_kana, f.corp_name, f.corp_no, f.prefecture, f.city,
-            f.address_full, f.phone, f.fax, f.url, f.lat, f.lng, f.status, f.first_seen, f.last_seen,
-            (SELECT group_concat(s.service_type || CASE WHEN s.capacity IS NULL THEN '' ELSE '(定員' || s.capacity || ')' END, ' / ')
-             FROM services s WHERE s.facility_key = f.facility_key) AS services,
-            (SELECT group_concat(DISTINCT a.category) FROM activities a WHERE a.facility_key = f.facility_key) AS activities,
-            (SELECT max(w.avg_monthly) FROM wages w WHERE w.facility_key = f.facility_key) AS wage_avg_monthly,
-            (SELECT max(w.fiscal_year) FROM wages w WHERE w.facility_key = f.facility_key) AS wage_fiscal_year
-     FROM facilities f ${sql} ORDER BY f.pref_code, f.city, f.name LIMIT 60000`,
-  ).all(...params);
-  const header = ['事業所番号', '事業所名', 'ふりがな', '法人名', '法人番号', '都道府県', '市区町村', '住所', '電話番号', 'FAX', 'URL', '緯度', '経度', '状態', '初出', '最終確認', 'サービス', '生産活動', '平均工賃月額', '工賃の年度'];
-  const lines = [header.join(',')];
-  for (const r of rows) lines.push(Object.values(r).map(csvCell).join(','));
-  return `﻿${lines.join('\r\n')}\r\n`;
+  const keys = new Set(
+    db.prepare(`SELECT f.facility_key FROM facilities f ${sql} LIMIT 60000`).all(...params)
+      .map((r) => r.facility_key),
+  );
+  return buildSingleSheet(db, { keys });
 }
 
 function meta() {

@@ -108,6 +108,7 @@ async function loadMeta() {
 }
 
 const EXPORT_NOTE = {
+  '就労支援事業所_全項目.csv': '★ 全部を1シートに。1行=1事業所、生産活動は分類ごとの○列つき。これだけで足ります',
   '01_事業所一覧.csv': '1行=1事業所。サービスごとの定員を列に展開済み。まずこれ',
   '02_サービス.csv': '1行=1サービス。営業時間・定休日つき',
   '03_工賃.csv': '1行=公表資料の1行。未突合の行も残してあります',
@@ -302,7 +303,7 @@ function renderResults() {
   if (hint) {
     hint.textContent = total === 0
       ? ''
-      : `「この条件をCSV」＝いま絞り込んでいる ${total.toLocaleString()} 件。「全件CSV」＝${(state.meta?.totals?.active ?? 0).toLocaleString()} 件すべて（工賃・生産活動つき、1行=1事業所）。どちらもExcelでそのまま開けます。`;
+      : `「この条件をCSV」＝いま絞り込んでいる ${total.toLocaleString()} 件。「全件CSV（1シート）」＝全事業所を1ファイルに（1行=1事業所、サービス・工賃・生産活動を横に展開）。どちらもExcelでそのまま開けます。`;
   }
 
   $('#pager').hidden = pages <= 1;

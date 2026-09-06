@@ -3458,3 +3458,46 @@ body.lp-refined .who-card:hover::before { opacity: 1; }
     body.lp-refined .lp-hero--photo::before,
     body.lp-refined .lp-hero--photo::after { animation: none; }
 }
+
+/* ---- welfareai：支援の循環（STEP 01-06）の円形イラスト ----
+   小さなアイコンから、ミッションと同じ「淡い円＋線画＋金のきらめき」に統一。
+   円と差し色は各ステップの色(--sc)を継ぎ、線はネイビーで揃える */
+body.lp-refined .step6 .sicon {
+    width: clamp(76px, 18vw, 92px);
+    height: auto;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    display: block;
+    margin: 0 auto 12px;
+}
+body.lp-refined .step6 .sicon svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+}
+body.lp-refined .step6 .sicon .il-bg { fill: var(--sc, var(--wa-blue)); opacity: 0.12; }
+body.lp-refined .step6 .sicon .il-ln {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+body.lp-refined .step6 .sicon .il-ac { fill: var(--sc, var(--wa-blue)); }
+body.lp-refined .step6 .sicon .il-sp { fill: var(--color-gold); }
+
+/* ホバーできらめきが際立つ（ミッションと同じ挙動） */
+body.lp-refined .step6 .sicon .il-sp {
+    transform-origin: 0 0;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), fill 0.4s ease;
+}
+body.lp-refined .step6:hover .sicon .il-sp {
+    transform: scale(1.16) rotate(14deg);
+    fill: var(--color-gold-deep);
+}
+@media (prefers-reduced-motion: reduce) {
+    body.lp-refined .step6 .sicon .il-sp { transition: none; }
+    body.lp-refined .step6:hover .sicon .il-sp { transform: none; }
+}

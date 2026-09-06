@@ -166,7 +166,8 @@ function buildAll(db, only = null) {
   if (want('00_はじめに.csv')) {
   const notes = [
     ['シート', '説明'],
-    ['01_事業所一覧', '1行 = 1事業所。サービスごとの定員を列に展開してあるので、そのままピボットできます。'],
+    ['就労支援事業所_全項目', '★1ファイルで済ませたいならこれ。全部を1シートに畳んであります。1行=1事業所で、サービス・工賃・生産活動を横に展開。生産活動は分類ごとの○列つき。突合できなかった資料の行も「レコード種別」列で区別して末尾に残しています。'],
+    ['01_事業所一覧', '1行 = 1事業所。上の全項目から、サービス詳細と活動の○列を省いたもの。'],
     ['02_サービス', '1行 = 1サービス。1事業所が複数サービスを持つため、事業所一覧より行数が多くなります。'],
     ['03_工賃', '1行 = 都道府県の公表資料の1行。突合できなかった行も残してあります（突合できたか列で判別）。'],
     ['04_生産活動', '1行 = 公表資料の1項目。同じ事業所が複数の分類を持ちます。'],
@@ -190,8 +191,135 @@ function buildAll(db, only = null) {
   return out;
 }
 
+/**
+ * 全部を1シートにまとめた書き出し。
+ *
+ * 事業所・サービス・工賃・生産活動は本来それぞれ粒度が違うので、
+ * 「1行 = 1事業所」に寄せて横へ展開する。
+ *   - サービスは定員を種別ごとの列に開く
+ *   - 生産活動は分類ごとに○の列を作る（表計算でフィルタ・ピボットしやすいため）
+ *   - 工賃は最新年度の代表値に加え、A型・B型を別列にも入れる
+ *
+ * どの事業所にも結び付けられなかった工賃・生産活動の行は、捨てずに末尾へ足す。
+ * 落とすと資料との件数照合ができなくなるため。1列目の「レコード種別」で分けられる。
+ */
+export function buildSingleSheet(db, { keys = null } = {}) {
+  const latest = db.prepare('SELECT period, label FROM snapshots ORDER BY period DESC LIMIT 1').get();
+  const basis = latest?.label ?? '不明';
+  const SRC = 'WAM NET 障害福祉サービス等情報公表システム オープンデータ';
+
+  const categories = db.prepare('SELECT DISTINCT category FROM activities ORDER BY category').all().map((r) => r.category);
+
+  // keys が渡されたときは、その事業所だけを対象にする（検索条件つきの書き出し）
+  const facilities = db.prepare('SELECT * FROM facilities ORDER BY pref_code, city, name').all()
+    .filter((f) => keys === null || keys.has(f.facility_key));
+
+  const svcByKey = new Map();
+  for (const s of db.prepare('SELECT * FROM services ORDER BY service_type').all()) {
+    if (!svcByKey.has(s.facility_key)) svcByKey.set(s.facility_key, []);
+    svcByKey.get(s.facility_key).push(s);
+  }
+  const actByKey = new Map();
+  for (const a of db.prepare('SELECT facility_key, category, detail, source_page, source_url, source_name FROM activities WHERE facility_key IS NOT NULL').all()) {
+    if (!actByKey.has(a.facility_key)) actByKey.set(a.facility_key, []);
+    actByKey.get(a.facility_key).push(a);
+  }
+  const wageByKey = new Map();
+  for (const w of db.prepare('SELECT * FROM wages WHERE facility_key IS NOT NULL ORDER BY fiscal_year DESC, avg_monthly DESC').all()) {
+    if (!wageByKey.has(w.facility_key)) wageByKey.set(w.facility_key, []);
+    wageByKey.get(w.facility_key).push(w);
+  }
+
+  const header = [
+    'レコード種別',
+    '事業所番号', '事業所名', 'ふりがな', '法人名', '法人番号',
+    '都道府県', '市区町村', '住所', '緯度', '経度',
+    '電話番号', 'FAX', 'URL',
+    '提供サービス', ...SERVICE_COLS.map((s) => `定員_${s}`),
+    'サービス詳細', '平日', '土曜', '日曜', '祝日', '定休日',
+    '生産活動', ...categories.map((c) => `活動_${c}`), '生産活動の内容', '生産活動の出典',
+    '平均工賃月額', '工賃の年度', '工賃のサービス種別',
+    '工賃_就労継続支援Ａ型', '工賃_就労継続支援Ｂ型', '工賃の突合方法', '工賃の出典',
+    '掲載状況', '初出スナップショット', '最終確認スナップショット',
+    '指定機関', 'データ基準', '基本情報の出典', '内部ID',
+  ];
+
+  const rows = [];
+  for (const f of facilities) {
+    const svcs = svcByKey.get(f.facility_key) ?? [];
+    const active = svcs.filter((s) => s.status === 'active');
+    const rep = active[0] ?? svcs[0];
+    const caps = Object.fromEntries(active.map((s) => [s.service_type, s.capacity]));
+    const acts = actByKey.get(f.facility_key) ?? [];
+    const actSet = new Set(acts.map((a) => a.category));
+    const wages = wageByKey.get(f.facility_key) ?? [];
+    const w0 = wages[0];
+    const byType = (t) => wages.find((w) => w.service_type === t)?.avg_monthly ?? '';
+
+    rows.push([
+      '事業所',
+      f.office_no, f.name, f.name_kana, f.corp_name, f.corp_no,
+      f.prefecture, f.city, f.address_full, f.lat, f.lng,
+      f.phone, f.fax, f.url,
+      active.map((s) => s.service_type).join(' / '),
+      ...SERVICE_COLS.map((s) => caps[s] ?? ''),
+      svcs.map((s) => `${s.service_type}${s.capacity == null ? '' : `(定員${s.capacity})`}${s.status === 'active' ? '' : '[掲載なし]'}`).join(' / '),
+      rep?.hours_weekday ?? '', rep?.hours_sat ?? '', rep?.hours_sun ?? '', rep?.hours_holiday ?? '', rep?.closed_days ?? '',
+      [...actSet].join(' / '),
+      ...categories.map((c) => (actSet.has(c) ? '○' : '')),
+      [...new Set(acts.map((a) => a.detail).filter(Boolean))].join('／'),
+      acts[0] ? (acts[0].source_page ?? acts[0].source_url) : '',
+      w0?.avg_monthly ?? '', w0 ? `${w0.fiscal_year}年度` : '', w0?.service_type ?? '',
+      byType('就労継続支援Ａ型'), byType('就労継続支援Ｂ型'),
+      w0?.match_method ?? '', w0 ? (w0.source_page ?? w0.source_url) : '',
+      f.status === 'active' ? '最新データに掲載あり' : '最新データに掲載なし',
+      f.first_seen, f.last_seen,
+      f.designator, basis, SRC, f.facility_key,
+    ]);
+  }
+
+  // 突合できなかった資料の行。事業所の行のあとに続ける。
+  // 絞り込み書き出しでは、どの事業所にも属さないため対象外にする。
+  const blank = (n) => Array.from({ length: n }, () => '');
+  if (keys !== null) return toCsv(header, rows);
+  for (const w of db.prepare('SELECT * FROM wages WHERE facility_key IS NULL ORDER BY prefecture, fiscal_year DESC').all()) {
+    const r = blank(header.length);
+    r[0] = '未突合の工賃';
+    r[header.indexOf('事業所番号')] = w.office_no ?? '';
+    r[header.indexOf('事業所名')] = w.facility_name;
+    r[header.indexOf('法人名')] = w.corp_name ?? '';
+    r[header.indexOf('法人番号')] = w.corp_no ?? '';
+    r[header.indexOf('都道府県')] = w.prefecture;
+    r[header.indexOf('市区町村')] = w.city ?? '';
+    r[header.indexOf('平均工賃月額')] = w.avg_monthly;
+    r[header.indexOf('工賃の年度')] = `${w.fiscal_year}年度`;
+    r[header.indexOf('工賃のサービス種別')] = w.service_type;
+    r[header.indexOf('工賃の突合方法')] = w.match_method ?? '';
+    r[header.indexOf('工賃の出典')] = w.source_page ?? w.source_url;
+    r[header.indexOf('データ基準')] = basis;
+    rows.push(r);
+  }
+  for (const a of db.prepare('SELECT * FROM activities WHERE facility_key IS NULL ORDER BY prefecture, category').all()) {
+    const r = blank(header.length);
+    r[0] = '未突合の生産活動';
+    r[header.indexOf('事業所名')] = a.facility_name;
+    r[header.indexOf('都道府県')] = a.prefecture;
+    r[header.indexOf('生産活動')] = a.category;
+    const ci = header.indexOf(`活動_${a.category}`);
+    if (ci >= 0) r[ci] = '○';
+    r[header.indexOf('生産活動の内容')] = a.detail ?? '';
+    r[header.indexOf('生産活動の出典')] = a.source_page ?? a.source_url;
+    r[header.indexOf('データ基準')] = basis;
+    rows.push(r);
+  }
+
+  return toCsv(header, rows);
+}
+
 /** 書き出せるファイル名（順序つき） */
+export const SINGLE_SHEET = '就労支援事業所_全項目.csv';
 export const TABLE_NAMES = [
+  SINGLE_SHEET,
   '00_はじめに.csv', '01_事業所一覧.csv', '02_サービス.csv',
   '03_工賃.csv', '04_生産活動.csv', '05_データソース.csv',
 ];
@@ -199,12 +327,14 @@ export const TABLE_NAMES = [
 /** 1つだけ作る。API から1ファイル取るときに全部を組み立てないため。 */
 export function buildTable(db, name) {
   if (!TABLE_NAMES.includes(name)) return null;
+  if (name === SINGLE_SHEET) return buildSingleSheet(db);
   return buildAll(db, name)[name] ?? null;
 }
 
 /** 全部作る（CLI 用） */
 export function buildTables(db) {
   const all = buildAll(db);
+  all[SINGLE_SHEET] = buildSingleSheet(db);
   return Object.fromEntries(TABLE_NAMES.map((n) => [n, all[n]]).filter(([, v]) => v != null));
 }
 
