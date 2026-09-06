@@ -217,11 +217,20 @@
 
           <!-- ミッション：長文を削り、ロゴの4点きらめきを motif にした
                ラインイラスト3点で「真価 → 舞台 → 社会の力」を視覚化する -->
+          <!-- ミッション：ステートメント → 理念の一文 → その解説 → イラスト3点。
+               きらめきは「位置決めの外側g」と「ホバー拡大の内側g(.sp)」を分ける。
+               同じ要素にSVGのtransform属性とCSSのtransform-boxを併用すると
+               基準点がずれて位置が飛ぶため、必ずこの入れ子を保つこと -->
           <div class="mission reveal">
             <p class="mission-eyebrow">Mission</p>
             <p class="mission-statement">ドロップアウトを、なくす。</p>
-            <p class="mission-tagline">一人ひとりの「できる」を、社会の力に。</p>
-            <p class="mission-lead">つまずいたのは、力がないからじゃない。<br>まだ、自分の舞台に出会っていないだけ。</p>
+            <p class="mission-tagline">〜誰もが真価があり、その真価を発揮できる舞台を、自分で作ることができる〜</p>
+
+            <div class="mission-terms">
+              <p><span class="term">真価</span>とは、誰かと比べて決まるものではなく、その人が本来持っている力のこと。</p>
+              <p><span class="term">舞台</span>とは、その力が誰かの役に立つ場所のこと。</p>
+              <p class="mission-terms-close">与えられるのを待つのではなく、自分の手でつくれる。<br>それが、Stellizeの信じていることです。</p>
+            </div>
 
             <div class="mission-items stagger">
 
@@ -229,16 +238,18 @@
                 <div class="mission-illust" aria-hidden="true">
                   <svg viewBox="0 0 120 120" role="presentation">
                     <defs>
-                      <radialGradient id="mi1" cx="50%" cy="42%" r="60%">
-                        <stop offset="0%" stop-color="#EFE9F7"/><stop offset="100%" stop-color="#EFE9F7" stop-opacity="0"/>
+                      <radialGradient id="mi1" cx="50%" cy="46%" r="58%">
+                        <stop offset="0%" stop-color="#EDE7F7"/><stop offset="100%" stop-color="#EDE7F7" stop-opacity="0"/>
                       </radialGradient>
                     </defs>
-                    <circle cx="60" cy="58" r="46" fill="url(#mi1)"/>
-                    <circle cx="60" cy="34" r="12.5" class="ln"/>
-                    <path d="M30 104C30 76 42 60 60 60s30 16 30 44" class="ln"/>
-                    <g class="sp" transform="translate(60,86) scale(0.85) translate(-12,-12)">
-                      <path d="M12 2c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/>
+                    <circle cx="60" cy="60" r="45" fill="url(#mi1)"/>
+                    <!-- 内に光を抱えた蕾 -->
+                    <path d="M60 20c14 18 24 33 24 47a24 24 0 0 1-48 0c0-14 10-29 24-47z" class="ln"/>
+                    <g transform="translate(60,70) scale(0.9)">
+                      <g class="sp"><path d="M0-10c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/></g>
                     </g>
+                    <circle cx="26" cy="34" r="2.6" class="dot"/>
+                    <circle cx="95" cy="42" r="2.2" class="dot" opacity=".7"/>
                   </svg>
                 </div>
                 <p class="mission-num">01</p>
@@ -250,17 +261,24 @@
                 <div class="mission-illust" aria-hidden="true">
                   <svg viewBox="0 0 120 120" role="presentation">
                     <defs>
-                      <radialGradient id="mi2" cx="50%" cy="42%" r="60%">
-                        <stop offset="0%" stop-color="#EFE9F7"/><stop offset="100%" stop-color="#EFE9F7" stop-opacity="0"/>
+                      <radialGradient id="mi2" cx="50%" cy="46%" r="58%">
+                        <stop offset="0%" stop-color="#EDE7F7"/><stop offset="100%" stop-color="#EDE7F7" stop-opacity="0"/>
                       </radialGradient>
+                      <linearGradient id="mi2b" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#D9BE86" stop-opacity=".55"/>
+                        <stop offset="60%" stop-color="#C0A16B" stop-opacity=".22"/>
+                        <stop offset="100%" stop-color="#C0A16B" stop-opacity="0"/>
+                      </linearGradient>
                     </defs>
-                    <circle cx="60" cy="58" r="46" fill="url(#mi2)"/>
-                    <path d="M20 96h22V78h22V60h22" class="ln"/>
-                    <circle cx="86" cy="44" r="8" class="ln"/>
-                    <path d="M74 60c0-6.6 5.4-12 12-12s12 5.4 12 12" class="ln"/>
-                    <g class="sp" transform="translate(86,20) scale(0.55) translate(-12,-12)">
-                      <path d="M12 2c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/>
+                    <circle cx="60" cy="60" r="45" fill="url(#mi2)"/>
+                    <!-- 降りそそぐ光と、自分で立つ舞台 -->
+                    <path d="M60 18 88 84H32z" fill="url(#mi2b)"/>
+                    <path d="M24 88h72" class="ln"/>
+                    <path d="M34 97h52" class="ln thin" opacity=".35"/>
+                    <g transform="translate(60,72) scale(0.92)">
+                      <g class="sp"><path d="M0-10c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/></g>
                     </g>
+                    <circle cx="60" cy="18" r="2.6" class="dot"/>
                   </svg>
                 </div>
                 <p class="mission-num">02</p>
@@ -272,20 +290,22 @@
                 <div class="mission-illust" aria-hidden="true">
                   <svg viewBox="0 0 120 120" role="presentation">
                     <defs>
-                      <radialGradient id="mi3" cx="50%" cy="46%" r="60%">
-                        <stop offset="0%" stop-color="#EFE9F7"/><stop offset="100%" stop-color="#EFE9F7" stop-opacity="0"/>
+                      <radialGradient id="mi3" cx="50%" cy="46%" r="58%">
+                        <stop offset="0%" stop-color="#EDE7F7"/><stop offset="100%" stop-color="#EDE7F7" stop-opacity="0"/>
                       </radialGradient>
                     </defs>
-                    <circle cx="60" cy="60" r="46" fill="url(#mi3)"/>
-                    <circle cx="60" cy="60" r="25" class="ln" opacity=".4"/>
-                    <circle cx="60" cy="60" r="38" class="ln" opacity=".28" stroke-dasharray="5 7"/>
-                    <circle cx="60.0" cy="12.0" r="3.6" class="dot"/>
-                    <circle cx="105.7" cy="45.2" r="3.6" class="dot"/>
-                    <circle cx="88.2" cy="98.8" r="3.6" class="dot"/>
-                    <circle cx="31.8" cy="98.8" r="3.6" class="dot"/>
-                    <circle cx="14.3" cy="45.2" r="3.6" class="dot"/>
-                    <g class="sp" transform="translate(60,60) scale(0.95) translate(-12,-12)">
-                      <path d="M12 2c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/>
+                    <circle cx="60" cy="60" r="45" fill="url(#mi3)"/>
+                    <!-- 星座：ひとつの光が、隣の光とつながって広がる -->
+                    <path d="M34 74 54 52 78 64 88 38" class="ln thin" opacity=".5"/>
+                    <path d="M54 52 58 88 78 64" class="ln thin" opacity=".3"/>
+                    <circle cx="34" cy="74" r="3.2" class="dot"/>
+                    <circle cx="78" cy="64" r="3.2" class="dot"/>
+                    <circle cx="58" cy="88" r="3.2" class="dot"/>
+                    <g transform="translate(88,38) scale(0.5)">
+                      <g class="sp"><path d="M0-10c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/></g>
+                    </g>
+                    <g transform="translate(54,52) scale(1)">
+                      <g class="sp"><path d="M0-10c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/></g>
                     </g>
                   </svg>
                 </div>
