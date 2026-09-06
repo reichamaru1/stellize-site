@@ -4,6 +4,7 @@ import { colIndex, colName, findHeaderRow, mapColumns } from '../src/ingest/xlsx
 import { classify, toCategory, cleanActivityLabel, CATEGORIES } from '../src/ingest/extra/activity.mjs';
 import { validateWageRecords } from '../src/ingest/extra/parse.mjs';
 import { buildIndex, matchRecord } from '../src/db/match.mjs';
+import { normalizeText } from '../src/ingest/normalize.mjs';
 
 test('列参照と列インデックスが相互変換できる', () => {
   assert.equal(colIndex('A1'), 0);
@@ -86,8 +87,8 @@ test('検証できる情報が無くても、非現実的な額は落とす', ()
 
 /* --- 突合 --- */
 const FACILITIES = [
-  { facility_key: 'k1', office_no: '1234500001', name: 'あおぞら作業所', name_norm: 'あおぞら作業所', corp_name: '社会福祉法人あおぞら', corp_no: '1111111111111', prefecture: '千葉県', city: '千葉市中央区' },
-  { facility_key: 'k2', office_no: '1234500002', name: 'あおぞら作業所', name_norm: 'あおぞら作業所', corp_name: '株式会社そら', corp_no: '2222222222222', prefecture: '千葉県', city: '船橋市' },
+  { facility_key: 'k1', office_no: '1234500001', name: 'あおぞら作業所', name_norm: normalizeText('あおぞら作業所'), corp_name: '社会福祉法人あおぞら', corp_no: '1111111111111', prefecture: '千葉県', city: '千葉市中央区' },
+  { facility_key: 'k2', office_no: '1234500002', name: 'あおぞら作業所', name_norm: normalizeText('あおぞら作業所'), corp_name: '株式会社そら', corp_no: '2222222222222', prefecture: '千葉県', city: '船橋市' },
 ];
 
 test('事業所番号があれば確実に突合する', () => {
@@ -116,4 +117,59 @@ test('法人番号と事業所名の組み合わせで突合できる', () => {
   const r = matchRecord({ corpNo: '1111111111111', facilityName: 'あおぞら作業所', prefecture: '千葉県' }, idx);
   assert.equal(r.facility.facility_key, 'k1');
   assert.equal(r.method, 'corp_no+name');
+});
+
+/* --- 市区町村の照合（実測で見つかった不具合の回帰テスト） --- */
+const CITY_FACS = [
+  { facility_key: 'a', office_no: '2312102557', name: 'ラポール', name_norm: normalizeText('らぽーる'), corp_name: null, corp_no: null, prefecture: '愛知県', city: '一宮市' },
+  { facility_key: 'b', office_no: '2318101405', name: '就労継続支援Ｂ型事業所らぽーる', name_norm: normalizeText('らぽーる'), corp_name: null, corp_no: null, prefecture: '愛知県', city: '名古屋市南区' },
+  { facility_key: 'c', office_no: '2313400123', name: 'たいじ', name_norm: normalizeText('たいじ'), corp_name: null, corp_no: null, prefecture: '愛知県', city: '海部郡大治町' },
+  { facility_key: 'd', office_no: '0110100001', name: 'そら', name_norm: normalizeText('そら'), corp_name: null, corp_no: null, prefecture: '北海道', city: '札幌市白石区' },
+  { facility_key: 'e', office_no: '1510100001', name: 'かがやき', name_norm: normalizeText('かがやき'), corp_name: null, corp_no: null, prefecture: '新潟県', city: '新潟市北区' },
+  // 市区町村語彙を作るための実在自治体（実データでは全市区町村が語彙に入る）
+  { facility_key: 'f', office_no: '2312000001', name: 'べつ', name_norm: normalizeText('べつ'), corp_name: null, corp_no: null, prefecture: '愛知県', city: '豊橋市' },
+];
+
+test('カナ正規化で同名になる別の市の事業所を掴まない', () => {
+  // 「らぽーる」と「ラポール」は正規化すると同じ。市区町村で区別できなければならない。
+  const idx = buildIndex(CITY_FACS);
+  const r = matchRecord({ facilityName: 'らぽーる', prefecture: '愛知県', city: '名古屋市' }, idx);
+  assert.equal(r.facility.facility_key, 'b');
+});
+
+test('郡の有無が違っても同じ市区町村とみなす', () => {
+  // 資料は「大治町」、事業所データは「海部郡大治町」
+  const idx = buildIndex(CITY_FACS);
+  const r = matchRecord({ facilityName: 'たいじ', prefecture: '愛知県', city: '大治町' }, idx);
+  assert.equal(r.facility.facility_key, 'c');
+});
+
+test('政令市の粒度差（札幌市 と 札幌市白石区）を吸収する', () => {
+  const idx = buildIndex(CITY_FACS);
+  const r = matchRecord({ facilityName: 'そら', prefecture: '北海道', city: '札幌市' }, idx);
+  assert.equal(r.facility.facility_key, 'd');
+});
+
+test('行政コードが前置された市区町村表記を扱える', () => {
+  // 新潟県の資料は「01-01新潟市北区」の形
+  const idx = buildIndex(CITY_FACS);
+  const r = matchRecord({ facilityName: 'かがやき', prefecture: '新潟県', city: '01-01新潟市北区' }, idx);
+  assert.equal(r.facility.facility_key, 'e');
+});
+
+test('市区町村ではない圏域名は照合条件に使わない', () => {
+  // 和歌山県の資料の「圏域」欄は「海草」「那賀」など市区町村ではない。
+  // これを市区町村として突き合わせると、正しい事業所まで弾いてしまう。
+  const facs = [{ facility_key: 'w', office_no: '3010100001', name: 'うみ', name_norm: normalizeText('うみ'), corp_name: null, corp_no: null, prefecture: '和歌山県', city: '海南市' }];
+  const idx = buildIndex(facs);
+  const r = matchRecord({ facilityName: 'うみ', prefecture: '和歌山県', city: '海草' }, idx);
+  assert.equal(r.facility.facility_key, 'w');
+  assert.equal(r.method, 'pref+name', '圏域名は市区町村として使わない');
+});
+
+test('市区町村が本当に食い違う場合は突合しない', () => {
+  const idx = buildIndex(CITY_FACS);
+  const r = matchRecord({ facilityName: 'たいじ', prefecture: '愛知県', city: '豊橋市' }, idx);
+  assert.equal(r.facility, null);
+  assert.equal(r.method, 'city_mismatch');
 });

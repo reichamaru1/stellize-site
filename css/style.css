@@ -3008,3 +3008,21 @@ body { padding-top: var(--header-h); }
     font-size: 0.78rem;
     letter-spacing: 0.08em;
 }
+
+/* ---- ヘッダーロゴ（画像差し替え） ----
+   テキストの Stellize から実ロゴ画像へ。ヘッダー高さに収まるよう
+   高さ基準で指定し、幅は自動。マーク＋ロゴタイプのみ（タグラインは
+   この寸法だと潰れるため logo-header.png 側で除外済み） */
+.logo {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+}
+.logo img {
+    height: 42px;
+    width: auto;
+    display: block;
+}
+@media (max-width: 768px) {
+    .logo img { height: 34px; }
+}

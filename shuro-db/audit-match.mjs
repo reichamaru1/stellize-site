@@ -45,7 +45,11 @@ for (const src of WAGE_SOURCES) {
     stats.byMethod.set(m, (stats.byMethod.get(m) ?? 0) + 1);
     if (!blind.facility) { stats.missed++; continue; }
     if (blind.facility.facility_key === truth.facility.facility_key) stats.agree++;
-    else {
+    else if (blind.facility.office_no === truth.facility.office_no) {
+      // 事業所番号が同じ＝同じ事業所。名称の揺れでレコードが分かれているだけで、
+      // 別の事業所を掴んだわけではない。
+      stats.sameOffice = (stats.sameOffice ?? 0) + 1;
+    } else {
       stats.disagree++;
       if (disagreements.length < 6) {
         disagreements.push({
@@ -59,16 +63,20 @@ for (const src of WAGE_SOURCES) {
   }
 }
 
-const attempted = stats.agree + stats.disagree;
+stats.sameOffice = stats.sameOffice ?? 0;
+const attempted = stats.agree + stats.disagree + stats.sameOffice;
 console.log('=== 名称ベース突合の精度（事業所番号での突合を正解とする） ===');
 console.log(`  検証対象（番号で確実に突合できた工賃レコード）: ${stats.truth}件`);
 console.log(`  名称だけで突合できた                        : ${attempted}件`);
 console.log(`    うち正解と一致                            : ${stats.agree}件`);
-console.log(`    うち別の事業所を選んだ                    : ${stats.disagree}件`);
+console.log(`    うち同じ事業所番号の別レコード            : ${stats.sameOffice}件（同一事業所。名称の揺れでレコードが分裂）`);
+console.log(`    うち別の事業所を選んだ（真の誤り）        : ${stats.disagree}件`);
 console.log(`  名称だけでは突合できなかった                : ${stats.missed}件`);
 console.log('');
-console.log(`  適合率（突合したもののうち正しい割合）: ${attempted ? ((stats.agree / attempted) * 100).toFixed(2) : '—'}%`);
-console.log(`  再現率（正解のうち拾えた割合）        : ${stats.truth ? ((stats.agree / stats.truth) * 100).toFixed(2) : '—'}%`);
+const correctFacility = stats.agree + stats.sameOffice;
+console.log(`  適合率（同一事業所を指していた割合）  : ${attempted ? ((correctFacility / attempted) * 100).toFixed(2) : '—'}%`);
+console.log(`  誤って別事業所を指した割合            : ${attempted ? ((stats.disagree / attempted) * 100).toFixed(2) : '—'}%`);
+console.log(`  再現率（正解のうち拾えた割合）        : ${stats.truth ? ((correctFacility / stats.truth) * 100).toFixed(2) : '—'}%`);
 console.log('');
 console.log('  名称突合で選ばれた方法の内訳:');
 for (const [k, v] of [...stats.byMethod].sort((a, b) => b[1] - a[1])) console.log(`    ${k}: ${v}件`);

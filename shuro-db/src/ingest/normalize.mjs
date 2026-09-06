@@ -27,8 +27,10 @@ export function toHalfWidth(s) {
     .replace(/[Ａ-Ｚａ-ｚ０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
     .replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
     .replace(/　/g, ' ')
-    // 全角ハイフン類・ダッシュ類をすべて ASCII のハイフンに寄せる
-    .replace(/[‐-―−－ー⁃˗]/g, '-');
+    // 全角ハイフン類・ダッシュ類を ASCII のハイフンに寄せる。
+    // 長音符「ー」(U+30FC) は含めない。名称の一部であり、ハイフンに潰すと
+    // 「ラポール」と「ラポ-ル」が同一になって別事業所を取り違える原因になる。
+    .replace(/[‐‑‒–—―−－⁃˗]/g, '-');
 }
 
 /** カタカナをひらがなへ（半角カナも先に全角化する） */
@@ -102,7 +104,9 @@ export function splitAddress(cityField, detailField, prefCode) {
 /** 住所の比較用正規化。番地の表記ゆれ（丁目・番地・ハイフン）を吸収する。 */
 export function normalizeAddress(s) {
   if (!s) return '';
-  let t = normalizeText(s);
+  // 住所では「１ー２ー３」のように長音符をハイフン代わりに打つ表記が実在するため、
+  // 住所に限ってはハイフンとして扱う。
+  let t = normalizeText(String(s).replace(/ー/g, '-'));
   t = t.replace(/大字|字/g, '');
   t = t.replace(/丁目|丁|番地|番|号/g, '-');
   t = t.replace(/-+/g, '-').replace(/-$/, '');
