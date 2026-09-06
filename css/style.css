@@ -3145,3 +3145,108 @@ body { padding-top: var(--header-h); }
 @media (prefers-reduced-motion: reduce) {
     .section h2::after { transform: scaleX(1); transition: none; }
 }
+
+
+/* ============================================================
+   ミッション：長文を削り、イラスト3点で見せる構成に
+   ============================================================ */
+.mission { text-align: center; }
+
+.mission-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-gold-deep);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.mission-tagline {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    color: var(--color-ink-soft);
+    letter-spacing: 0.06em;
+    margin-bottom: 26px;
+}
+/* 金の細罫でステートメントとリードを仕切る */
+.mission-tagline::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 1px;
+    margin: 24px auto 0;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+.mission-lead {
+    font-size: clamp(1.02rem, 2.3vw, 1.2rem);
+    line-height: 2;
+    color: var(--text-secondary);
+    margin-bottom: 46px;
+}
+
+.mission-items {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 28px;
+}
+
+/* カード見た目をやめ、イラスト主役の余白のある見せ方に */
+.mission-item {
+    background: none;
+    border-left: none;
+    padding: 0 10px;
+}
+
+.mission-illust {
+    width: clamp(110px, 26vw, 138px);
+    margin: 0 auto 6px;
+}
+.mission-illust svg { width: 100%; height: auto; display: block; overflow: visible; }
+/* 線はネイビー、きらめきは金（ロゴのマークと同じモチーフ） */
+.mission-illust .ln {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.mission-illust .sp   { fill: var(--color-gold); }
+.mission-illust .dot  { fill: var(--color-primary); }
+
+/* ホバーできらめきがふわっと際立つ */
+.mission-item .mission-illust .sp {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), fill 0.4s ease;
+}
+.mission-item:hover .mission-illust .sp {
+    transform: scale(1.18) rotate(12deg);
+    fill: var(--color-gold-deep);
+}
+
+.mission-num {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    color: var(--color-gold);
+    margin-bottom: 6px;
+}
+
+.mission-item h4 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.08rem;
+    color: var(--color-ink);
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 0.03em;
+}
+.mission-item p {
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mission-item .mission-illust .sp { transition: none; }
+    .mission-item:hover .mission-illust .sp { transform: none; }
+}

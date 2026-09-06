@@ -272,3 +272,31 @@ dialog::backdrop { background: rgb(0 0 0 / .5); }
 .export-list { list-style: none; padding: 0; margin: 8px 0 0; }
 .export-list li { padding: 5px 0; }
 .export-list .hint { display: inline; }
+
+/* --- 検索結果ヘッダのCSVボタン --- */
+.head-actions { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.csv-actions { display: inline-flex; gap: 6px; }
+.csv-actions .btn { text-decoration: none; }
+.csv-hint { margin: 6px 0 0; }
+.csv-hint:empty { display: none; }
+@media (max-width: 600px) {
+  .head-actions { width: 100%; justify-content: space-between; }
+}
+
+/* --- 結果ヘッダを追従させる ---
+   件数・表示切替・CSVボタンが常に手の届く位置にあるようにする。
+   一覧が数千件あるとき、CSVを取るためだけに先頭まで戻るのは無駄なので。 */
+.results-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+/* 追従中でも背景が透けないよう、地図パネルより前面に置く */
+#map-panel { position: relative; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .results-head { position: static; }
+}

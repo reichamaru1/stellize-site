@@ -76,37 +76,12 @@
     ]
   }
   </script>
+<style>.reveal,.fade-in,.stagger,.reveal-left,.reveal-right,.reveal-scale{opacity:1!important;transform:none!important}.section h2::after{transform:scaleX(1)!important}#loader{display:none!important}.philosophy-box{display:none}</style>
 </head>
 
 <body>
 
  <!-- ローディング：ロゴ線画 + グワんグワん -->
-<div id="loader" class="loader loader--crazy">
-  <div class="loader-bg">
-    <span class="blob b1"></span>
-    <span class="blob b2"></span>
-    <span class="blob b3"></span>
-  </div>
-
-  <div class="loader-inner">
-    <!-- 線画ロゴ（簡易：S） -->
-    <svg class="logo-draw" viewBox="0 0 220 220" role="img" aria-label="Stellize loading logo">
-      <path class="logo-path"
-        d="M155 55
-           C130 30, 70 35, 70 75
-           C70 110, 120 105, 120 135
-           C120 170, 70 175, 60 150"
-        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <path class="logo-path logo-path-2"
-        d="M160 150
-           C150 185, 100 195, 75 175"
-        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-
-    <p class="loader-text">Stellize</p>
-    <p class="loader-sub">Loading...</p>
-  </div>
-</div>
 
   <!-- ヘッダー（id付与 + class 追加） -->
   <header class="header header--floating" id="siteHeader">
@@ -123,85 +98,7 @@
     </div>
   </header>
 
-  <!-- ヒーロー（全画面／画像の左余白にテキストをオーバーレイ）
-       h1は行ごとに .hero-line で包み、1行ずつ時間差で立ち上げる -->
-  <section class="hero hero--overlay hero--full">
-    <div class="hero-banner">
-      <img src="assets/images/hero.jpg" alt="福祉施設のアトリエで、パソコンやスマホを使い穏やかにSNS発信や制作に取り組む人々" class="hero-bg" width="1821" height="864">
-      <span class="hero-scrim" aria-hidden="true"></span>
-      <!-- 背景で緩やかに漂う光のオーブ（装飾） -->
-      <span class="hero-orbs" aria-hidden="true">
-        <span class="orb orb-1"></span>
-        <span class="orb orb-2"></span>
-        <span class="orb orb-3"></span>
-      </span>
-      <div class="container">
-        <div class="hero-text">
-          <h1><span class="hero-line">価値を咲かせ、</span><span class="hero-line"><span>共に生きる。</span></span></h1>
-          <p>社会に貢献したい。自分らしく働きたい。<br>その想いを実現する舞台を、Stellizeはつくります。</p>
-          <div class="hero-buttons">
-            <a href="#business" class="btn btn-primary">事業を見る</a>
-            <a href="#contact" class="btn btn-secondary">導入の相談をする</a>
-          </div>
-        </div>
-      </div>
-      <a href="#business" class="hero-scroll" aria-label="事業紹介へスクロール">
-        <span class="hero-scroll-label">Scroll</span>
-        <span class="hero-scroll-line" aria-hidden="true"></span>
-      </a>
-    </div>
-  </section>
-
-  <!-- 事業紹介（ヒーロー直後に配置） -->
-  <section id="business" class="section business-section">
-    <div class="container">
-      <p class="label reveal">Our Business</p>
-      <h2 class="reveal">事業紹介</h2>
-
-      <div class="business-cards stagger">
-        <div class="card hover-float">
-          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
-          <p class="card-badge" hidden>導入実績 準備中</p>
-          <h3>就労支援向けクリエイティブ講座</h3>
-          <p>利用者さん向けのクリエイティブ講座。「得意」や「好き」を仕事につなげ、スキルアップと工賃向上・通所率向上を支援します。オンライン・訪問で選択可能。</p>
-          <a href="course.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-
-        <div class="card hover-float">
-          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
-          <p class="card-badge" hidden>導入実績 準備中</p>
-          <h3>SNS・生産活動研修</h3>
-          <p>人間関係・発信や集客・生産活動の獲得——現場の課題に、4つの専門研修でピンポイントに対応。リスキリング助成金の活用と、研修後の自走体制づくりまで伴走します。</p>
-          <a href="training.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-
-        <div class="card hover-float">
-          <!-- 実績確定後: hiddenを外して「◯施設で導入」等を記載 -->
-          <p class="card-badge" hidden>導入実績 準備中</p>
-          <h3>共創型プラットフォーム「WelfareAI」</h3>
-          <p>仕事・学び・相談・つながりをひとつに。利用者の「やってみたい」を施設の「やりたい」に変える、福祉の現場を支えるアプリです。基本利用は無料。</p>
-          <a href="welfareai.html" class="btn-link">詳しくはこちら <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 導入ストーリー漫画（掲載スロット）
-       漫画（施設向け導入ストーリー）が用意できたら:
-       1. section の hidden 属性を外す
-       2. .manga-grid 内に <img> を4枚入れる（alt にセリフ全文を記載）
-       それまでは非表示のまま何もレンダリングされない -->
-  <section id="story-manga" class="section" hidden>
-    <div class="container">
-      <p class="label reveal">Story</p>
-      <h2 class="reveal">ある事業所の導入ストーリー</h2>
-      <div class="manga-grid stagger">
-        <!-- <img src="assets/images/manga-1.webp" alt="..." width="1080" height="760" loading="lazy" decoding="async"> ×4 -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ABOUT（parallax対象に class付与） -->
+  
   <section id="about" class="section about-section parallax-section">
     <div class="container">
       <div class="about-content">
@@ -234,9 +131,9 @@
                       </radialGradient>
                     </defs>
                     <circle cx="60" cy="58" r="46" fill="url(#mi1)"/>
-                    <circle cx="60" cy="38" r="13" class="ln"/>
-                    <path d="M28 102c0-17.7 14.3-32 32-32s32 14.3 32 32" class="ln"/>
-                    <g class="sp" transform="translate(60,90) scale(0.8) translate(-12,-12)">
+                    <circle cx="60" cy="42" r="13" class="ln"/>
+                    <path d="M32 96c0-15 12.5-26 28-26s28 11 28 26" class="ln"/>
+                    <g class="sp" transform="translate(60,84) scale(0.62) translate(-12,-12)">
                       <path d="M12 2c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/>
                     </g>
                   </svg>
@@ -277,13 +174,13 @@
                       </radialGradient>
                     </defs>
                     <circle cx="60" cy="60" r="46" fill="url(#mi3)"/>
-                    <circle cx="60" cy="60" r="25" class="ln" opacity=".4"/>
-                    <circle cx="60" cy="60" r="38" class="ln" opacity=".28" stroke-dasharray="5 7"/>
-                    <circle cx="60.0" cy="12.0" r="3.6" class="dot"/>
-                    <circle cx="105.7" cy="45.2" r="3.6" class="dot"/>
-                    <circle cx="88.2" cy="98.8" r="3.6" class="dot"/>
-                    <circle cx="31.8" cy="98.8" r="3.6" class="dot"/>
-                    <circle cx="14.3" cy="45.2" r="3.6" class="dot"/>
+                    <path d="M60 34a26 26 0 0 1 0 52 26 26 0 0 1 0-52" class="ln" opacity=".45"/>
+                    <path d="M60 22a38 38 0 0 1 0 76" class="ln" opacity=".28"/>
+                    <circle cx="60" cy="16" r="3.4" class="dot"/>
+                    <circle cx="98" cy="44" r="3.4" class="dot"/>
+                    <circle cx="90" cy="94" r="3.4" class="dot"/>
+                    <circle cx="30" cy="94" r="3.4" class="dot"/>
+                    <circle cx="22" cy="44" r="3.4" class="dot"/>
                     <g class="sp" transform="translate(60,60) scale(0.95) translate(-12,-12)">
                       <path d="M12 2c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/>
                     </g>

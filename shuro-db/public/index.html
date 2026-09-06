@@ -134,18 +134,25 @@
       <button type="submit" class="btn primary">検索する</button>
       <button type="reset" class="btn">条件をクリア</button>
     </div>
-    <p class="actions-note"><a id="csv-link" href="/api/export.csv">この条件の結果をCSVでダウンロード</a></p>
+    <p class="actions-note">検索結果のCSVは、結果の上にある「この条件をCSV」から落とせます。</p>
   </form>
 
   <main id="results" tabindex="-1">
     <h2 class="sr-only">検索結果</h2>
     <div class="results-head">
       <p class="count" id="count" role="status" aria-live="polite">条件を指定して検索してください。</p>
-      <div class="view-toggle" role="group" aria-label="表示の切り替え">
-        <button type="button" class="btn small" id="view-list" aria-pressed="true">一覧</button>
-        <button type="button" class="btn small" id="view-map" aria-pressed="false">地図</button>
+      <div class="head-actions">
+        <div class="view-toggle" role="group" aria-label="表示の切り替え">
+          <button type="button" class="btn small" id="view-list" aria-pressed="true">一覧</button>
+          <button type="button" class="btn small" id="view-map" aria-pressed="false">地図</button>
+        </div>
+        <div class="csv-actions" role="group" aria-label="CSVのダウンロード">
+          <a class="btn small primary" id="csv-now" href="/api/export.csv" download>この条件をCSV</a>
+          <a class="btn small" id="csv-all" href="/api/export/01_%E4%BA%8B%E6%A5%AD%E6%89%80%E4%B8%80%E8%A6%A7.csv" download>全件CSV</a>
+        </div>
       </div>
     </div>
+    <p class="hint csv-hint" id="csv-hint"></p>
 
     <div id="map-panel" hidden>
       <div id="map" role="application" aria-label="事業所の地図"></div>

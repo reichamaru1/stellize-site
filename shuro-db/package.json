@@ -15,6 +15,8 @@
     "start": "node --no-warnings src/server.mjs",
     "test": "node --no-warnings --test test/*.test.mjs",
     "export": "node --no-warnings src/export.mjs",
-    "audit": "node --no-warnings audit-match.mjs"
+    "audit": "node --no-warnings audit-match.mjs",
+    "csv": "node --no-warnings src/export.mjs",
+    "all": "npm run fetch:all && npm run build && npm run export"
   }
 }

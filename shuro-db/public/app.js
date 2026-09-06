@@ -41,7 +41,7 @@ function currentParams() {
 function syncUrl(p) {
   const s = p.toString();
   history.replaceState(null, '', s ? `?${s}` : location.pathname);
-  $('#csv-link').href = `/api/export.csv?${s}`;
+  $('#csv-now').href = `/api/export.csv?${s}`;
 }
 
 function restoreFromUrl() {
@@ -296,6 +296,13 @@ function renderResults() {
       '条件を広げてみてください。キーワードを短くする、都道府県の指定を外す、などが有効です。'));
   } else {
     $('#cards').replaceChildren(...items.map(card));
+  }
+
+  const hint = $('#csv-hint');
+  if (hint) {
+    hint.textContent = total === 0
+      ? ''
+      : `「この条件をCSV」＝いま絞り込んでいる ${total.toLocaleString()} 件。「全件CSV」＝${(state.meta?.totals?.active ?? 0).toLocaleString()} 件すべて（工賃・生産活動つき、1行=1事業所）。どちらもExcelでそのまま開けます。`;
   }
 
   $('#pager').hidden = pages <= 1;
