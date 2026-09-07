@@ -319,6 +319,73 @@ function renderResults() {
   if (state.view === 'map') drawMap();
 }
 
+/* ---------- 送付リスト ---------- */
+const CHANNEL_OUTPUT = {
+  post: [['labels', '宛名ラベルCSV']],
+  fax: [['fax', 'FAX送付リストCSV']],
+  flyer: [['route', '投函ルートCSV'], ['labels', '宛名ラベルCSV']],
+};
+
+async function loadOutreach() {
+  const box = $('#outreach');
+  if (!box) return;
+  const m = await (await fetch('/api/outreach/meta')).json();
+
+  $('#outreach-policy').replaceChildren(
+    el('strong', { textContent: '送信そのものは自動化していません。' }),
+    el('ul', {}, m.sendingPolicy.map((t) => el('li', { textContent: t }))),
+  );
+  renderCampaigns(m.campaigns);
+  await refreshOutreachPreview();
+}
+
+/** いま絞り込んでいる条件で、何件に送れるかを先に見せる */
+async function refreshOutreachPreview() {
+  const box = $('#outreach-preview');
+  if (!box) return;
+  const p = currentParams();
+  p.set('channel', $('#oc-channel').value);
+  const r = await (await fetch(`/api/outreach/preview?${p}`)).json();
+  const ch = $('#oc-channel').value;
+  const lines = [
+    `いまの条件に合うのは ${r.total.toLocaleString()} 件です。`,
+    ch === 'fax'
+      ? `このうちFAX番号があるのは ${r.withFax.toLocaleString()} 件。番号のない ${(r.total - r.withFax).toLocaleString()} 件はリストに入りません。`
+      : `同じ住所への重複を1件にまとめると ${r.uniqAddress.toLocaleString()} 件になります。`,
+  ];
+  if (ch === 'flyer' && r.route?.length) {
+    const top = r.route.slice(0, 5).map((x) => `${x.area} ${x.count}件（約${x.distanceKm}km）`).join('／');
+    lines.push(`市区町村ごとに歩く順を組みます。件数の多い順に ${top}`);
+  }
+  box.replaceChildren(...lines.map((t) => el('p', { textContent: t, style: 'margin:2px 0' })));
+}
+
+function renderCampaigns(list) {
+  const box = $('#oc-list');
+  if (!list?.length) { box.replaceChildren(el('p', { className: 'hint', textContent: 'まだ送付リストはありません。' })); return; }
+  box.replaceChildren(...list.map((c) => {
+    const outputs = CHANNEL_OUTPUT[c.channel] ?? [];
+    const links = el('div', { className: 'oc-links' }, outputs.map(([kind, label]) =>
+      el('a', { className: 'btn small', href: `/api/outreach/campaign/${c.id}/download/${kind}`, download: '', textContent: label })));
+    const del = el('button', { type: 'button', className: 'btn small', textContent: '削除' });
+    del.addEventListener('click', async () => {
+      if (!confirm(`「${c.name}」を削除します。よろしいですか。`)) return;
+      await fetch(`/api/outreach/campaign/${c.id}`, { method: 'DELETE' });
+      renderCampaigns(await (await fetch('/api/outreach/campaigns')).json());
+    });
+    links.append(del);
+    const label = { post: '郵送', fax: 'FAX', flyer: 'チラシ投函' }[c.channel] ?? c.channel;
+    return el('div', { className: 'oc-card' }, [
+      el('div', { className: 'oc-head' }, [
+        el('span', { className: 'oc-name', textContent: c.name }),
+        el('span', { className: 'tag', textContent: label }),
+        el('span', { className: 'hint', textContent: `${c.total}件（送付済 ${c.sent} / 未着手 ${c.pending}）` }),
+      ]),
+      links,
+    ]);
+  }));
+}
+
 /* ---------- 詳細 ---------- */
 const SERVICE_NOTE = {
   '就労移行支援': '一般企業への就職を目指して、訓練や就職活動の支援を受けるサービスです（原則2年）。',
@@ -505,6 +572,7 @@ async function drawMap() {
 /* ---------- 起動 ---------- */
 (async function init() {
   await loadMeta();
+  loadOutreach().catch(() => {});
   const p = restoreFromUrl();
   if (p.get('pref')) await loadCities(p.get('pref'), p.get('city'));
 
@@ -567,6 +635,43 @@ async function drawMap() {
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
     );
   });
+  /* --- 送付リスト --- */
+  $('#oc-channel').addEventListener('change', refreshOutreachPreview);
+  $('#outreach').addEventListener('toggle', (e) => { if (e.target.open) refreshOutreachPreview(); });
+
+  $('#oc-create').addEventListener('click', async () => {
+    const name = $('#oc-name').value.trim();
+    const out = $('#oc-result');
+    if (!name) { out.textContent = '送付リストの名前を入れてください。'; return; }
+    const filter = Object.fromEntries(currentParams());
+    out.textContent = '作成しています…';
+    const res = await fetch('/api/outreach/campaigns', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, channel: $('#oc-channel').value, filter }),
+    });
+    const r = await res.json();
+    if (!res.ok) { out.textContent = r.error ?? '作成できませんでした。'; return; }
+    const sk = Object.entries(r.skipped).filter(([, v]) => v > 0).map(([k, v]) => `${k} ${v}件`).join('／');
+    out.textContent = `「${r.name}」を作成しました。${r.added}件が対象です。` + (sk ? `除外: ${sk}。` : '');
+    $('#oc-name').value = '';
+    renderCampaigns(await (await fetch('/api/outreach/campaigns')).json());
+  });
+
+  $('#oc-suppress').addEventListener('click', async () => {
+    const v = $('#oc-sup-key').value.trim();
+    const reason = $('#oc-sup-reason').value.trim();
+    const out = $('#oc-sup-result');
+    if (!v || !reason) { out.textContent = '対象と理由の両方を入れてください。'; return; }
+    const body = /^[\d-]+$/.test(v) ? { fax: v, reason } : { facilityKey: v, reason };
+    const res = await fetch('/api/outreach/suppressions', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    const r = await res.json();
+    out.textContent = res.ok ? `登録しました。送付停止は現在 ${r.total} 件です。` : (r.error ?? '登録できませんでした。');
+    $('#oc-sup-key').value = ''; $('#oc-sup-reason').value = '';
+    renderCampaigns(await (await fetch('/api/outreach/campaigns')).json());
+  });
+
   $('#clear-location').addEventListener('click', () => { clearNear(); runSearch(); });
   $('#radius_km').addEventListener('change', () => { if (state.near) { setNear(state.near, '現在地'); runSearch(); } });
 

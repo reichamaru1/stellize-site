@@ -203,6 +203,51 @@
       実際の廃止・休止を確認したものではありません。事業所番号の変更・改称・移転でもこの状態になります。
       同一施設の可能性がある記録は、詳細画面に候補として表示します（自動統合はしていません）。
     </p>
+    <details id="outreach">
+      <summary>この条件で送付リストを作る（郵送・FAX・チラシ投函）</summary>
+
+      <p class="notice" id="outreach-policy"></p>
+
+      <div id="outreach-preview" class="hint" role="status"></div>
+
+      <div class="field">
+        <label for="oc-channel">送付の方法</label>
+        <select id="oc-channel">
+          <option value="post">郵送（宛名ラベルを作る）</option>
+          <option value="fax">FAX（送付リストを作る）</option>
+          <option value="flyer">チラシ投函（歩く順のルートを作る）</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="oc-name">送付リストの名前</label>
+        <input type="text" id="oc-name" placeholder="例: 2026春_愛知_就労移行" autocomplete="off">
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="oc-create">この条件で送付リストを作る</button>
+      </div>
+      <p class="hint" id="oc-result" role="status"></p>
+
+      <h3>作成済みの送付リスト</h3>
+      <div id="oc-list"></div>
+
+      <h3>送付停止</h3>
+      <p class="hint">「送らないでほしい」と言われた先を登録します。以後すべての送付リストから自動で外れ、作成済みのものも対象外になります。</p>
+      <div class="field">
+        <label for="oc-sup-key">事業所の内部ID または FAX番号</label>
+        <input type="text" id="oc-sup-key" placeholder="内部ID（詳細画面に表示）またはFAX番号" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="oc-sup-reason">理由</label>
+        <input type="text" id="oc-sup-reason" placeholder="例: 先方より不要の申し出" autocomplete="off">
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="oc-suppress">送付停止に登録する</button>
+      </div>
+      <p class="hint" id="oc-sup-result" role="status"></p>
+    </details>
+
     <details id="bulk-export">
       <summary>CSVで全件を書き出す</summary>
       <p class="hint">

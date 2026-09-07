@@ -9,6 +9,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeText } from './ingest/normalize.mjs';
 import { buildTable, buildSingleSheet, TABLE_NAMES, SINGLE_SHEET } from './export.mjs';
+import {
+  openOutreach, CHANNELS, createCampaign, listCampaigns, getCampaign,
+  deleteCampaign, markStatus, addSuppression, listSuppressions,
+} from './outreach/store.mjs';
+import {
+  buildPostalLabels, buildFaxList, buildFlyerRoute, summarizeRoute, buildMergedDocs, PLACEHOLDERS,
+} from './outreach/output.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DB_PATH = path.join(ROOT, 'data', 'shuro.db');
@@ -354,6 +361,39 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
+const outreach = openOutreach();
+
+async function readJson(req, limit = 1_000_000) {
+  const chunks = [];
+  let size = 0;
+  for await (const c of req) {
+    size += c.length;
+    if (size > limit) throw new Error('リクエストが大きすぎます');
+    chunks.push(c);
+  }
+  if (chunks.length === 0) return {};
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
+
+/** 検索条件に合う事業所を、送付リストの材料として取り出す */
+function facilitiesForOutreach(sp, cap = 20000) {
+  const { sql, params } = buildWhere(sp);
+  return db.prepare(
+    `SELECT facility_key, office_no, name, corp_name, prefecture, city, address_full, phone, fax, url, lat, lng
+     FROM facilities f ${sql} ORDER BY pref_code, city, name LIMIT ?`,
+  ).all(...params, cap);
+}
+
+const csvResponse = (res, filename, csv) => {
+  const body = Buffer.from(csv, 'utf8');
+  res.writeHead(200, {
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+    'Content-Length': body.length,
+  });
+  res.end(body);
+};
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`);
   const p = url.pathname;
@@ -393,6 +433,75 @@ const server = createServer(async (req, res) => {
       });
       return res.end(body);
     }
+    /* ---------- 送付管理 ---------- */
+    if (p === '/api/outreach/meta') {
+      return json(res, {
+        channels: Object.entries(CHANNELS).map(([k, v]) => ({ key: k, label: v.label })),
+        placeholders: PLACEHOLDERS,
+        campaigns: listCampaigns(outreach),
+        suppressions: listSuppressions(outreach).length,
+        // 実際の送信を自動化しない理由を、画面にも出せるように返す
+        sendingPolicy: [
+          'このアプリは送付リストと文面・投函ルートまでを作ります。送信そのものは行いません。',
+          'メールアドレスは元データに含まれないため、メールDMは対象外です（事業所サイトの一括収集はしません）。',
+          'FAXは相手の用紙とトナーを消費します。送る前に停止依頼の受付先を文面に入れ、依頼はこの画面の「送付停止」に登録してください。',
+        ],
+      });
+    }
+    if (p === '/api/outreach/preview') {
+      const rows = facilitiesForOutreach(url.searchParams);
+      const channel = url.searchParams.get('channel') ?? 'post';
+      const withFax = rows.filter((r) => r.fax).length;
+      const uniqAddress = new Set(rows.map((r) => r.address_full)).size;
+      return json(res, {
+        channel, total: rows.length, withFax, uniqAddress, withGeo: rows.filter((r) => r.lat != null).length,
+        reachable: channel === 'fax' ? withFax : uniqAddress,
+        route: channel === 'flyer' ? summarizeRoute(rows).slice(0, 30) : null,
+      });
+    }
+    if (p === '/api/outreach/campaigns' && req.method === 'POST') {
+      const body = await readJson(req);
+      const sp = new URLSearchParams(body.filter ?? {});
+      const rows = facilitiesForOutreach(sp);
+      const result = createCampaign(outreach,
+        { name: body.name, channel: body.channel, filter: body.filter, note: body.note }, rows);
+      return json(res, result, 201);
+    }
+    if (p === '/api/outreach/campaigns') return json(res, listCampaigns(outreach));
+    if (p.startsWith('/api/outreach/campaign/')) {
+      const rest = p.slice('/api/outreach/campaign/'.length).split('/');
+      const id = Number(rest[0]);
+      const c = getCampaign(outreach, id);
+      if (!c) return json(res, { error: '送付リストが見つかりません' }, 404);
+
+      if (rest[1] === 'status' && req.method === 'POST') {
+        const body = await readJson(req);
+        return json(res, { updated: markStatus(outreach, { campaignId: id, ...body }) });
+      }
+      if (rest[1] === 'merge' && req.method === 'POST') {
+        const body = await readJson(req);
+        return csvResponse(res, `${c.name}_差し込み文面.csv`, buildMergedDocs(c, c.targets, body.template ?? ''));
+      }
+      if (rest[1] === 'download') {
+        const kind = rest[2] ?? 'labels';
+        const builders = {
+          labels: [buildPostalLabels, '宛名ラベル'],
+          fax: [buildFaxList, 'FAX送付リスト'],
+          route: [buildFlyerRoute, 'チラシ投函ルート'],
+        };
+        const b = builders[kind];
+        if (!b) return json(res, { error: '不明な出力です' }, 404);
+        return csvResponse(res, `${c.name}_${b[1]}.csv`, b[0](c, c.targets));
+      }
+      if (req.method === 'DELETE') return json(res, { deleted: deleteCampaign(outreach, id) });
+      return json(res, { ...c, routeSummary: c.channel === 'flyer' ? summarizeRoute(c.targets) : null });
+    }
+    if (p === '/api/outreach/suppressions' && req.method === 'POST') {
+      const body = await readJson(req);
+      return json(res, { total: addSuppression(outreach, body) }, 201);
+    }
+    if (p === '/api/outreach/suppressions') return json(res, listSuppressions(outreach));
+
     if (p.startsWith('/api/')) return json(res, { error: 'Unknown endpoint' }, 404);
     return serveStatic(req, res, p);
   } catch (e) {
