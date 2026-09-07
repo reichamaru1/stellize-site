@@ -3686,3 +3686,116 @@ body.lp-refined .after-label { color: #A85A1E; }
 body.lp-refined .flow-badge--subsidy .n { color: #9C4A66; }
 body.lp-refined .issue-card h3,
 body.lp-refined .issue-card .inum { color: #B34866; }
+
+
+/* ============================================================
+   アプローチ節：土台の考え方を名指しせず、現場に何が起きるかで見せる
+   ============================================================ */
+.approach { text-align: center; }
+
+.approach-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-gold-deep);
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.approach h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(1.35rem, 3.2vw, 2rem);
+    line-height: 1.65;
+    color: var(--color-ink);
+    letter-spacing: 0.03em;
+    margin-bottom: 22px;
+}
+.approach .choice-theory-lead {
+    font-size: clamp(0.98rem, 2.1vw, 1.1rem);
+    line-height: 2.05;
+    color: var(--text-secondary);
+    max-width: 660px;
+    margin: 0 auto 12px;
+}
+.approach .choice-theory-lead strong { color: var(--color-ink); font-weight: 600; }
+/* 金の細罫で本文へ受け渡す */
+.approach .choice-theory-lead::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 1px;
+    margin: 30px auto 0;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+.approach-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+.approach-points .point-item {
+    background: none;
+    border: none;
+    padding: 0 8px;
+    text-align: center;
+}
+.approach-illust { width: clamp(104px, 24vw, 128px); margin: 0 auto 8px; }
+.approach-illust svg { width: 100%; height: auto; display: block; overflow: visible; }
+.approach-illust .il-ln {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 2.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.approach-illust .il-ln.thin { stroke-width: 1.7; }
+.approach-illust .il-sp { fill: var(--color-gold); }
+
+.approach-illust .il-sp {
+    transform-origin: 0 0;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), fill 0.4s ease;
+}
+.approach-points .point-item:hover .il-sp {
+    transform: scale(1.16) rotate(14deg);
+    fill: var(--color-gold-deep);
+}
+
+.approach-num {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    color: var(--color-gold);
+    margin-bottom: 6px;
+}
+.approach-points .point-item h4 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.06rem;
+    color: var(--color-ink);
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: 0.03em;
+    display: block;
+}
+.approach-points .point-item p {
+    font-size: 0.92rem;
+    line-height: 1.95;
+    color: var(--text-secondary);
+}
+
+.approach-summary {
+    margin-top: 46px;
+    font-size: clamp(0.94rem, 2vw, 1.02rem);
+    line-height: 2.1;
+    color: var(--text-secondary);
+}
+.approach-summary strong {
+    color: var(--color-ink);
+    font-weight: 600;
+    border-bottom: 1.5px solid var(--color-gold);
+    padding-bottom: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .approach-illust .il-sp { transition: none; }
+    .approach-points .point-item:hover .il-sp { transform: none; }
+}
