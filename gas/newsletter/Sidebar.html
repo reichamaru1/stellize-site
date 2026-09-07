@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root { --navy:#1F2A54; --gold:#C0A16B; --cream:#FAF7F2; --line:#E2DACD; --muted:#7A7368; }
+  body { margin:0; padding:14px 14px 40px; font-family:'Hiragino Kaku Gothic ProN','Yu Gothic Medium',Meiryo,sans-serif;
+         font-size:12px; line-height:1.8; color:#3A3A3A; background:#fff; }
+  h2 { margin:20px 0 8px; font-size:11px; letter-spacing:.08em; color:var(--muted); font-weight:600;
+       border-bottom:1px solid var(--line); padding-bottom:5px; }
+  h2:first-child { margin-top:0; }
+  select, input[type=text] { width:100%; box-sizing:border-box; padding:7px 8px; font-size:12px;
+       border:1px solid var(--line); border-radius:5px; font-family:inherit; background:#fff; }
+  button { width:100%; box-sizing:border-box; padding:9px 10px; margin-top:7px; font-size:12px; font-weight:600;
+       font-family:inherit; border:0; border-radius:5px; cursor:pointer; background:var(--navy); color:#fff; }
+  button.sub { background:#fff; color:var(--navy); border:1px solid var(--navy); }
+  button.warn { background:#B85F7C; }
+  button:disabled { opacity:.4; cursor:default; }
+  .row { display:flex; gap:6px; } .row button { margin-top:7px; }
+  .stat { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dotted var(--line); }
+  .stat b { font-weight:600; color:var(--navy); font-variant-numeric:tabular-nums; }
+  .msg { margin-top:8px; padding:9px 10px; border-radius:5px; font-size:11.5px; line-height:1.75; white-space:pre-wrap; }
+  .err  { background:#FBEFF3; color:#8A3A54; }
+  .warn { background:#FDF6E7; color:#7A5F22; }
+  .ok   { background:#EDF2F0; color:#3E5A4C; }
+  .note { font-size:10.5px; color:var(--muted); line-height:1.7; margin:6px 0 0; }
+  .bar { height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin:6px 0 2px; }
+  .bar i { display:block; height:100%; background:var(--gold); }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+
+<h2>今日の送信枠</h2>
+<div class="stat"><span>Gmailの残数</span><b id="quota">–</b></div>
+<div class="stat"><span>このツールで送った数</span><b id="today">–</b></div>
+<div class="stat"><span>いま送れる数</span><b id="sendable">–</b></div>
+
+<h2>送る号</h2>
+<select id="issue" onchange="check()"></select>
+<div class="row">
+  <button class="sub" onclick="preview()">プレビュー</button>
+  <button class="sub" onclick="previewText()">テキスト版</button>
+</div>
+
+<div id="checkbox"></div>
+
+<h2>1. テスト送信</h2>
+<input type="text" id="testTo" placeholder="宛先（空欄なら自分）">
+<button class="sub" id="btnTest" onclick="test()">テスト送信する</button>
+<p class="note">本番の前に必ず1回。スマホでも開いて、リンクと配信停止が動くか確かめてください。</p>
+
+<h2>2. 本番送信</h2>
+<button id="btnStart" onclick="start()">この号を送信する</button>
+<p class="note">押すと宛先を確定して送り始めます。1日の枠を使い切ったら、翌日に自動で続きます。</p>
+
+<div id="running" class="hide">
+  <h2>送信中</h2>
+  <div class="stat"><span id="runIssue"></span><b id="runCount"></b></div>
+  <div class="bar"><i id="runBar" style="width:0%"></i></div>
+  <div class="row">
+    <button class="sub" onclick="resume()">続きを送る</button>
+    <button class="warn" onclick="stop()">止める</button>
+  </div>
+</div>
+
+<div id="msg"></div>
+
+<script>
+  var state = null;
+  var busy = false;
+
+  function $(id) { return document.getElementById(id); }
+  function show(cls, text) { $('msg').innerHTML = '<div class="msg ' + cls + '">' + text.replace(/</g,'&lt;') + '</div>'; }
+  function lock(on) {
+    busy = on;
+    ['btnTest','btnStart'].forEach(function (id) { $(id).disabled = on; });
+  }
+
+  function load() {
+    google.script.run.withSuccessHandler(function (s) {
+      state = s;
+      $('quota').textContent = s.quota + ' 通';
+      $('today').textContent = s.sentToday + ' 通';
+      $('sendable').textContent = s.sendable + ' 通';
+      if (!$('testTo').value) $('testTo').placeholder = s.me;
+
+      var sel = $('issue');
+      var keep = sel.value;
+      sel.innerHTML = s.drafts.map(function (d) {
+        return '<option value="' + d.issue + '">' + d.issue + '　' + d.state + '　' + d.subject.slice(0, 24) + '</option>';
+      }).join('');
+      if (keep) sel.value = keep;
+
+      if (s.running) {
+        var d = s.drafts.filter(function (x) { return x.issue === s.running; })[0] || { sent: 0, total: 0 };
+        $('running').className = '';
+        $('runIssue').textContent = s.running;
+        $('runCount').textContent = d.sent + ' / ' + d.total + ' 通';
+        $('runBar').style.width = (d.total ? Math.round(d.sent / d.total * 100) : 0) + '%';
+      } else {
+        $('running').className = 'hide';
+      }
+      check();
+    }).withFailureHandler(function (e) { show('err', e.message); }).uiState();
+  }
+
+  function check() {
+    var issue = $('issue').value;
+    if (!issue) { $('checkbox').innerHTML = ''; return; }
+    $('checkbox').innerHTML = '<p class="note">確認中…</p>';
+    google.script.run.withSuccessHandler(function (r) {
+      var h = '<div class="stat"><span>宛先（' + r.segment + '）</span><b>' + r.count + ' 件</b></div>';
+      if (r.errors.length) h += '<div class="msg err">送れません\n・' + r.errors.join('\n・') + '</div>';
+      if (r.warns.length)  h += '<div class="msg warn">確認したい点\n・' + r.warns.join('\n・') + '</div>';
+      if (!r.errors.length && !r.warns.length) h += '<div class="msg ok">送信前チェックは問題なしです。</div>';
+      $('checkbox').innerHTML = h;
+      $('btnStart').disabled = r.errors.length > 0;
+    }).withFailureHandler(function (e) { $('checkbox').innerHTML = '<div class="msg err">' + e.message + '</div>'; })
+      .uiCheck(issue);
+  }
+
+  function preview()     { google.script.run.withFailureHandler(function (e) { show('err', e.message); }).uiPreview($('issue').value); }
+  function previewText() { google.script.run.withFailureHandler(function (e) { show('err', e.message); }).uiPreviewText($('issue').value); }
+
+  function test() {
+    if (busy) return;
+    lock(true); show('ok', 'テスト送信中…');
+    google.script.run
+      .withSuccessHandler(function (m) { lock(false); show('ok', m); load(); })
+      .withFailureHandler(function (e) { lock(false); show('err', e.message); })
+      .sendTest($('issue').value, $('testTo').value.trim());
+  }
+
+  function start() {
+    if (busy) return;
+    var issue = $('issue').value;
+    // 取り消せない操作なので、件数を見せてもう一度確認する
+    google.script.run.withSuccessHandler(function (r) {
+      if (r.errors.length) { show('err', '送れません\n・' + r.errors.join('\n・')); return; }
+      if (!confirm(issue + ' を ' + r.count + ' 件に送信します。\n送信を始めると取り消せません。よろしいですか？')) return;
+      lock(true); show('ok', '送信を開始しています…');
+      google.script.run
+        .withSuccessHandler(function (m) { lock(false); show('ok', m); load(); })
+        .withFailureHandler(function (e) { lock(false); show('err', e.message); })
+        .startSending(issue);
+    }).withFailureHandler(function (e) { show('err', e.message); }).uiCheck(issue);
+  }
+
+  function resume() {
+    show('ok', '続きを送っています…');
+    google.script.run.withSuccessHandler(function (m) { show('ok', m); load(); })
+      .withFailureHandler(function (e) { show('err', e.message); }).resumeSending();
+  }
+
+  function stop() {
+    if (!confirm('送信を止めます。すでに送った分は取り消せません。よろしいですか？')) return;
+    google.script.run.withSuccessHandler(function (m) { show('ok', m); load(); })
+      .withFailureHandler(function (e) { show('err', e.message); }).stopSending();
+  }
+
+  load();
+  setInterval(function () { if (!busy) load(); }, 30000);   // 送信中の進捗を追う
+</script>
+</body>
+</html>

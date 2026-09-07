@@ -5,3 +5,6 @@ Thumbs.db
 
 # 検証用の一時ページ（自動コミットに巻き込まれないように）
 __v*.html
+
+# メールのプレビューは生成物（画像を埋め込むので大きい）。node mail/build.mjs で作り直せる
+mail/preview/

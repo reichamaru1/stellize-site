@@ -1,16 +1,22 @@
 <!--
   Stellize HTMLメール 共通テンプレート（骨格）
 
-  メールクライアントはCSSの対応がバラバラなので、サイト側のCSSは一切使わず
-  ここで完結させている。守っている制約は次の4つ。
+  サイトの世界観をメールに持ち込むための取り決め。
+    ・地は米色 #F0EBE3、本体は白のカード。角丸と淡い影で「便箋」に見せる
+    ・見出しは明朝、字間 0.06em。ここがブランドの背骨なので絶対に崩さない
+    ・罫はシャンパンゴールド #C0A16B の細線。太くしない
+    ・星 ✦ は区切りと飾りにだけ使う。多用すると安っぽくなる
 
+  メールクライアント対策として守っている制約。
     1. レイアウトは <table> のみ。flex / grid / position は使わない
     2. 色・余白・文字はすべてインラインstyle。<style> はレスポンシブと
-       ダークモードの上書きだけに使う（Gmailアプリの一部は <style> を捨てるため）
+       ダークモードの上書きだけ（Gmailアプリの一部は <style> を捨てるため）
     3. Webフォントは読み込まない。Gmailが対応しないので端末のフォントに任せる
-    4. 画像は必ず絶対URL。alt を入れ、画像オフでも意味が通る文にする
+    4. 面のグラデーションは bgcolor（単色）を必ず併記する。
+       Outlookは background-image を無視するので、単色でも成立する配色にする
+    5. 画像は必ず絶対URL。alt を入れ、画像オフでも意味が通る文にする
 
-  {{...}} は Render.gs / mail/builder が置換する差し込み口。
+  {{...}} は Render.gs / mail/build.mjs が置換する差し込み口。
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
@@ -25,29 +31,35 @@
 <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
 <![endif]-->
 <style type="text/css">
-  /* Outlook が本文の行間を詰めるのを防ぐ */
   table, td { mso-table-lspace:0pt; mso-table-rspace:0pt; }
   img { -ms-interpolation-mode:bicubic; border:0; outline:none; text-decoration:none; }
   body { margin:0; padding:0; width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
-  /* iOS が電話番号・日付を勝手にリンクにして青くするのを打ち消す */
   a[x-apple-data-detectors] { color:inherit !important; text-decoration:none !important; font-size:inherit !important; font-family:inherit !important; font-weight:inherit !important; line-height:inherit !important; }
 
   @media only screen and (max-width:620px) {
-    .sl-wrap { width:100% !important; }
-    .sl-pad { padding-left:24px !important; padding-right:24px !important; }
-    .sl-h1 { font-size:22px !important; line-height:1.5 !important; }
-    .sl-h2 { font-size:18px !important; }
-    .sl-btn a { display:block !important; }
+    .sl-wrap  { width:100% !important; }
+    .sl-pad   { padding-left:26px !important; padding-right:26px !important; }
+    .sl-pad-l { padding-left:26px !important; padding-right:26px !important; }
+    .sl-h1    { font-size:24px !important; line-height:1.62 !important; letter-spacing:.03em !important; }
+    .sl-h2    { font-size:19px !important; }
+    .sl-state { font-size:19px !important; line-height:1.85 !important; }
+    .sl-lead  { font-size:15.5px !important; }
+    .sl-num   { font-size:30px !important; }
+    .sl-btn a { display:block !important; padding-left:16px !important; padding-right:16px !important; }
     .sl-stack { display:block !important; width:100% !important; max-width:100% !important; }
-    .sl-stack-gap { height:16px !important; }
-    .sl-logo img { width:132px !important; height:auto !important; }
+    .sl-gap   { display:block !important; height:14px !important; line-height:14px !important; }
+    .sl-logo img { width:138px !important; height:auto !important; }
+    .sl-spec-key { width:82px !important; }
+    .sl-voice-img { width:52px !important; }
   }
 
-  /* Outlook.com / Outlookアプリ のダークモード。地の色まで反転されると
-     ロゴやゴールドの罫が沈むので、明るい面だけ明示的に戻す */
-  [data-ogsc] .sl-card { background:#FFFFFF !important; }
-  [data-ogsc] .sl-text { color:#3A3A3A !important; }
+  /* Outlook.com / Outlookアプリ のダークモード。地まで反転されるとゴールドの罫が沈むので、
+     明るい面と文字色だけ明示的に戻す */
+  [data-ogsc] .sl-card  { background:#FFFFFF !important; }
+  [data-ogsc] .sl-cream { background:#FAF7F2 !important; }
+  [data-ogsc] .sl-text  { color:#3A3A3A !important; }
   [data-ogsc] .sl-title { color:{{ACCENT}} !important; }
+  [data-ogsc] .sl-kicker{ color:#9A7F4E !important; }
 </style>
 </head>
 <body style="margin:0; padding:0; background-color:#F0EBE3;">
@@ -58,68 +70,89 @@
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F0EBE3;">
   <tr>
-    <td align="center" style="padding:24px 12px 40px 12px;">
+    <td align="center" style="padding:26px 12px 44px 12px;">
 
       <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
       <table role="presentation" class="sl-wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; margin:0 auto;">
 
-        <!-- ブラウザで見る -->
         <tr>
-          <td align="center" style="padding:0 24px 16px 24px; font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic Medium','Yu Gothic',Meiryo,sans-serif; font-size:11px; line-height:1.6; color:#8A8378;">
+          <td align="center" style="padding:0 24px 14px 24px; font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic Medium','Yu Gothic',Meiryo,sans-serif; font-size:11px; line-height:1.6; color:#9A9184;">
             {{WEBVIEW}}
           </td>
         </tr>
 
-        <!-- ヘッダー：ロゴ -->
+        <!-- ロゴとタグライン。ここでブランドを名乗る -->
         <tr>
-          <td class="sl-logo" align="center" style="padding:0 24px 20px 24px;">
-            <a href="{{SITE_URL}}" style="text-decoration:none;"><img src="{{LOGO_URL}}" width="152" height="36" alt="Stellize" style="display:block; width:152px; height:auto; border:0;" /></a>
+          <td class="sl-logo" align="center" style="padding:0 24px 8px 24px;">
+            <a href="{{SITE_URL}}" style="text-decoration:none;"><img src="{{LOGO_URL}}" width="158" height="37" alt="Stellize" style="display:block; width:158px; height:auto; border:0; font-family:'Hiragino Mincho ProN','Yu Mincho',serif; font-size:18px; letter-spacing:0.14em; color:#1F2A54; text-decoration:none;" /></a>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:0 24px 22px 24px; font-family:'Hiragino Mincho ProN','Yu Mincho','YuMincho','MS PMincho',serif; font-size:11px; letter-spacing:0.34em; color:#9A7F4E; text-indent:0.34em;">
+            自分の価値に、気づく。
           </td>
         </tr>
 
         <!-- 本体カード -->
         <tr>
-          <td class="sl-card" style="background-color:#FFFFFF; border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(31,42,84,0.06);">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <td class="sl-card" style="background-color:#FFFFFF; border-radius:16px; overflow:hidden;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:16px; overflow:hidden;">
 
-              <!-- カード上端のアクセント罫 -->
-              <tr><td style="height:4px; line-height:4px; font-size:0; background-color:{{ACCENT}};">&nbsp;</td></tr>
+              <!-- カード上端。テーマ色の細い帯 -->
+              <tr><td style="height:5px; line-height:5px; font-size:0; background-color:{{ACCENT}};">&nbsp;</td></tr>
 
-              <!-- タイトル -->
+              <!-- 冒頭画像（原稿に !! があれば入る） -->
+              {{HERO}}
+
+              <!-- 見出しまわり。米色から白へ流して、便箋の書き出しに見せる -->
               <tr>
-                <td class="sl-pad" style="padding:36px 44px 4px 44px;">
-                  <p style="margin:0 0 10px 0; font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic Medium','Yu Gothic',Meiryo,sans-serif; font-size:11px; letter-spacing:0.16em; color:{{ACCENT_DEEP}}; text-transform:uppercase;">{{EYEBROW}}</p>
-                  <h1 class="sl-h1 sl-title" style="margin:0; font-family:'Hiragino Mincho ProN','Yu Mincho','YuMincho','MS PMincho',serif; font-size:26px; line-height:1.6; font-weight:600; color:{{ACCENT}};">{{TITLE}}</h1>
+                <td class="sl-cream" bgcolor="#FAF7F2" style="background-color:#FAF7F2; background-image:linear-gradient(180deg,#FAF7F2 0%,#FFFFFF 100%);">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td class="sl-pad" style="padding:40px 46px 0 46px;">
+                        <p class="sl-kicker" style="margin:0 0 14px 0; font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic Medium','Yu Gothic',Meiryo,sans-serif; font-size:10px; letter-spacing:0.24em; color:#9A7F4E; text-indent:0.24em;">{{EYEBROW}}</p>
+                        <h1 class="sl-h1 sl-title" style="margin:0; font-family:'Hiragino Mincho ProN','Yu Mincho','YuMincho','MS PMincho',serif; font-size:28px; line-height:1.72; font-weight:600; letter-spacing:0.055em; color:{{ACCENT}};">{{TITLE}}</h1>
+                      </td>
+                    </tr>
+                    <!-- 星の飾り罫。サイトの star-divider と同じ役 -->
+                    <tr>
+                      <td class="sl-pad" style="padding:22px 46px 40px 46px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                          <tr>
+                            <td style="width:54px; height:1px; line-height:1px; font-size:0; background-color:#DFCFA8;">&nbsp;</td>
+                            <td style="padding:0 10px; font-family:'Hiragino Kaku Gothic ProN',Meiryo,sans-serif; font-size:11px; line-height:1; color:#C0A16B;">&#10022;</td>
+                            <td style="width:54px; height:1px; line-height:1px; font-size:0; background-color:#DFCFA8;">&nbsp;</td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
 
-              <!-- 見出し下のゴールド罫 -->
-              <tr>
-                <td class="sl-pad" style="padding:18px 44px 0 44px;">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:48px; height:2px; line-height:2px; font-size:0; background-color:#C0A16B;">&nbsp;</td></tr></table>
-                </td>
-              </tr>
-
-              <!-- 本文ブロック（Render.gs が組み立てたHTMLが入る） -->
+              <!-- 本文 -->
               {{BODY}}
 
-              <tr><td style="height:12px; line-height:12px; font-size:0;">&nbsp;</td></tr>
+              <tr><td style="height:14px; line-height:14px; font-size:0;">&nbsp;</td></tr>
+
+              <!-- カード下端のゴールド罫 -->
+              <tr><td style="height:3px; line-height:3px; font-size:0; background-color:#C0A16B;">&nbsp;</td></tr>
             </table>
           </td>
         </tr>
 
         <!-- 差出人情報とフッター
-             ここは特定電子メール法で表示が必要な項目。消さないこと。
+             特定電子メール法で表示が必要な項目。消さないこと。
              ・送信者の名称 ・住所 ・問い合わせ受付先 ・受信拒否の通知先 -->
         <tr>
-          <td class="sl-pad" style="padding:28px 44px 0 44px; font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic Medium','Yu Gothic',Meiryo,sans-serif; font-size:12px; line-height:1.9; color:#7A7368;">
+          <td class="sl-pad" style="padding:30px 46px 0 46px; font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic Medium','Yu Gothic',Meiryo,sans-serif; font-size:12px; line-height:1.95; color:#82796C;">
             {{FOOTER_NOTE}}
-            <p style="margin:0 0 4px 0; font-size:12px; color:#5C564D; font-weight:600;">{{COMPANY}}</p>
+            <p style="margin:0 0 5px 0; font-family:'Hiragino Mincho ProN','Yu Mincho',serif; font-size:14px; letter-spacing:0.04em; color:#3F3A32;">{{COMPANY}}</p>
             <p style="margin:0 0 2px 0;">{{ADDRESS}}</p>
-            <p style="margin:0 0 12px 0;"><a href="{{SITE_URL}}" style="color:{{ACCENT_DEEP}}; text-decoration:underline;">{{SITE_URL_LABEL}}</a>　|　<a href="{{CONTACT_URL}}" style="color:{{ACCENT_DEEP}}; text-decoration:underline;">お問い合わせ</a>　|　<a href="{{PRIVACY_URL}}" style="color:{{ACCENT_DEEP}}; text-decoration:underline;">プライバシーポリシー</a></p>
-            <p style="margin:0 0 4px 0; font-size:11px; line-height:1.8; color:#8A8378;">{{PERMISSION_NOTE}}</p>
-            <p style="margin:0 0 20px 0; font-size:11px;"><a href="{{UNSUB_URL}}" style="color:#8A8378; text-decoration:underline;">今後このメールを受け取らない（配信停止）</a></p>
-            <p style="margin:0 0 8px 0; font-size:10px; color:#A39B8F;">&copy; {{YEAR}} Stellize. All rights reserved.</p>
+            <p style="margin:0 0 14px 0;"><a href="{{SITE_URL}}" style="color:{{ACCENT_DEEP}}; text-decoration:underline;">{{SITE_URL_LABEL}}</a>　|　<a href="{{CONTACT_URL}}" style="color:{{ACCENT_DEEP}}; text-decoration:underline;">お問い合わせ</a>　|　<a href="{{PRIVACY_URL}}" style="color:{{ACCENT_DEEP}}; text-decoration:underline;">プライバシーポリシー</a></p>
+            <p style="margin:0 0 4px 0; font-size:11px; line-height:1.85; color:#9A9184;">{{PERMISSION_NOTE}}</p>
+            <p style="margin:0 0 22px 0; font-size:11px;"><a href="{{UNSUB_URL}}" style="color:#9A9184; text-decoration:underline;">今後このメールを受け取らない（配信停止）</a></p>
+            <p style="margin:0 0 6px 0; font-size:10px; letter-spacing:0.06em; color:#B0A79A;">&copy; {{YEAR}} Stellize. All rights reserved.</p>
           </td>
         </tr>
 
