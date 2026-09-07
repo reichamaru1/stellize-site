@@ -37,6 +37,12 @@
     --color-gold: #C0A16B;
     --color-gold-light: #E6D3A8;
     --color-gold-deep: #9A7F4E;
+
+    /* パステルと同じ色相のまま濃度だけ上げた文字用の色。
+       淡い紫・淡いピンクは面には効くが文字だと薄すぎて読めないため、
+       見出しなど文字に乗せるときはこちらを使う */
+    --color-primary-deep: #6F5F96;
+    --color-accent-deep: #B85F7C;
     --shadow-lg: 0 24px 70px rgba(21, 29, 59, 0.18);
 }
 
@@ -319,9 +325,13 @@ body {
     letter-spacing: 0.08em;
 }
 
-.hero-text h1 span {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+/* 強調語だけをグラデーションにする。
+   `.hero-text h1 span` のままだと行を包む .hero-line にも掛かり、
+   見出し全体が淡い紫になって読めなくなる */
+.hero-text h1 .hl-grad {
+    background: linear-gradient(135deg, var(--color-primary-deep), var(--color-accent-deep));
     -webkit-background-clip: text;
+            background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 600;
 }
@@ -2983,7 +2993,7 @@ body { padding-top: var(--header-h); }
     font-weight: 600;
     text-shadow: 0 1px 20px rgba(250, 247, 242, 0.85);
 }
-.hero--full .hero-text h1 span {
+.hero--full .hero-text h1 .hl-grad {
     /* グラデーション文字は text-shadow が乗らないので個別に解除 */
     text-shadow: none;
 }
@@ -3501,3 +3511,178 @@ body.lp-refined .step6:hover .sicon .il-sp {
     body.lp-refined .step6 .sicon .il-sp { transition: none; }
     body.lp-refined .step6:hover .sicon .il-sp { transform: none; }
 }
+
+
+/* ============================================================
+   ヘッダーナビ：カーソルを合わせたときに「押せる」と分かる見た目に
+   これまでは淡い紫に色が変わるだけで、変化も薄く判別しづらかった
+   ============================================================ */
+.nav a {
+    position: relative;
+    padding: 8px 2px;
+    transition: color 0.25s ease;
+}
+/* 下線が中央から広がる */
+.nav a:not(.btn-contact)::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, var(--color-gold), var(--color-primary-deep));
+    transition: left 0.28s cubic-bezier(0.16, 1, 0.3, 1), right 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav a:not(.btn-contact):hover::after,
+.nav a:not(.btn-contact):focus-visible::after {
+    left: 0;
+    right: 0;
+}
+/* 淡い紫だと変化が見えないので、ホバー時は濃色にする */
+.nav a:not(.btn-contact):hover,
+.nav a:not(.btn-contact):focus-visible {
+    color: var(--color-ink);
+}
+
+/* CTAボタンは浮かせて押せる感を出す */
+.nav .btn-contact {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.nav .btn-contact:hover,
+.nav .btn-contact:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(31, 42, 84, 0.22), inset 0 0 0 1px rgba(230, 211, 168, 0.7);
+}
+
+/* キーボード操作時のフォーカスも見えるようにする */
+.nav a:focus-visible,
+.logo:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+.logo { transition: opacity 0.25s ease; }
+.logo:hover { opacity: 0.72; }
+
+@media (prefers-reduced-motion: reduce) {
+    .nav a::after,
+    .nav .btn-contact { transition: none; }
+    .nav .btn-contact:hover { transform: none; }
+}
+
+
+/* ============================================================
+   可読性の底上げ
+   淡いパステルは「面」には効くが「文字」に乗せると薄すぎて読めない。
+   パステルの面はそのままに、文字だけ同系色の濃い方へ差し替える
+   ============================================================ */
+
+/* 補助テキストの灰色が薄すぎた（白地で約2.9:1） */
+:root { --text-light: #6E6E6E; }
+
+/* 淡い紫を文字に使っていた箇所（白地で約2.5:1）を同系の濃色へ */
+.philosophy-box h3,
+.story strong,
+.card h3,
+.btn-link,
+.blog-link,
+.coming-soon-placeholder p,
+.choice-theory-box h4,
+.step-number,
+.price,
+.solution-card h3,
+.voice-role,
+.price-compare-arrow,
+.price-highlight,
+.impact-arrow,
+.impact-after,
+.cta-tier .tier-icon,
+.tier-btn,
+.btn-outline {
+    color: var(--color-primary-deep);
+}
+.mission .mission-statement { color: var(--color-primary-deep); }
+
+/* フッター：背景のラベンダーは指定どおり残し、文字側を紺にして読めるようにする
+   （白文字だとこの明るさの地に対して約2.5:1しか出ない） */
+.footer { color: var(--color-ink); }
+.footer-col h4 { color: var(--color-ink); }
+.footer-col p  { color: var(--color-ink-soft); }
+.footer-col a {
+    color: var(--color-ink);
+    opacity: 0.82;
+    transition: opacity 0.25s ease, color 0.25s ease;
+}
+.footer-col a:hover,
+.footer-col a:focus-visible {
+    opacity: 1;
+    color: var(--color-ink-deep);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.footer-bottom {
+    border-top-color: rgba(31, 42, 84, 0.22);
+    color: var(--color-ink);
+    opacity: 0.85;
+}
+.footer-bottom a { color: var(--color-ink) !important; opacity: 0.85 !important; }
+.footer-bottom a:hover { opacity: 1 !important; text-decoration: underline; }
+
+
+/* ---- CTAボタン：白文字が乗る面は濃度を上げる ----
+   淡いラベンダー(#AE9FC4)に白文字だと約2.5:1しか出ない。
+   同じラベンダーのまま濃度だけ上げて白文字が読めるようにする */
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary-deep) 0%, #8E7FB4 100%);
+    box-shadow: 0 8px 25px rgba(111, 95, 150, 0.32), inset 0 0 0 1px rgba(230, 211, 168, 0.5);
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5E5083 0%, #7E6FA6 100%);
+}
+.btn-contact {
+    background: var(--color-primary-deep);
+}
+.btn-contact:hover {
+    background: #5E5083;
+}
+
+/* 小さめの金ラベル（12px前後）は、この明るさだと本文基準に届かないので一段濃く */
+:root { --color-gold-deep: #7E663A; }
+
+/* LP側の淡色文字：面の配色はそのままに、文字だけ読める濃さへ */
+body.lp-refined { --lp-green: #4E6B52; --lp-green-d: #3E5742; }
+body.lp-refined .case-card .who,
+body.lp-refined .mission-card .mnum,
+body.lp-refined .ba .arrow { color: var(--lp-green); }
+
+
+/* ---- 残っていた淡色文字を、同系色の濃い方へ ----
+   いずれも背景の配色は変えず、文字だけ読める濃さに寄せている */
+:root { --color-accent-deep: #AD5875; }
+
+/* course / training の「Q」記号、STEPバッジの番号 */
+body.lp-refined .empathy-item .q { color: var(--color-accent-deep); }
+body.lp-refined .flow-badge--subsidy .n { color: var(--color-accent-deep); }
+
+/* partners の担当ラベル（緑がクリーム地に薄かった） */
+.prole { color: #43604A; }
+
+/* welfareai の課題カード：ピンク／オレンジの見出しと番号 */
+body.lp-refined .issue-card h3,
+body.lp-refined .issue-card .inum { color: #C25470; }
+body.lp-refined .issue-card:nth-child(2) h3,
+body.lp-refined .issue-card:nth-child(2) .inum,
+body.lp-refined .issue-card:nth-child(5) h3,
+body.lp-refined .issue-card:nth-child(5) .inum { color: #8F5C14; }
+
+/* ---- 最後の詰め：基準にわずかに届かない配色を一段だけ濃く ---- */
+body.lp-refined {
+    --lp-pink: #C2607A;   /* 白文字を乗せるバッジ地。淡いままだと2.2:1 */
+    --lp-red:  #A34832;   /* クリーム地の強調文字 */
+}
+body.lp-refined .ba-after .ba-label,
+body.lp-refined .after-label { color: #A85A1E; }
+body.lp-refined .flow-badge--subsidy .n { color: #9C4A66; }
+body.lp-refined .issue-card h3,
+body.lp-refined .issue-card .inum { color: #B34866; }
