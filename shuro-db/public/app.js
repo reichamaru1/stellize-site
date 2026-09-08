@@ -59,6 +59,7 @@ function restoreFromUrl() {
   for (const cb of document.querySelectorAll('#service-types input')) cb.checked = services.has(cb.value);
   const acts = new Set(p.getAll('activity'));
   for (const cb of document.querySelectorAll('#activity-cats input')) cb.checked = acts.has(cb.value);
+  state.updateActivityCount?.();
   return p;
 }
 
@@ -82,6 +83,15 @@ async function loadMeta() {
   $('#pref').append(...m.prefectures.map((p) =>
     el('option', { value: p.prefecture, textContent: `${p.prefecture}（${p.c.toLocaleString()}）` })));
 
+  const updateActivityCount = () => {
+    const n = document.querySelectorAll('#activity-cats input:checked').length;
+    const c = $('#activity-count');
+    if (c) c.textContent = n ? `${n}件を選択中` : '';
+    // 条件が入っているのに畳んだままだと気付けないので開く
+    if (n) $('#activity-field')?.setAttribute('open', '');
+  };
+  state.updateActivityCount = updateActivityCount;
+
   const acts = $('#activity-cats');
   acts.replaceChildren(...m.activityCategories.map((a) => {
     const id = `act-${a.category}`;
@@ -90,6 +100,8 @@ async function loadMeta() {
       el('span', {}, [a.category, ' ', el('span', { className: 'n', textContent: `(${a.c.toLocaleString()})` })]),
     ]);
   }));
+
+  updateActivityCount();
 
   // どの都道府県のデータが入っているかを、隠さず明示する
   const actPrefs = [...new Set(m.extraSources.filter((s) => s.kind === 'activity' && s.matched > 0).map((s) => s.prefecture))];
@@ -582,6 +594,7 @@ async function drawMap() {
   $('#city').addEventListener('change', () => { useAreaFilter(); runSearch(); });
   for (const id of ['status', 'sort']) $('#' + id).addEventListener('change', () => runSearch());
   $('#service-types').addEventListener('change', () => runSearch());
+  $('#activity-cats').addEventListener('change', () => { state.updateActivityCount?.(); runSearch(); });
 
   const goto = (n) => { state.page = Math.min(Math.max(1, n), Math.max(1, state.pages)); runSearch({ resetPage: false, focus: true }); };
   $('#first').addEventListener('click', () => goto(1));
