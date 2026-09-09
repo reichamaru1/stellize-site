@@ -1,0 +1,53 @@
+#!/bin/zsh
+# 俺の事業を管理せよ — 起動スクリプト
+#
+# やっていること
+#   1. すでに起動していればそれを使う（二重起動しない）
+#   2. 起動していなければ node でサーバを立ち上げ、応答するまで待つ
+#   3. 専用ウィンドウ（Chrome/Edgeのアプリモード）で開く。無ければ既定のブラウザ
+#
+# 依存を増やさないため、Electron等は使っていない。
+
+APP_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+PORT=8710
+URL="http://localhost:$PORT"
+LOG="$APP_DIR/data/app.log"
+
+# node の場所。GUIから起動するとPATHが最小限なので、よくある場所を足す
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.volta/bin:$HOME/.nvm/versions/node/current/bin:$PATH"
+
+notify() { osascript -e "display alert \"俺の事業を管理せよ\" message \"$1\"" >/dev/null 2>&1; }
+
+if ! command -v node >/dev/null 2>&1; then
+  notify "node が見つかりませんでした。Node.js 22.5 以上をインストールしてください。"
+  exit 1
+fi
+
+# すでに動いていれば、そのまま開く
+if ! curl -s -o /dev/null --max-time 1 "$URL/api/summary"; then
+  mkdir -p "$APP_DIR/data"
+  cd "$APP_DIR" || exit 1
+  nohup node --no-warnings src/server.mjs >>"$LOG" 2>&1 &
+  for i in {1..40}; do
+    curl -s -o /dev/null --max-time 1 "$URL/api/summary" && break
+    sleep 0.25
+  done
+  if ! curl -s -o /dev/null --max-time 1 "$URL/api/summary"; then
+    notify "起動できませんでした。data/app.log を確認してください。"
+    exit 1
+  fi
+fi
+
+# 専用ウィンドウで開く。アプリモードが使えるブラウザを順に探す
+for B in \
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge" \
+  "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+do
+  if [ -x "$B" ]; then
+    "$B" --app="$URL" --window-size=1440,900 --user-data-dir="$APP_DIR/data/.browser" >/dev/null 2>&1 &
+    exit 0
+  fi
+done
+
+open "$URL"

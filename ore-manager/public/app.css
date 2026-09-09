@@ -1,0 +1,128 @@
+:root{
+  --navy:#1F2A54; --navy-2:#2E3A66; --navy-3:#151D3B;
+  --gold:#C0A16B; --gold-2:#9A7F4E; --gold-3:#E6D3A8;
+  --cream:#FAF7F2; --ground:#F0EBE3; --line:#E2DACD; --line-2:#EFEAE0;
+  --ink:#2F2C27; --muted:#7A7368; --faint:#A39B8F;
+  --green:#41564C; --green-2:#5C7C6F;
+  --rose:#B85F7C; --lav:#6F5F96;
+  --ok:#3E5A4C; --ng:#8A3A54;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; display:flex; background:var(--ground); color:var(--ink);
+  font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic Medium','Yu Gothic',Meiryo,sans-serif;
+  font-size:13px; line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+.num{font-variant-numeric:tabular-nums; font-feature-settings:'tnum'}
+
+/* ---------- 左の柱 ---------- */
+#side{
+  width:212px; flex:0 0 212px; height:100vh; position:sticky; top:0;
+  background:var(--navy); color:#fff; display:flex; flex-direction:column;
+}
+.brand{display:flex; align-items:center; gap:11px; padding:20px 18px 18px}
+.brand .mark{color:var(--gold); font-size:16px; line-height:1}
+.brand .title{
+  font-family:'Hiragino Mincho ProN','Yu Mincho',serif; font-size:14.5px;
+  font-weight:600; letter-spacing:.09em; line-height:1.5;
+}
+#nav{flex:1; overflow-y:auto; padding:6px 10px}
+#nav button{
+  display:flex; align-items:center; gap:9px; width:100%; padding:9px 11px; margin-bottom:2px;
+  background:none; border:0; border-radius:7px; color:#C6CBDD; font:inherit; font-size:12.5px;
+  text-align:left; cursor:pointer;
+}
+#nav button:hover{background:rgba(255,255,255,.07); color:#fff}
+#nav button.on{background:var(--gold); color:var(--navy); font-weight:600}
+#nav button .ic{width:15px; text-align:center; font-size:12px; opacity:.85}
+#nav button.on .ic{opacity:1}
+#nav .sep{margin:12px 11px 6px; font-size:9.5px; letter-spacing:.18em; color:#7A83A0}
+.foot{padding:12px 18px 16px; border-top:1px solid rgba(255,255,255,.1); font-size:10.5px; line-height:1.75; color:#8A93AE}
+
+/* ---------- 右 ---------- */
+#main{flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; overflow:hidden}
+#top{
+  flex:0 0 auto; display:flex; align-items:center; gap:14px; padding:16px 26px 14px;
+  background:var(--cream); border-bottom:1px solid var(--line);
+}
+#top h1{margin:0; font-family:'Hiragino Mincho ProN','Yu Mincho',serif; font-size:18px; font-weight:600; letter-spacing:.06em; color:var(--navy)}
+.spacer{flex:1}
+#page-tools{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+#view{flex:1; overflow-y:auto; padding:22px 26px 60px}
+.loading{padding:40px; text-align:center; color:var(--faint)}
+
+/* ---------- 部品 ---------- */
+input,select,button,textarea{font-family:inherit; font-size:12.5px}
+input[type=text],input[type=search],input[type=month],input[type=password],select,textarea{
+  padding:7px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);
+}
+input:focus,select:focus,textarea:focus{outline:2px solid #C9C2D8; outline-offset:-1px}
+.btn{padding:7px 14px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--navy); cursor:pointer}
+.btn:hover{background:var(--cream)}
+.btn.pri{background:var(--navy); color:#fff; border-color:var(--navy); font-weight:600}
+.btn.pri:hover{background:var(--navy-2)}
+.btn:disabled{opacity:.45; cursor:default}
+
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin-bottom:22px}
+.card{background:#fff; border-radius:11px; padding:17px 19px; border:1px solid var(--line-2)}
+.card .k{font-size:10.5px; letter-spacing:.1em; color:var(--muted); margin-bottom:7px}
+.card .v{font-family:'Hiragino Mincho ProN','Yu Mincho',serif; font-size:25px; font-weight:600; line-height:1.25; color:var(--navy)}
+.card .v.minus{color:var(--rose)}
+.card .s{margin-top:5px; font-size:11px; color:var(--faint)}
+.card.accent{background:var(--navy); border-color:var(--navy)}
+.card.accent .k{color:#9EA7C2}
+.card.accent .v{color:#fff}
+.card.accent .s{color:#8A93AE}
+
+.panel{background:#fff; border:1px solid var(--line-2); border-radius:11px; margin-bottom:20px; overflow:hidden}
+.panel > h2{
+  margin:0; padding:13px 18px; font-size:12px; font-weight:600; letter-spacing:.06em;
+  color:var(--navy); background:var(--cream); border-bottom:1px solid var(--line-2);
+  display:flex; align-items:center; gap:10px;
+}
+.panel > h2 .sub{font-weight:400; color:var(--muted); font-size:11px; letter-spacing:0}
+.panel .body{padding:16px 18px}
+.panel .body.flush{padding:0}
+
+table{width:100%; border-collapse:collapse; font-size:12.5px}
+th{
+  position:sticky; top:0; background:var(--cream); text-align:left; font-weight:600; color:var(--muted);
+  font-size:10.5px; letter-spacing:.05em; padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap; z-index:1;
+}
+td{padding:9px 12px; border-bottom:1px solid var(--line-2); vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#FCFAF6}
+td.r,th.r{text-align:right}
+td.nowrap{white-space:nowrap}
+.scroll{max-height:520px; overflow:auto}
+.money{font-variant-numeric:tabular-nums; white-space:nowrap}
+.in{color:var(--ok)} .out{color:var(--ng)}
+.dim{color:var(--faint)}
+
+.tag{display:inline-block; padding:2px 8px; border-radius:20px; font-size:10.5px; line-height:1.7; background:var(--cream); color:var(--muted); border:1px solid var(--line)}
+.tag.ok{background:#EDF2F0; color:var(--ok); border-color:#D6E2DC}
+.tag.ng{background:#FBEFF3; color:var(--ng); border-color:#F0DAE1}
+.tag.hold{background:#FDF6E7; color:#7A5F22; border-color:#EFE1C0}
+
+.bar{height:7px; background:var(--line-2); border-radius:4px; overflow:hidden; min-width:70px}
+.bar i{display:block; height:100%; background:var(--gold)}
+.bar i.over{background:var(--green-2)}
+
+.tabs{display:flex; gap:6px; margin-bottom:16px}
+.tabs button{padding:7px 15px; border:1px solid var(--line); border-radius:20px; background:#fff; color:var(--muted); cursor:pointer}
+.tabs button.on{background:var(--navy); color:#fff; border-color:var(--navy); font-weight:600}
+
+.empty{padding:34px; text-align:center; color:var(--faint); font-size:12px}
+.err{margin:0 0 16px; padding:11px 14px; border-radius:8px; background:#FBEFF3; color:var(--ng); font-size:12px}
+.hint{margin:8px 0 0; font-size:11px; line-height:1.8; color:var(--muted)}
+
+.split{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+@media (max-width:1080px){ .split{grid-template-columns:1fr} }
+@media (max-width:760px){
+  body{flex-direction:column}
+  #side{width:100%; flex:0 0 auto; height:auto; position:static; flex-direction:row; align-items:center; overflow-x:auto}
+  #nav{display:flex; gap:4px; padding:8px}
+  #nav .sep,.foot,.brand .title{display:none}
+  #main{height:auto}
+}
