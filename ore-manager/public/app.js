@@ -379,18 +379,27 @@ const PAGES = {
         bySec[r.section][r.metric].t[r.week - 1] = r.target ?? 0;
         bySec[r.section][r.metric].a[r.week - 1] = r.actual ?? 0;
       }
+      // 「率」で終わる指標は週をまたいで足せない（率の合計は意味を持たない）ので平均にする
+      const isRate = (name) => /率$/.test(name);
+      const avg = (xs) => { const v = xs.filter((x) => x); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; };
+      const fmtVal = (name, v) => (isRate(name) ? Math.round(v * 100) + '%' : String(Math.round(v * 100) / 100));
+
       for (const [sec, metrics] of Object.entries(bySec)) {
-        const rows = Object.values(metrics).map((m) => ({
-          metric: m.metric,
-          target: m.t.reduce((a, b) => a + b, 0),
-          actual: m.a.reduce((a, b) => a + b, 0),
-          w: m.t.map((t, i) => `${m.a[i]}/${t}`).join('　'),
-        }));
+        const rows = Object.values(metrics).map((m) => {
+          const rate = isRate(m.metric);
+          return {
+            metric: m.metric,
+            target: rate ? avg(m.t) : m.t.reduce((a, b) => a + b, 0),
+            actual: rate ? avg(m.a) : m.a.reduce((a, b) => a + b, 0),
+            rate,
+            w: m.t.map((t, i) => (rate ? fmtVal(m.metric, m.a[i]) : `${m.a[i]}/${t}`)).join('　'),
+          };
+        });
         box.append(panel(sec, null, tableOf([
           { k: 'metric', label: '指標' },
-          { k: 'w', label: '週ごと（実績/目標）', cls: 'nowrap num' },
-          { k: 'target', label: '目標', r: true, cls: 'num' },
-          { k: 'actual', label: '実績', r: true, cls: 'num' },
+          { k: 'w', label: '週ごと', cls: 'nowrap num' },
+          { k: 'target', label: '目標', r: true, cls: 'num', fmt: (v, r) => fmtVal(r.metric, v) },
+          { k: 'actual', label: '実績', r: true, cls: 'num', fmt: (v, r) => fmtVal(r.metric, v) },
           { k: '_', label: '達成', fmt: (v, r) => {
             const p = r.target ? Math.round(r.actual / r.target * 100) : 0;
             return el('div', { style: 'display:flex;align-items:center;gap:8px' },
@@ -481,6 +490,13 @@ async function render(key) {
   }
   location.hash = key;
 }
+
+// URLのハッシュで画面が決まるようにする。
+// ブラウザの戻る/進むと、リンクの共有（#money など）を効かせるため。
+window.addEventListener('hashchange', () => {
+  const key = location.hash.slice(1);
+  if (key in PAGES && key !== current) render(key);
+});
 
 async function boot() {
   const s = await api('/api/summary').catch(() => null);
