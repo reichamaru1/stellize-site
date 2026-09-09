@@ -205,7 +205,7 @@ const PAGES = {
     state: { tab: 'pipeline', q: '' },
     tools() {
       const st = PAGES.customers.state;
-      if (st.tab !== 'contacts') return [];
+      if (st.tab !== 'contacts' && st.tab !== 'cards') return [];
       const kw = el('input', { type: 'search', placeholder: '会社・氏名・業種で検索', value: st.q,
         oninput: (e) => { st.q = e.target.value; },
         onchange: () => render('customers') });
@@ -216,7 +216,8 @@ const PAGES = {
       const st = PAGES.customers.state;
       const box = el('div');
       const tabs = el('div', { class: 'tabs' },
-        [['pipeline', '商談パイプライン'], ['deals', '契約一覧'], ['contacts', '人脈台帳']]
+        [['pipeline', '商談パイプライン'], ['deals', '契約一覧'], ['contacts', '人脈台帳'],
+         ['cards', '名刺'], ['partners', '協業先']]
           .map(([k, label]) => el('button', {
             class: st.tab === k ? 'on' : '',
             onclick: () => { st.tab = k; render('customers'); },
@@ -250,6 +251,33 @@ const PAGES = {
           { k: 'amount', label: '受注額', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
           { k: 'monthly', label: '月額', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
           { k: 'content', label: '内容' },
+        ], d.rows)));
+      } else if (st.tab === 'cards') {
+        const d = await api('/api/cards?q=' + encodeURIComponent(st.q));
+        box.append(panel('所属グループ', null, tableOf([
+          { k: 'groups', label: 'グループ' },
+          { k: 'n', label: '人数', r: true },
+        ], d.groups)));
+        box.append(panel('名刺', d.total + '件', tableOf([
+          { k: 'company', label: '会社名' },
+          { k: 'name', label: '名前', cls: 'nowrap' },
+          { k: 'title', label: '役職' },
+          { k: 'email', label: 'メール' },
+          { k: 'phone', label: '電話', cls: 'nowrap' },
+          { k: 'mobile', label: '携帯', cls: 'nowrap' },
+          { k: 'groups', label: 'グループ' },
+          { k: 'status', label: '進捗' },
+        ], d.rows)));
+      } else if (st.tab === 'partners') {
+        const d = await api('/api/partners');
+        box.append(panel('協業先', d.rows.length + '件', tableOf([
+          { k: 'company', label: '会社名' },
+          { k: 'person', label: '担当者', cls: 'nowrap' },
+          { k: 'title', label: '役職', cls: 'nowrap' },
+          { k: 'likelihood', label: '協力角度', cls: 'nowrap' },
+          { k: 'role', label: '何を任せたい' },
+          { k: 'relationship', label: '関係値', fmt: (v) => statusTag(v) },
+          { k: 'memo', label: '備考' },
         ], d.rows)));
       } else {
         const d = await api('/api/contacts?q=' + encodeURIComponent(st.q));
@@ -349,6 +377,256 @@ const PAGES = {
         { k: 'frame', label: '枠' },
         { k: 'subject', label: '件名' },
       ], s.recent || [])));
+      return box;
+    },
+  },
+
+
+  pl: {
+    icon: '▲', label: '月次損益',
+    state: { year: '' },
+    async load() {
+      const st = PAGES.pl.state;
+      const d = await api('/api/pl' + (st.year ? '?year=' + st.year : ''));
+      st.year = d.year;
+      const box = el('div');
+
+      const sel = el('select', { onchange: (e) => { st.year = e.target.value; render('pl'); } },
+        d.years.map((y) => {
+          const o = el('option', { value: y }, y + '年');
+          if (y === st.year) o.selected = true;
+          return o;
+        }));
+      box.append(panel('対象年', null, sel));
+
+      box.append(panel('年ごとの推移', '売上と販管費（内訳の合計）', tableOf([
+        { k: 'y', label: '年', cls: 'nowrap' },
+        { k: 'sales', label: '売上', r: true, cls: 'money in', fmt: (v) => money(v) },
+        { k: 'cost', label: '販管費', r: true, cls: 'money out', fmt: (v) => money(v) },
+        { k: '_p', label: '差引', r: true, cls: 'money', fmt: (v, r) => {
+          const n = r.sales - r.cost;
+          return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
+        } },
+      ], d.summary, { scroll: false })));
+
+      box.append(panel('売上の出どころ', st.year + '年', tableOf([
+        { k: 'subcategory', label: '出どころ', fmt: (v, r) => v || r.category },
+        { k: 'category', label: '区分', cls: 'nowrap' },
+        { k: 'n', label: '月数', r: true },
+        { k: 'amount', label: '合計', r: true, cls: 'money', fmt: (v) => money(v) },
+      ], d.bySource)));
+
+      // 区分ごとに、月を横に並べた表を出す
+      const months = d.months;
+      const grid = (rows) => {
+        const keys = [...new Set(rows.map((r) => (r.category || '') + '｜' + (r.subcategory || '')))];
+        return keys.map((k) => {
+          const [cat, sub] = k.split('｜');
+          const row = { label: sub ? (cat ? cat + '／' + sub : sub) : cat };
+          let sum = 0;
+          for (const m of months) {
+            const hit = rows.find((r) => r.month === m && (r.category || '') === cat && (r.subcategory || '') === sub);
+            row[m] = hit ? hit.amount : 0;
+            sum += row[m];
+          }
+          row._sum = sum;
+          return row;
+        });
+      };
+      const monthCols = (extra = {}) => [{ k: 'label', label: '項目', cls: 'nowrap' }]
+        .concat(months.map((m) => ({ k: m, label: m.slice(5) + '月', r: true, cls: 'money',
+          fmt: (v) => (v ? yen(v) : '') })))
+        .concat([{ k: '_sum', label: '年計', r: true, cls: 'money', fmt: (v) => money(v) }]);
+
+      for (const [sec, title] of [['売上', '売上の内訳'], ['売上原価', '売上原価'], ['販管費', '販管費の内訳']]) {
+        const rows = d.rows.filter((r) => r.section === sec && !r.is_total);
+        if (!rows.length) continue;
+        const g = grid(rows);
+        box.append(panel(title, g.length + '項目', tableOf(monthCols(), g)));
+      }
+
+      const totals = d.rows.filter((r) => r.is_total);
+      if (totals.length) {
+        box.append(panel('合計・利益（シート側の集計値）', null, tableOf(monthCols(), grid(totals))));
+      }
+      return box;
+    },
+  },
+
+  plan: {
+    icon: '◇', label: '計画と実績',
+    state: { year: '' },
+    async load() {
+      const st = PAGES.plan.state;
+      const d = await api('/api/plan' + (st.year ? '?year=' + st.year : ''));
+      st.year = d.year;
+      const box = el('div');
+
+      const sel = el('select', { onchange: (e) => { st.year = e.target.value; render('plan'); } },
+        d.years.map((y) => {
+          const o = el('option', { value: y }, y + '年');
+          if (y === st.year) o.selected = true;
+          return o;
+        }));
+      box.append(panel('対象年', null, sel));
+
+      const months = d.months;
+      // 目標・実績・目安 を、区分ごとに月で横に並べる
+      for (const kind of ['目標', '実績', '目安']) {
+        for (const side of ['売上', '支出']) {
+          const rows = d.rows.filter((r) => r.kind === kind && r.side === side);
+          if (!rows.length) continue;
+          const keys = [...new Set(rows.map((r) => (r.category || '') + '｜' + (r.subcategory || '')))];
+          const grid = keys.map((k) => {
+            const [cat, sub] = k.split('｜');
+            const row = { label: sub ? cat + '／' + sub : cat };
+            let sum = 0;
+            for (const m of months) {
+              const hit = rows.find((r) => r.month === m && (r.category || '') === cat && (r.subcategory || '') === sub);
+              row[m] = hit ? hit.amount : 0;
+              sum += row[m];
+            }
+            row._sum = sum;
+            return row;
+          });
+          const cols2 = [{ k: 'label', label: '項目', cls: 'nowrap' }]
+            .concat(months.map((m) => ({ k: m, label: m.slice(5) + '月', r: true, cls: 'money',
+              fmt: (v) => (v ? yen(v) : '') })))
+            .concat([{ k: '_sum', label: '年計', r: true, cls: 'money', fmt: (v) => money(v) }]);
+          box.append(panel(`${kind}　${side}`, grid.length + '項目', tableOf(cols2, grid)));
+        }
+      }
+
+      const met = await api('/api/metrics');
+      const scopes = [...new Set(met.rows.map((r) => r.scope))];
+      if (scopes.length) {
+        box.append(panel('事業のパラメータ', null, tableOf([
+          { k: 'scope', label: '区分', cls: 'nowrap' },
+          { k: 'key', label: '項目' },
+          { k: 'value', label: '値', r: true, cls: 'num' },
+        ], met.rows)));
+      }
+      return box;
+    },
+  },
+
+  events: {
+    icon: '◍', label: '交流会',
+    async load() {
+      const d = await api('/api/events');
+      const box = el('div');
+      const fee = d.rows.reduce((a, r) => a + r.fee, 0);
+      const appts = d.rows.reduce((a, r) => a + r.appts, 0);
+      const closings = d.rows.reduce((a, r) => a + r.closings, 0);
+      box.append(el('div', { class: 'cards' },
+        card('参加費の合計', money(fee), d.rows.length + '回の参加', 'accent'),
+        card('アポ', appts + '件', appts ? '1件あたり ' + money(Math.round(fee / appts)) : ''),
+        card('成約', closings + '件', closings ? '1件あたり ' + money(Math.round(fee / closings)) : ''),
+        card('名刺', d.rows.reduce((a, r) => a + r.cards_got, 0) + '枚')));
+
+      box.append(panel('会ごとの費用対効果', 'どこに出続けるかを決めるための表', tableOf([
+        { k: 'series', label: '交流会' },
+        { k: 'n', label: '回', r: true },
+        { k: 'fee', label: '参加費計', r: true, cls: 'money', fmt: (v) => money(v) },
+        { k: 'cards_got', label: '名刺', r: true },
+        { k: 'appts', label: 'アポ', r: true },
+        { k: 'closings', label: '成約', r: true },
+        { k: 'collabs', label: '協業', r: true },
+        { k: '_cpa', label: 'アポ単価', r: true, cls: 'money',
+          fmt: (v, r) => (r.appts ? money(Math.round(r.fee / r.appts)) : '—') },
+        { k: '_cpc', label: '成約単価', r: true, cls: 'money',
+          fmt: (v, r) => (r.closings ? money(Math.round(r.fee / r.closings)) : '—') },
+      ], d.byName)));
+
+      box.append(panel('参加の記録', d.rows.length + '回', tableOf([
+        { k: 'held_on', label: '日時', cls: 'nowrap' },
+        { k: 'name', label: '交流会' },
+        { k: 'place', label: '場所' },
+        { k: 'attendees', label: '人数', r: true },
+        { k: 'fee', label: '参加費', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+        { k: 'cards_got', label: '名刺', r: true },
+        { k: 'appts', label: 'アポ', r: true },
+        { k: 'closings', label: '成約', r: true },
+        { k: 'note', label: '備考' },
+      ], d.rows)));
+      return box;
+    },
+  },
+
+  pricing: {
+    icon: '＄', label: '料金表',
+    async load() {
+      const d = await api('/api/pricing');
+      const box = el('div');
+      box.append(panel('料金表', d.rows.length + '項目', tableOf([
+        { k: 'category', label: '科目', cls: 'nowrap' },
+        { k: 'item', label: '項目' },
+        { k: 'unit', label: '単位', cls: 'nowrap' },
+        { k: 'price', label: '単価', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+        { k: 'cost', label: '原価', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+        { k: '_m', label: '粗利', r: true, cls: 'money',
+          fmt: (v, r) => (r.price ? money(r.price - r.cost) : '') },
+        { k: '_r', label: '粗利率', r: true, cls: 'num',
+          fmt: (v, r) => (r.price ? Math.round((r.price - r.cost) / r.price * 100) + '%' : '') },
+        { k: 'vendor', label: '外注先' },
+        { k: 'note', label: '備考' },
+      ], d.rows)));
+      return box;
+    },
+  },
+
+  audit: {
+    icon: '✓', label: '取り込みの検算',
+    async load() {
+      const d = await api('/api/audit');
+      const box = el('div');
+      box.append(el('div', { class: 'cards' },
+        card('入出金の差引', (d.balance < 0 ? '-¥' : '¥') + yen(Math.abs(d.balance)),
+          '明細から積み上げた到達点', 'accent'),
+        card('収入合計', money(d.cashflowIncome)),
+        card('支出合計', money(d.cashflowExpense)),
+        card('経費明細', money(d.expenseTotal))));
+
+      box.append(panel('シートの月次サマリーとの突き合わせ',
+        '一致していれば、明細が正しく取り込めている根拠になる', tableOf([
+        { k: 'month', label: '月', cls: 'nowrap' },
+        { k: 'expense', label: 'シートの支出', r: true, cls: 'money', fmt: (v) => money(v) },
+        { k: 'myExpense', label: '経費明細から', r: true, cls: 'money', fmt: (v) => money(v) },
+        { k: '_e', label: '', fmt: (v, r) => el('span', { class: 'tag ' + (r.expense === r.myExpense ? 'ok' : 'ng') },
+          r.expense === r.myExpense ? '一致' : '差 ' + money(r.myExpense - r.expense)) },
+        { k: 'income', label: 'シートの収入', r: true, cls: 'money', fmt: (v) => money(v) },
+        { k: 'myIncome', label: '入出金明細から', r: true, cls: 'money', fmt: (v) => money(v) },
+        { k: '_i', label: '', fmt: (v, r) => el('span', { class: 'tag ' + (r.income === r.myIncome ? 'ok' : 'hold') },
+          r.income === r.myIncome ? '一致' : '差 ' + money(r.myIncome - r.income)) },
+      ], d.summaryRows || [], { scroll: false })));
+      box.append(el('p', { class: 'hint' },
+        '支出はすべて一致します。収入がずれる月があるのは、シート側が4月以降を見込み額で埋めているためで、'
+        + '取り込みの漏れではありません。'));
+
+      box.append(panel('取り込んだ件数', '全' + d.counts.length + '表', tableOf([
+        { k: 'label', label: '表' },
+        { k: 'n', label: '件数', r: true, cls: 'num', fmt: (v) => yen(v) },
+      ], d.counts, { scroll: false })));
+
+      box.append(panel('通帳PDFの取込ログ', null, tableOf([
+        { k: 'imported_at', label: '取込日時', cls: 'nowrap' },
+        { k: 'filename', label: 'ファイル名' },
+        { k: 'bank', label: '銀行', cls: 'nowrap' },
+        { k: 'count', label: '件数', r: true },
+        { k: 'income', label: '収入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
+        { k: 'expense', label: '支出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
+        { k: 'memo', label: 'メモ' },
+      ], d.pdfLog)));
+
+      box.append(panel('カテゴリの自動判定ルール', d.rules.length + '件', tableOf([
+        { k: 'keyword', label: '代表キーワード' },
+        { k: 'side', label: '収入/支出', cls: 'nowrap' },
+        { k: 'subcategory', label: 'サブカテゴリ' },
+      ], d.rules)));
+
+      box.append(el('p', { class: 'hint' },
+        'より詳しい検算（連番の欠け・差引残高の積み上げ・シート集計との突き合わせ）は、'
+        + 'ターミナルで npm run verify を実行すると出ます。'));
       return box;
     },
   },
@@ -456,8 +734,9 @@ const PAGES = {
    ============================================================ */
 
 const ORDER = [
-  ['見る', ['dash', 'money', 'expenses', 'kpi']],
-  ['動かす', ['customers', 'facilities', 'mail']],
+  ['お金', ['dash', 'money', 'pl', 'expenses', 'plan']],
+  ['売る', ['customers', 'events', 'facilities', 'mail']],
+  ['調べる', ['kpi', 'pricing', 'audit']],
   ['', ['settings']],
 ];
 let current = 'dash';

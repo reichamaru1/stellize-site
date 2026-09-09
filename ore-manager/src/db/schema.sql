@@ -49,15 +49,16 @@ CREATE TABLE IF NOT EXISTS expenses (
 CREATE INDEX IF NOT EXISTS idx_ex_date ON expenses(date);
 CREATE INDEX IF NOT EXISTS idx_ex_cat  ON expenses(category);
 
--- 月次の収支計画。実績と並べるために持つ。
+-- 月次の数値。目標・実績・目安を1つの表に持つ（並べて比べるため）。
 CREATE TABLE IF NOT EXISTS plan_monthly (
   id          INTEGER PRIMARY KEY,
   month       TEXT NOT NULL,            -- YYYY-MM
+  kind        TEXT NOT NULL DEFAULT '目標',  -- 目標 / 実績 / 目安
   side        TEXT NOT NULL,            -- 売上 / 支出
   category    TEXT NOT NULL,
   subcategory TEXT,
   amount      INTEGER NOT NULL DEFAULT 0,
-  UNIQUE(month, side, category, subcategory)
+  UNIQUE(month, kind, side, category, subcategory)
 );
 
 -- ============================================================
@@ -144,6 +145,135 @@ CREATE TABLE IF NOT EXISTS kpi (
   target    REAL,
   actual    REAL,
   UNIQUE(month, week, section, metric)
+);
+
+-- 月次損益（着金ベース）。年ごとに、売上・売上原価・販管費・利益指標が1枚のP/Lになっている。
+-- 売上だけの表ではないので、区分（section）を持たせて混ぜないようにする。
+CREATE TABLE IF NOT EXISTS pl_monthly (
+  id          INTEGER PRIMARY KEY,
+  source_key  TEXT UNIQUE,
+  month       TEXT NOT NULL,            -- YYYY-MM
+  section     TEXT NOT NULL,            -- 売上 / 売上原価 / 販管費 / 指標
+  category    TEXT,                     -- 中分類（顧問費用・諸会費 など）
+  subcategory TEXT,                     -- 明細（会社名・費目）
+  amount      INTEGER NOT NULL DEFAULT 0,
+  is_total    INTEGER NOT NULL DEFAULT 0 -- 合計・利益の行。内訳と足して二重に数えないため
+);
+CREATE INDEX IF NOT EXISTS idx_pl_month ON pl_monthly(month);
+CREATE INDEX IF NOT EXISTS idx_pl_sec ON pl_monthly(section);
+
+-- 料金表。単価と原価を持つので、見積の根拠になる。
+CREATE TABLE IF NOT EXISTS pricing (
+  id         INTEGER PRIMARY KEY,
+  source_key TEXT UNIQUE,
+  category   TEXT,                      -- 科目
+  item       TEXT,                      -- 項目
+  unit       TEXT,
+  price      INTEGER DEFAULT 0,         -- 単価
+  cost       INTEGER DEFAULT 0,         -- 原価
+  profit     INTEGER DEFAULT 0,
+  vendor     TEXT,                      -- 外注先
+  note       TEXT
+);
+
+-- 名刺。人脈台帳とは別。あちらは「会った記録」、こちらは「連絡先」。
+CREATE TABLE IF NOT EXISTS cards (
+  id         INTEGER PRIMARY KEY,
+  source_key TEXT UNIQUE,
+  company    TEXT,
+  name       TEXT,
+  dept       TEXT,
+  title      TEXT,
+  email      TEXT,
+  zip        TEXT,
+  address    TEXT,
+  phone      TEXT,
+  fax        TEXT,
+  mobile     TEXT,
+  groups     TEXT,                      -- 所属する交流会など
+  wants      TEXT,                      -- 相手が求めているもの
+  status     TEXT,                      -- 進捗状況
+  memo       TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_cd_company ON cards(company);
+CREATE INDEX IF NOT EXISTS idx_cd_group ON cards(groups);
+
+-- 交流会の費用対効果。どの会に出るかを決めるための表。
+CREATE TABLE IF NOT EXISTS events (
+  id           INTEGER PRIMARY KEY,
+  source_key   TEXT UNIQUE,
+  name         TEXT,
+  place        TEXT,
+  held_on      TEXT,
+  hours        REAL,
+  attendees    INTEGER DEFAULT 0,
+  fee          INTEGER DEFAULT 0,
+  cards_got    INTEGER DEFAULT 0,       -- 名刺交換数
+  line_got     INTEGER DEFAULT 0,
+  appts        INTEGER DEFAULT 0,       -- アポ取り数
+  closings     INTEGER DEFAULT 0,       -- 成約数
+  collabs      INTEGER DEFAULT 0,       -- 協業
+  referrals    INTEGER DEFAULT 0,       -- 紹介
+  cost_per_appt    INTEGER DEFAULT 0,
+  cost_per_closing INTEGER DEFAULT 0,
+  note         TEXT
+);
+
+-- 協業先。誰に何を任せられるか。
+CREATE TABLE IF NOT EXISTS partners (
+  id           INTEGER PRIMARY KEY,
+  source_key   TEXT UNIQUE,
+  company      TEXT,
+  person       TEXT,
+  title        TEXT,
+  likelihood   TEXT,                    -- 協力角度
+  role         TEXT,                    -- 何を任せたい
+  industry     TEXT,
+  strength     TEXT,
+  relationship TEXT,                    -- 自社との関係値
+  memo         TEXT
+);
+
+-- 事業のパラメータ（原価・平均単価・顧客数・売上見込など）。
+CREATE TABLE IF NOT EXISTS metrics (
+  id     INTEGER PRIMARY KEY,
+  scope  TEXT NOT NULL,                 -- 企業情報 / 目標売上 / 現状 / 売上見込
+  key    TEXT NOT NULL,
+  value  TEXT,
+  UNIQUE(scope, key)
+);
+
+-- 通帳PDFの取込ログ。入出金がどこから来たかを追えるようにする。
+CREATE TABLE IF NOT EXISTS pdf_log (
+  id          INTEGER PRIMARY KEY,
+  source_key  TEXT UNIQUE,
+  imported_at TEXT,
+  filename    TEXT,
+  bank        TEXT,
+  count       INTEGER DEFAULT 0,
+  income      INTEGER DEFAULT 0,
+  expense     INTEGER DEFAULT 0,
+  memo        TEXT
+);
+
+-- カテゴリの自動判定ルール。摘要のどの言葉でどう分類しているか。
+CREATE TABLE IF NOT EXISTS category_rules (
+  id          INTEGER PRIMARY KEY,
+  source_key  TEXT UNIQUE,
+  keyword     TEXT,
+  side        TEXT,                     -- 収入 / 支出
+  subcategory TEXT
+);
+
+-- シート側の「収支管理ダッシュボード」が出している月次サマリー。
+-- 自分で計算した値と突き合わせるために、シートの言い分をそのまま持っておく。
+CREATE TABLE IF NOT EXISTS monthly_summary (
+  id        INTEGER PRIMARY KEY,
+  month     TEXT NOT NULL UNIQUE,      -- YYYY-MM
+  income    INTEGER NOT NULL DEFAULT 0,
+  expense   INTEGER NOT NULL DEFAULT 0,
+  profit    INTEGER NOT NULL DEFAULT 0,
+  cost_rate REAL
 );
 
 -- ============================================================

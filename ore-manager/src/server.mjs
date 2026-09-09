@@ -237,6 +237,75 @@ const server = createServer(async (req, res) => {
       });
     }
     if (p === '/api/deals')    return json(res, { rows: all('SELECT * FROM deals ORDER BY closed_on DESC, id DESC') });
+    if (p === '/api/cards') {
+      const kw = (q.get('q') || '').trim(), like = '%' + kw + '%';
+      return json(res, {
+        rows: kw
+          ? all(`SELECT * FROM cards WHERE company LIKE ? OR name LIKE ? OR groups LIKE ? OR title LIKE ?
+              ORDER BY company, name LIMIT 400`, like, like, like, like)
+          : all('SELECT * FROM cards ORDER BY company, name LIMIT 400'),
+        total: one('SELECT COUNT(*) c FROM cards').c,
+        groups: all(`SELECT groups, COUNT(*) n FROM cards WHERE groups <> '' GROUP BY 1 ORDER BY n DESC LIMIT 20`),
+      });
+    }
+    if (p === '/api/partners') return json(res, { rows: all('SELECT * FROM partners ORDER BY id') });
+    if (p === '/api/pricing')  return json(res, { rows: all('SELECT * FROM pricing ORDER BY id') });
+    if (p === '/api/events') {
+      const rows = all('SELECT * FROM events ORDER BY id');
+      // どの交流会に出るかを決めるための集計。単発の回より、会ごとの累計で見る
+      const byName = all(`SELECT
+          replace(replace(substr(name, 1, instr(name || '】', '】')), '【', ''), '】', '') AS series,
+          COUNT(*) n, SUM(fee) fee, SUM(cards_got) cards_got, SUM(appts) appts,
+          SUM(closings) closings, SUM(collabs) collabs, SUM(referrals) referrals
+        FROM events GROUP BY 1 ORDER BY fee DESC`);
+      return json(res, { rows, byName });
+    }
+    if (p === '/api/pl') {
+      const years = all("SELECT DISTINCT substr(month,1,4) y FROM pl_monthly ORDER BY y").map((r) => r.y);
+      const year = q.get('year') || years[years.length - 1] || '';
+      const like = year + '%';
+      return json(res, {
+        years, year,
+        months: all('SELECT DISTINCT month FROM pl_monthly WHERE month LIKE ? ORDER BY month', like).map((r) => r.month),
+        rows: all('SELECT * FROM pl_monthly WHERE month LIKE ? ORDER BY section, category, subcategory, month', like),
+        // 年ごとの粗い形。どの年に何で稼いだかを1行で見る
+        summary: all(`SELECT substr(month,1,4) y,
+            COALESCE(SUM(CASE WHEN is_total=0 AND section='売上' THEN amount END),0) sales,
+            COALESCE(SUM(CASE WHEN is_total=0 AND section='販管費' THEN amount END),0) cost
+          FROM pl_monthly GROUP BY 1 ORDER BY 1`),
+        bySource: all(`SELECT subcategory, category, SUM(amount) amount, COUNT(*) n
+          FROM pl_monthly WHERE is_total=0 AND section='売上' AND month LIKE ?
+          GROUP BY 1,2 ORDER BY amount DESC`, like),
+      });
+    }
+    if (p === '/api/metrics') return json(res, { rows: all('SELECT * FROM metrics ORDER BY scope, id') });
+    if (p === '/api/audit') {
+      // シートの月次サマリーと、明細から計算した値を並べる。
+      // ここが合っているかどうかが、取り込みが正しいことの根拠になる
+      const summaryRows = all('SELECT * FROM monthly_summary ORDER BY month').map((r) => ({
+        ...r,
+        myExpense: one("SELECT COALESCE(SUM(amount),0) a FROM expenses WHERE substr(date,1,7)=?", r.month).a,
+        myIncome: one("SELECT COALESCE(SUM(income),0) a FROM cashflow WHERE substr(date,1,7)=?", r.month).a,
+      }));
+      return json(res, {
+        summaryRows,
+        pdfLog: all('SELECT * FROM pdf_log ORDER BY imported_at DESC'),
+        rules: all('SELECT * FROM category_rules ORDER BY side, subcategory'),
+        counts: [
+          ['入出金明細', 'cashflow'], ['経費明細', 'expenses'], ['人脈台帳', 'contacts'],
+          ['契約一覧', 'deals'], ['商談パイプライン', 'pipeline'], ['名刺', 'cards'],
+          ['交流会', 'events'], ['協業先', 'partners'], ['料金表', 'pricing'],
+          ['月次損益', 'pl_monthly'], ['月次数値', 'plan_monthly'], ['週次KPI', 'kpi'],
+          ['事業パラメータ', 'metrics'], ['月次収支サマリー', 'monthly_summary'],
+          ['PDF取込ログ', 'pdf_log'], ['カテゴリ判定ルール', 'category_rules'],
+        ].map(([label, t]) => ({ label, n: one(`SELECT COUNT(*) c FROM ${t}`).c })),
+        // 明細が正しく取り込めている根拠として、差引残高の到達点を出す
+        balance: one('SELECT COALESCE(SUM(income),0)-COALESCE(SUM(expense),0) a FROM cashflow').a,
+        cashflowIncome: one('SELECT COALESCE(SUM(income),0) a FROM cashflow').a,
+        cashflowExpense: one('SELECT COALESCE(SUM(expense),0) a FROM cashflow').a,
+        expenseTotal: one('SELECT COALESCE(SUM(amount),0) a FROM expenses').a,
+      });
+    }
     if (p === '/api/pipeline') return json(res, { rows: all('SELECT * FROM pipeline ORDER BY id DESC') });
     if (p === '/api/kpi') {
       const m = q.get('month') || null;
@@ -247,11 +316,14 @@ const server = createServer(async (req, res) => {
       });
     }
     if (p === '/api/plan') {
-      const m = q.get('month');
+      const year = q.get('year') || '';
+      const months = all('SELECT DISTINCT month FROM plan_monthly ORDER BY month').map((r) => r.month);
+      const years = [...new Set(months.map((m) => m.slice(0, 4)))];
+      const y = year || years[years.length - 1] || '';
       return json(res, {
-        months: all('SELECT DISTINCT month FROM plan_monthly ORDER BY month').map((r) => r.month),
-        rows: m ? all('SELECT * FROM plan_monthly WHERE month=? ORDER BY side, category', m)
-                : all('SELECT side, category, SUM(amount) amount FROM plan_monthly GROUP BY 1,2 ORDER BY 1, 3 DESC'),
+        years, year: y,
+        months: months.filter((m) => m.startsWith(y)),
+        rows: all(`SELECT * FROM plan_monthly WHERE month LIKE ? ORDER BY kind, side, category, subcategory, month`, y + '%'),
       });
     }
 
