@@ -101,13 +101,20 @@ export function makeGasGlobals() {
       formatDate: (d, tz, fmt) => {
         const t = new Date(d);
         const p2 = (n) => String(n).padStart(2, '0');
-        return String(fmt || 'yyyy-MM-dd HH:mm:ss')
-          .replace('yyyy', t.getFullYear())
-          .replace('MM', p2(t.getMonth() + 1))
-          .replace('dd', p2(t.getDate()))
-          .replace('HH', p2(t.getHours()))
-          .replace('mm', p2(t.getMinutes()))
-          .replace('ss', p2(t.getSeconds()));
+        // 長いトークンから順に置換する（MM を先に処理しないと M が食ってしまう）
+        const map = [
+          ['yyyy', String(t.getFullYear())], ['MM', p2(t.getMonth() + 1)], ['dd', p2(t.getDate())],
+          ['HH', p2(t.getHours())], ['mm', p2(t.getMinutes())], ['ss', p2(t.getSeconds())],
+          ['M', String(t.getMonth() + 1)], ['d', String(t.getDate())],
+        ];
+        let out = '', rest = String(fmt || 'yyyy-MM-dd HH:mm:ss');
+        outer: while (rest) {
+          for (const [tok, val] of map) {
+            if (rest.startsWith(tok)) { out += val; rest = rest.slice(tok.length); continue outer; }
+          }
+          out += rest[0]; rest = rest.slice(1);
+        }
+        return out;
       },
       getUuid: () => crypto.randomUUID(),
       computeHmacSha256Signature: (msg, key) => [...crypto.createHmac('sha256', key).update(msg).digest()],

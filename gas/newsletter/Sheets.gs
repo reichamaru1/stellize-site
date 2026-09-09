@@ -84,8 +84,8 @@ function sheetDefs() { return [
   },
   {
     name: SHEETS.drafts,
-    header: ['号ID', '状態', 'テンプレート', 'セグメント', '件名', 'プリヘッダー', '大見出し', '本文', '対象数', '送信済', '失敗', '送信開始', '送信完了'],
-    widths: [110, 90, 130, 120, 320, 260, 300, 620, 70, 70, 60, 140, 140],
+    header: ['号ID', '状態', 'テンプレート', '枠', 'セグメント', '件名', 'プリヘッダー', '大見出し', '本文', '対象数', '送信済', '失敗', '送信開始', '送信完了'],
+    widths: [110, 90, 130, 150, 120, 320, 260, 300, 620, 70, 70, 60, 140, 140],
     frozen: 1,
   },
   {
@@ -160,6 +160,10 @@ function setupSheets() {
     .requireValueInList(Object.keys(TEMPLATE_THEMES), true).setAllowInvalid(false).build();
   dr.getRange(2, headerMap(dr)['テンプレート'] + 1, 500, 1).setDataValidation(tplRule);
   dr.getRange(2, headerMap(dr)['本文'] + 1, 500, 1).setWrap(false);
+  // 日刊の枠。曜日で固定してあるので、選ぶだけで済むようにする
+  const frameRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(DAILY_FRAMES.map(function (f) { return f.key; }), true).setAllowInvalid(true).build();
+  dr.getRange(2, headerMap(dr)['枠'] + 1, 500, 1).setDataValidation(frameRule);
 
   // 空の「シート1」が残っていたら消す
   const blank = book.getSheetByName('シート1') || book.getSheetByName('Sheet1');

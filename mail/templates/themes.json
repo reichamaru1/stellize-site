@@ -1,4 +1,15 @@
 {
+  "daily": {
+    "label": "日刊（読み物）",
+    "eyebrow": "日刊　現場から",
+    "accent": "#41564C",
+    "accentDeep": "#5C7C6F",
+    "accentSoft": "#EDF2F0",
+    "ctaFrom": "#41564C",
+    "ctaTo": "#5C7C6F",
+    "base": "daily",
+    "note": "平日毎日の読み物。売らない・教えない・オチをつけない。1本600〜900字。CTAは置かない（売り込みは月1の営業レターに任せる）。"
+  },
   "b2b": {
     "label": "事業所向け ご案内レター",
     "eyebrow": "STELLIZE ─ 就労支援の現場へ",
@@ -7,7 +18,8 @@
     "accentSoft": "#EEF0F7",
     "ctaFrom": "#1F2A54",
     "ctaTo": "#2E3A66",
-    "note": "就労支援事業所へのご案内。ネイビー×ゴールドで信頼を先に立てる。用件を先に、CTAは1つに絞る。"
+    "note": "就労支援事業所へのご案内。ネイビー×ゴールドで信頼を先に立てる。用件を先に、CTAは1つに絞る。",
+    "base": "default"
   },
   "newsletter": {
     "label": "メルマガ（定期便）",
@@ -17,7 +29,8 @@
     "accentSoft": "#F3F0F8",
     "ctaFrom": "#6F5F96",
     "ctaTo": "#8E7DB2",
-    "note": "定期的に送る号。読み物として長くなってよい。ラベンダーを主役に。"
+    "note": "定期的に送る号。読み物として長くなってよい。ラベンダーを主役に。",
+    "base": "default"
   },
   "partner": {
     "label": "パートナー・社内向け レポート",
@@ -27,7 +40,8 @@
     "accentSoft": "#EDF2F0",
     "ctaFrom": "#41564C",
     "ctaTo": "#5C7C6F",
-    "note": "提携先・関係者への定期報告。数字と事実を淡々と並べる。"
+    "note": "提携先・関係者への定期報告。数字と事実を淡々と並べる。",
+    "base": "default"
   },
   "announce": {
     "label": "お知らせ・募集（単発）",
@@ -37,6 +51,7 @@
     "accentSoft": "#FBEFF3",
     "ctaFrom": "#B85F7C",
     "ctaTo": "#D0879E",
-    "note": "新サービス・イベント告知など、単発で目を引かせたいとき。"
+    "note": "新サービス・イベント告知など、単発で目を引かせたいとき。",
+    "base": "default"
   }
 }

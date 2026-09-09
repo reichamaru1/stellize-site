@@ -20,10 +20,15 @@ const ROOT = join(HERE, '..');
 const GAS = join(ROOT, 'gas', 'newsletter');
 
 const read = (p) => readFileSync(join(HERE, p), 'utf8');
-const base = read('templates/base.html');
+// 骨格は用途ごとに分かれている。themes.json の "base" がどれを使うかを指す
+const bases = {
+  default: read('templates/base.html'),
+  daily: read('templates/base-daily.html'),
+};
 const blocks = read('templates/blocks.html');
 const themes = JSON.parse(read('templates/themes.json'));
 const renderSrc = read('render.js');
+const voiceSrc = read('voice.js');
 
 /* ---------- 1. Templates.gs ---------- */
 
@@ -41,11 +46,13 @@ const header = (from) => `/**
 `;
 
 writeFileSync(join(GAS, 'Templates.gs'),
-  header('templates/（base.html / blocks.html / themes.json）') + `
-/** メール全体の骨格（base.html） */
-const TEMPLATE_BASE = [
-  ${asGasString(base)}
-].join('\\n');
+  header('templates/（base*.html / blocks.html / themes.json）') + `
+/** メール全体の骨格。themes.json の "base" で選ぶ */
+const TEMPLATE_BASES = {
+${Object.entries(bases).map(([k, v]) => `  ${JSON.stringify(k)}: [
+    ${asGasString(v).split('\n').join('\n  ')}
+  ].join('\\n')`).join(',\n')}
+};
 
 /** 本文ブロック集（blocks.html） */
 const TEMPLATE_BLOCKS = [
@@ -59,14 +66,15 @@ const TEMPLATE_THEMES = ${JSON.stringify(themes, null, 2)};
 /* ---------- 2. Render.gs ---------- */
 
 writeFileSync(join(GAS, 'Render.gs'), header('render.js') + '\n' + renderSrc);
+writeFileSync(join(GAS, 'Voice.gs'), header('voice.js') + '\n' + voiceSrc);
 
 /* ---------- 2b. builder/templates.js ---------- */
 
 // エディタは file:// で開くため fetch でテンプレートを読めない。
 // Templates.gs と同じ中身を、素の <script> で読める形にも書き出しておく。
 writeFileSync(join(HERE, 'builder', 'templates.js'),
-  header('templates/（base.html / blocks.html / themes.json）') + `
-const TEMPLATE_BASE = ${JSON.stringify(base)};
+  header('templates/（base*.html / blocks.html / themes.json）') + `
+const TEMPLATE_BASES = ${JSON.stringify(bases)};
 const TEMPLATE_BLOCKS = ${JSON.stringify(blocks)};
 const TEMPLATE_THEMES = ${JSON.stringify(themes, null, 2)};
 `);
@@ -107,8 +115,14 @@ function inlineImages(html) {
       });
 }
 
+/** 「2026年9月9日（火）」。日刊の題字に出す */
+const WD = ['日', '月', '火', '水', '木', '金', '土'];
+const dateline = (d) =>
+  `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${WD[d.getDay()]}）`;
+
 const themeFor = (name) =>
-  name.startsWith('b2b') ? themes.b2b
+  name.startsWith('daily') ? themes.daily
+  : name.startsWith('b2b') ? themes.b2b
   : name.startsWith('partner') ? themes.partner
   : name.startsWith('announce') ? themes.announce
   : themes.newsletter;
@@ -120,14 +134,17 @@ const made = [];
 for (const f of readdirSync(join(HERE, 'samples')).filter((f) => f.endsWith('.txt'))) {
   const name = basename(f, '.txt');
   const body = read(join('samples', f));
-  const meta = name.startsWith('b2b')
+  const meta = name.startsWith('daily')
+    ? { title: '「私が作ったって、書いていいんですか」', pre: '袋に名前を入れることになった日の話です。', eyebrow: '現場で見たこと' }
+    : name.startsWith('b2b')
     ? { title: 'その作品は、まだ誰にも見えていない。', pre: '棚に並んだ作品が動かない理由は、たぶん値段ではありません。' }
     : { title: 'Stellize通信　第1号', pre: '現場で起きた小さな変化を3つ。' };
   const title = meta.title;
+  const theme = themeFor(name);
   const html = sandbox.slzRenderEmail({
-    base, blocks, theme: themeFor(name),
-    subject: title, title, preheader: meta.pre,
-    body, vars: SAMPLE_VARS,
+    base: bases[theme.base || 'default'], blocks, theme,
+    subject: title, title, preheader: meta.pre, eyebrow: meta.eyebrow,
+    body, vars: { ...SAMPLE_VARS, DATELINE: dateline(new Date()) },
   });
   // プレビューは1ファイルで完結させたいので、画像を data URI に埋め込む。
   // 本番（GAS）は絶対URLのまま送る

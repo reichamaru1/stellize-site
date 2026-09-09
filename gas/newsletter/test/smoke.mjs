@@ -99,6 +99,21 @@ const anon = run(`(function(){ const b = campaignHtml(draftByIssue('vol001'));
   return personalize(b, {email:'', 宛名:'', 法人名:'', 事業所名:'', 都道府県:''}); })()`);
 ok('宛名が空なら「ご担当者」に落ちる', () => assert.ok(anon.html.includes('ご担当者様')));
 
+console.log('\n■ 日刊は別の骨格を使う');
+run(`appendRow(SHEETS.drafts, {'号ID':'d001','状態':'下書き','テンプレート':'daily','セグメント':'事業所',
+  '件名':'「私が作ったって、書いていいんですか」','プリヘッダー':'袋に名前を入れた日の話です。',
+  '大見出し':'「私が作ったって、書いていいんですか」','本文':'先週、ある事業所で袋詰めの作業を見ていたときのことです。','送信済':0,'失敗':0})`);
+const daily = run(`campaignHtml(draftByIssue('d001')).html`);
+ok('日刊の骨格になっている', () => {
+  assert.ok(daily.includes('max-width:580px'), '日刊は580px幅');
+  assert.ok(!daily.includes('自分の価値に、気づく。'), '日刊にタグラインは出さない');
+});
+ok('日付が入る', () => assert.match(daily, /\d{4}年\d{1,2}月\d{1,2}日（[日月火水木金土]）/));
+ok('営業レターは従来の骨格のまま', () => {
+  const letter = run(`campaignHtml(draftByIssue('vol001')).html`);
+  assert.ok(letter.includes('max-width:600px') && letter.includes('自分の価値に、気づく。'));
+});
+
 console.log('\n■ 署名の検証');
 ok('正しい署名は通る', () => assert.equal(run(`verifyEmail('a@example.jp', signEmail('a@example.jp'))`), true));
 ok('他人の署名では通らない', () => assert.equal(run(`verifyEmail('b@example.jp', signEmail('a@example.jp'))`), false));
@@ -137,7 +152,10 @@ ok('停止済みは取り込みで復活しない', () => {
 });
 
 console.log('\n■ 枠が尽きたときの分割送信と再開');
-const day = 'SENT_' + new Date().toISOString().slice(0, 10).replace(/-/g, '');
+// 送信枠のキーは Asia/Tokyo の日付で作られる。UTCで組むと日付がずれる日がある
+const jst = new Date();
+const day = 'SENT_' + [jst.getFullYear(), jst.getMonth() + 1, jst.getDate()]
+  .map((n, i) => (i ? String(n).padStart(2, '0') : String(n))).join('');
 const setLimit = (n) => run(`(function(){ const sh=sheet(SHEETS.settings);
   sh.getRange(2,1,sh.getLastRow()-1,2).getValues().forEach(function(r,i){
     if(r[0]==='1日の送信上限') sh.getRange(i+2,2).setValue('${n}');

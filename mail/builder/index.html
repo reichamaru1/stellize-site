@@ -96,9 +96,13 @@
   <section class="pane edit">
     <div class="fields">
       <div class="r">
-        <div style="flex:0 0 190px">
+        <div style="flex:0 0 170px">
           <label>テンプレート（配色）</label>
-          <select id="theme" onchange="draw()"></select>
+          <select id="theme" onchange="onTheme()"></select>
+        </div>
+        <div style="flex:0 0 170px" id="frameWrap">
+          <label>枠（日刊のみ）</label>
+          <select id="frame" onchange="draw()"></select>
         </div>
         <div>
           <label>件名 <span class="count" id="cSubject"></span></label>
@@ -190,6 +194,7 @@
 </dialog>
 
 <script src="../render.js"></script>
+<script src="../voice.js"></script>
 <script src="templates.js"></script>
 <script src="skeletons.js"></script>
 <script>
@@ -222,12 +227,32 @@ Object.keys(TEMPLATE_THEMES).forEach((k) => {
   $('theme').appendChild(o);
 });
 
+DAILY_FRAMES.forEach((f) => {
+  const o = document.createElement('option');
+  o.value = f.key; o.textContent = f.key + '（' + f.days.map((d) => '日月火水木金土'[d]).join('・') + '）';
+  $('frame').appendChild(o);
+});
+{
+  // 平日なら今日の枠を初期値にする。土日は月曜の枠から始める
+  const f = slzFrameForDay(new Date().getDay()) || DAILY_FRAMES[0];
+  $('frame').value = f.key;
+}
+
 function current() {
   return {
     theme: TEMPLATE_THEMES[$('theme').value],
+    frame: isDaily() ? $('frame').value : '',
     subject: $('subject').value, title: $('title').value,
     preheader: $('pre').value, body: $('body').value,
   };
+}
+
+function isDaily() { return $('theme').value === 'daily'; }
+
+/** 日刊のときだけ枠を出す。ほかのテンプレートでは意味がない */
+function onTheme() {
+  $('frameWrap').style.display = isDaily() ? '' : 'none';
+  draw();
 }
 
 /** 差し込みタグをサンプル値に置き換える（送信時と同じ形で見るため） */
@@ -236,11 +261,19 @@ function merge(s) {
     Object.prototype.hasOwnProperty.call(SAMPLE, k.trim()) ? SAMPLE[k.trim()] : m);
 }
 
+/** 「2026年9月9日（火）」。日刊の題字に出す */
+function dateline(d) {
+  const wd = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日（' + wd + '）';
+}
+
 function build() {
   const c = current();
   return slzRenderEmail({
-    base: TEMPLATE_BASE, blocks: TEMPLATE_BLOCKS, theme: c.theme,
-    subject: c.subject, title: c.title, preheader: c.preheader, body: c.body, vars: VARS,
+    base: TEMPLATE_BASES[c.theme.base || 'default'], blocks: TEMPLATE_BLOCKS, theme: c.theme,
+    subject: c.subject, title: c.title, preheader: c.preheader, body: c.body,
+    eyebrow: c.frame || undefined,
+    vars: Object.assign({ DATELINE: dateline(new Date()) }, VARS),
   });
 }
 
@@ -274,15 +307,23 @@ function check(html, c) {
   if (!c.preheader.trim()) out.push('<span class="warn">プリヘッダーが空です。受信箱の一覧で本文の先頭が拾われます。</span>');
   if (!c.title.trim()) out.push('<span class="ng">大見出しが空です。</span>');
 
-  if (ctas === 0) out.push('<span class="warn">行動をうながす場所がありません。読んだあと何をすればいいか書きましょう。</span>');
+  if (ctas === 0 && !isDaily()) out.push('<span class="warn">行動をうながす場所がありません。読んだあと何をすればいいか書いてください。</span>');
   if (ctas > 2) out.push('<span class="warn">導線が' + ctas + 'か所あります。迷わせるので、主な行動は1つに絞るのが基本です。</span>');
 
-  if (!blocks.some((b) => b.type === 'statement')) out.push('手を止める一行（:::statement）がありません。長い文章ほど、途中に置くと読み進めてもらえます。');
-  if (!blocks.some((b) => b.type === 'ps')) out.push('追伸（:::ps）がありません。本文を飛ばした人が最後に読む場所です。');
-  if (!blocks.some((b) => b.type === 'voice' || b.type === 'quote')) out.push('第三者の言葉がありません。自分で書いた説明より、他人の一言のほうが届きます。');
-  if (!blocks.some((b) => b.type === 'numbers')) out.push('具体的な数字がありません。1つあるだけで、話の輪郭がはっきりします。');
+  if (!isDaily()) {
+    if (!blocks.some((b) => b.type === 'statement')) out.push('手を止める一行（:::statement）がありません。長い文章ほど、途中に置くと読み進めてもらえます。');
+    if (!blocks.some((b) => b.type === 'ps')) out.push('追伸（:::ps）がありません。本文を飛ばした人が最後に読む場所です。');
+    if (!blocks.some((b) => b.type === 'voice' || b.type === 'quote')) out.push('第三者の言葉がありません。自分で書いた説明より、他人の一言のほうが届きます。');
+    if (!blocks.some((b) => b.type === 'numbers')) out.push('具体的な数字がありません。1つあるだけで、話の輪郭がはっきりします。');
+  }
 
   if (kb > 92) out.push('<span class="ng">HTMLが約' + kb + 'KBあります。Gmailは102KBで本文を切ります。</span>');
+
+  // 日刊は「信頼をつくる」ことが目的なので、書き方そのものも見る
+  if (isDaily()) {
+    slzVoiceCheck({ body: c.body, title: c.title, subject: c.subject, frame: c.frame, blocks: blocks })
+      .forEach((v) => out.push('<span class="' + (v.level === 'ng' ? 'ng' : v.level === 'warn' ? 'warn' : '') + '">' + v.msg + '</span>'));
+  }
   if (/\{\{([^{}]+)\}\}/.test(merge(c.body + c.subject))) {
     const unknown = [...new Set((c.body + c.subject).match(/\{\{[^{}]+\}\}/g) || [])]
       .filter((t) => !Object.prototype.hasOwnProperty.call(SAMPLE, t.replace(/[{}]/g, '').trim()));
@@ -331,7 +372,7 @@ function copyHtml() {
 function copyForSheet() {
   const c = current();
   const esc = (s) => '"' + String(s).replace(/"/g, '""') + '"';
-  const row = [$('theme').value, '', c.subject, c.preheader, c.title, c.body].map(esc).join('\t');
+  const row = [$('theme').value, c.frame, '', c.subject, c.preheader, c.title, c.body].map(esc).join('\t');
   navigator.clipboard.writeText(row).then(() => toast(
     'コピーしました。スプレッドシートの「原稿」シートで、号IDと状態を入れた行の「テンプレート」欄を選んで貼り付けてください。'),
     () => toast('コピーできませんでした。'));
@@ -364,9 +405,10 @@ SKELETONS.forEach((s, i) => {
     + '<p style="margin:5px 0 0;font-size:11.5px;line-height:1.85;color:#8A8072">' + s.note + '</p>';
   d.querySelector('button').onclick = () => {
     $('theme').value = s.theme;
+    if (s.frame) $('frame').value = s.frame;
     $('subject').value = s.subject; $('title').value = s.title; $('pre').value = s.pre;
     $('body').value = s.body;
-    skeleton.close(); draw();
+    skeleton.close(); onTheme();
   };
   $('skelList').appendChild(d);
 });
@@ -375,7 +417,7 @@ SKELETONS.forEach((s, i) => {
 function save() {
   try {
     localStorage.setItem('stellize-mail-draft', JSON.stringify({
-      theme: $('theme').value, subject: $('subject').value,
+      theme: $('theme').value, frame: $('frame').value, subject: $('subject').value,
       title: $('title').value, pre: $('pre').value, body: $('body').value,
     }));
   } catch (e) { /* プライベートウィンドウなどでは保存できない。書けなくても支障はない */ }
@@ -384,7 +426,8 @@ function restore() {
   try {
     const d = JSON.parse(localStorage.getItem('stellize-mail-draft') || 'null');
     if (!d) return false;
-    $('theme').value = d.theme || 'b2b';
+    $('theme').value = d.theme || 'daily';
+    if (d.frame) $('frame').value = d.frame;
     $('subject').value = d.subject || ''; $('title').value = d.title || '';
     $('pre').value = d.pre || ''; $('body').value = d.body || '';
     return true;
@@ -393,10 +436,10 @@ function restore() {
 
 if (!restore()) {
   const s = SKELETONS[0];
-  $('theme').value = s.theme; $('subject').value = s.subject;
-  $('title').value = s.title; $('pre').value = s.pre; $('body').value = s.body;
+  $('theme').value = s.theme; if (s.frame) $('frame').value = s.frame;
+  $('subject').value = s.subject; $('title').value = s.title; $('pre').value = s.pre; $('body').value = s.body;
 }
-draw();
+onTheme();
 </script>
 </body>
 </html>

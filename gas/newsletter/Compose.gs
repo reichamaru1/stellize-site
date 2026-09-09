@@ -23,6 +23,17 @@ function themeOf(name) {
   return TEMPLATE_THEMES[key] || TEMPLATE_THEMES.newsletter;
 }
 
+/** そのテーマが使う骨格。営業レターと日刊では作りから違う。 */
+function baseOf(theme) {
+  return TEMPLATE_BASES[theme.base || 'default'] || TEMPLATE_BASES['default'];
+}
+
+/** 「2026年9月9日（火）」。日刊の題字に出す。 */
+function dateline(d) {
+  const wd = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+  return Utilities.formatDate(d, 'Asia/Tokyo', 'yyyy年M月d日') + '（' + wd + '）';
+}
+
 /**
  * 配信停止URL。1人ずつ署名が違う（他人を勝手に停止できないようにするため）。
  * 宛先が特定できないとき（ブラウザ表示）は問い合わせ先に落とす。
@@ -65,6 +76,7 @@ function campaignHtml(draft) {
     PERMISSION_NOTE: c['既定の許諾文'],
     UNSUB_URL: '{{配信停止URL}}',
     WEBVIEW: webview,
+    DATELINE: dateline(new Date()),
     // 開封計測は入れていない。GASのWebアプリは画像を返せず、
     // 1x1画像の代わりに壊れた画像アイコンが本文に出てしまうため。
     // 反応はUTM付きリンク → GA4 で見る（設定シートの「UTM自動付与」）。
@@ -72,10 +84,12 @@ function campaignHtml(draft) {
   };
 
   let html = slzRenderEmail({
-    base: TEMPLATE_BASE,
+    base: baseOf(theme),
     blocks: TEMPLATE_BLOCKS,
     theme: theme,
     subject: String(draft['件名'] || ''),
+    // 「枠」を入れていれば、見出しの上の小さいラベルはそれになる（日刊の曜日枠など）
+    eyebrow: String(draft['枠'] || '').trim() || theme.eyebrow,
     title: String(draft['大見出し'] || draft['件名'] || ''),
     preheader: String(draft['プリヘッダー'] || ''),
     body: String(draft['本文'] || ''),
@@ -187,6 +201,16 @@ function validateDraft(draft) {
     const size = campaignHtml(draft).html.length;
     if (size > 92000) warns.push('HTMLが約' + Math.round(size / 1024) + 'KBあります。Gmailは102KBで本文を切るので、画像を減らすか本文を短くしてください');
   } catch (e) { /* 組み立てで落ちる原因は上のチェックで拾えている */ }
+
+  // 日刊は「信頼をつくる」ことが目的なので、書き方のほうも見る
+  if (String(draft['テンプレート']).trim() === 'daily') {
+    slzVoiceCheck({
+      body: String(draft['本文'] || ''), title: String(draft['大見出し'] || ''),
+      subject: String(draft['件名'] || ''), frame: String(draft['枠'] || ''),
+    }).forEach(function (v) {
+      if (v.level !== 'hint') warns.push(v.msg);
+    });
+  }
 
   const subject = String(draft['件名'] || '');
   if (subject.length > 40) warns.push('件名が' + subject.length + '文字あります。スマホでは25文字前後までしか表示されません');
