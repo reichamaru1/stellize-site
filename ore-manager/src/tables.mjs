@@ -268,6 +268,35 @@ export const TABLES = {
     ],
   }),
 
+  cost_kinds: T('お金の区分（事業／個人）', {
+    order: 'kind, category',
+    search: ['category', 'memo'],
+    filters: ['kind'],
+    columns: [
+      { k: 'category', label: 'カテゴリ', type: 'text' },
+      { k: 'kind', label: '区分', type: 'text', w: 90 },
+      { k: 'guessed', label: '推測のまま', type: 'bool', w: 90 },
+      { k: 'memo', label: 'メモ', type: 'text' },
+    ],
+  }),
+
+  todos: T('やること', {
+    order: "CASE status WHEN '進行中' THEN 0 WHEN '未着手' THEN 1 ELSE 2 END, "
+      + "CASE priority WHEN '高' THEN 0 WHEN '中' THEN 1 ELSE 2 END, due",
+    dateCol: 'due',
+    search: ['title', 'detail', 'linked'],
+    filters: ['status', 'priority', 'area'],
+    columns: [
+      { k: 'status', label: '状態', type: 'text', w: 90 },
+      { k: 'priority', label: '優先', type: 'text', w: 70 },
+      { k: 'title', label: 'やること', type: 'text' },
+      { k: 'area', label: '分野', type: 'text', w: 100 },
+      { k: 'due', label: '期限', type: 'date', w: 110 },
+      { k: 'linked', label: '相手・案件', type: 'text' },
+      { k: 'detail', label: '詳細', type: 'text' },
+    ],
+  }),
+
   pdf_log: T('PDF取込ログ', {
     order: 'imported_at DESC',
     search: ['filename', 'bank', 'memo'],

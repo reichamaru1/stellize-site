@@ -154,9 +154,9 @@ console.log('\n■ 月次損益（合計行 vs 内訳の足し算）');
   const cases = [
     ['実績合計売上高', "section='売上' AND category='実績売上高'"],
     ['総売上', "section='売上'"],
-    ['販管費の合計', "section='販管費'"],
+    ['経費の合計', "section='経費'"],
   ];
-  const totalName = { '実績合計売上高': '実績合計売上高', '総売上': '総売上', '販管費の合計': '合計' };
+  const totalName = { '実績合計売上高': '実績合計売上高', '総売上': '総売上', '経費の合計': '合計' };
   for (const [label, where] of cases) {
     const rows = db.prepare(`SELECT month,
         COALESCE(SUM(CASE WHEN is_total=1 AND category=? THEN amount END),0) t,

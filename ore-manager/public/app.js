@@ -73,18 +73,35 @@ const fmtCell = (col, v) => {
 };
 
 function dataTable(name, opts = {}) {
-  const st = { q: '', f: {}, from: '', to: '', offset: 0, limit: 200, sort: '', dir: 'asc' };
+  // st.col には列ごとの条件を入れる。{ 列名: {eq, like, month, min, max} }
+  const st = { q: '', col: {}, offset: 0, limit: 200, sort: '', dir: 'asc' };
   const root = el('div', { class: 'dt' });
 
-  const draw = async () => {
+  const params = () => {
     const p = new URLSearchParams({ q: st.q, limit: st.limit, offset: st.offset });
-    for (const [k, v] of Object.entries(st.f)) if (v) p.set('f_' + k, v);
-    if (st.from) p.set('from', st.from);
-    if (st.to) p.set('to', st.to);
+    for (const [k, c] of Object.entries(st.col)) {
+      if (!c) continue;
+      if (c.eq) p.set('f_' + k, c.eq);
+      if (c.like) p.set('qc_' + k, c.like);
+      if (c.month) p.set('m_' + k, c.month);
+      if (c.min) p.set('min_' + k, c.min);
+      if (c.max) p.set('max_' + k, c.max);
+    }
     if (st.sort) { p.set('sort', st.sort); p.set('dir', st.dir); }
+    return p;
+  };
 
+  const set = (k, key, v) => {
+    st.col[k] = Object.assign({}, st.col[k], { [key]: v });
+    st.offset = 0;
+    draw();
+  };
+  const activeCount = () => Object.values(st.col)
+    .filter((c) => c && Object.values(c).some(Boolean)).length + (st.q ? 1 : 0);
+
+  const draw = async () => {
     root.replaceChildren(el('div', { class: 'loading' }, '読み込み中…'));
-    const d = await api(`/api/table/${encodeURIComponent(name)}?` + p);
+    const d = await api(`/api/table/${encodeURIComponent(name)}?` + params());
     root.replaceChildren(render(d));
     if (opts.onLoaded) opts.onLoaded(d);
   };
@@ -117,7 +134,7 @@ function dataTable(name, opts = {}) {
       closeDrawer(); draw();
     } }, isNew ? '追加する' : '保存する');
 
-    const del = isNew ? null : el('button', { class: 'btn warn', onclick: async () => {
+    const remove = isNew ? null : el('button', { class: 'btn warn', onclick: async () => {
       if (!confirm('この行を削除します。取り消せません。よろしいですか？')) return;
       await del2(`/api/table/${encodeURIComponent(name)}/${row.id}`);
       closeDrawer(); draw();
@@ -134,93 +151,105 @@ function dataTable(name, opts = {}) {
 
     openDrawer((isNew ? '新しい行を追加' : d.label + ' を編集'),
       el('div', {}, fields, msg,
-        el('div', { class: 'drawer-actions' }, save, del, release,
+        el('div', { class: 'drawer-actions' }, save, remove, release,
           el('button', { class: 'btn', onclick: closeDrawer }, 'とじる'))),
       row && row.edited_at
         ? `この行は ${row.edited_at} にこのアプリで編集しました。シートを取り込み直しても上書きされません。`
         : null);
   };
 
+  /* --- 見出しの中の絞り込み --- */
+  const filterCell = (d, c) => {
+    const cur = st.col[c.k] || {};
+    const opts = d.options[c.k];
+
+    if (c.type === 'money' || c.type === 'number') {
+      const lo = el('input', { class: 'fx num', type: 'text', placeholder: '以上', value: cur.min || '' });
+      const hi = el('input', { class: 'fx num', type: 'text', placeholder: '以下', value: cur.max || '' });
+      lo.addEventListener('change', () => set(c.k, 'min', lo.value.trim()));
+      hi.addEventListener('change', () => set(c.k, 'max', hi.value.trim()));
+      return el('div', { class: 'fx-pair' }, lo, hi);
+    }
+
+    // 種類が少ない列は選択、多い列は入力
+    if (opts && opts.length) {
+      const key = (c.type === 'date' || c.type === 'month') ? 'month' : 'eq';
+      const sel = el('select', { class: 'fx', onchange: (e) => set(c.k, key, e.target.value) },
+        el('option', { value: '' }, 'すべて'),
+        opts.map((o) => {
+          const label = c.type === 'bool' ? (o.v ? 'はい' : 'いいえ') : String(o.v);
+          const op = el('option', { value: String(o.v) }, `${label.slice(0, 18)}（${o.n}）`);
+          if (String(cur[key] ?? '') === String(o.v)) op.selected = true;
+          return op;
+        }));
+      return sel;
+    }
+
+    const inp = el('input', { class: 'fx', type: 'search', placeholder: '含む', value: cur.like || '' });
+    inp.addEventListener('change', () => set(c.k, 'like', inp.value.trim()));
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') set(c.k, 'like', inp.value.trim()); });
+    return inp;
+  };
+
   /* --- 画面 --- */
   const render = (d) => {
     const box = el('div');
+    const n = activeCount();
 
-    /* 検索と絞り込み */
+    /* 上のバー：全体検索と、条件のクリアと、追加 */
     const kw = el('input', { type: 'search', class: 'dt-search',
-      placeholder: (d.columns.slice(0, 3).map((c) => c.label).join('・')) + ' などで検索',
-      value: st.q });
-    kw.addEventListener('keydown', (e) => { if (e.key === 'Enter') { st.q = kw.value; st.offset = 0; draw(); } });
-    kw.addEventListener('search', () => { st.q = kw.value; st.offset = 0; draw(); });
+      placeholder: 'すべての項目から探す', value: st.q });
+    const runSearch = () => { st.q = kw.value; st.offset = 0; draw(); };
+    kw.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+    kw.addEventListener('search', runSearch);
 
-    const controls = [kw];
-    for (const key of d.filters) {
-      const col = d.columns.find((c) => c.k === key);
-      const opts = d.options[key] || [];
-      if (!col || !opts.length) continue;
-      const sel = el('select', { onchange: (e) => { st.f[key] = e.target.value; st.offset = 0; draw(); } },
-        el('option', { value: '' }, col.label + '：すべて'),
-        opts.map((o) => {
-          const label = col.type === 'bool' ? (o.v ? 'はい' : 'いいえ') : String(o.v);
-          const op = el('option', { value: String(o.v) }, `${label.slice(0, 22)}（${o.n}）`);
-          if (String(st.f[key] ?? '') === String(o.v)) op.selected = true;
-          return op;
-        }));
-      controls.push(sel);
+    const bar = [kw];
+    if (n) {
+      bar.push(el('span', { class: 'dt-active' }, `絞り込み ${n}件`));
+      bar.push(el('button', { class: 'btn', onclick: () => {
+        st.q = ''; st.col = {}; st.offset = 0; draw();
+      } }, 'すべて解除'));
     }
-    if (d.hasRange) {
-      const t = d.rangeKind === 'month' ? 'month' : 'month';
-      controls.push(el('input', { type: t, value: st.from, title: '開始',
-        onchange: (e) => { st.from = e.target.value; st.offset = 0; draw(); } }));
-      controls.push(el('span', { class: 'dim' }, '〜'));
-      controls.push(el('input', { type: t, value: st.to, title: '終了',
-        onchange: (e) => { st.to = e.target.value; st.offset = 0; draw(); } }));
-    }
-    const active = st.q || st.from || st.to || Object.values(st.f).some(Boolean);
-    if (active) {
-      controls.push(el('button', { class: 'btn', onclick: () => {
-        st.q = ''; st.f = {}; st.from = ''; st.to = ''; st.offset = 0; draw();
-      } }, '条件をクリア'));
-    }
-    controls.push(el('span', { style: 'flex:1' }));
-    controls.push(el('button', { class: 'btn pri', onclick: () => openEditor(d, null) }, '＋ 追加'));
-    box.append(el('div', { class: 'dt-bar' }, controls));
+    bar.push(el('span', { style: 'flex:1' }));
+    const sumTexts = Object.entries(d.sums).filter(([, v]) => v).map(([k, v]) => {
+      const col = d.columns.find((c) => c.k === k);
+      return `${col ? col.label : k} ${money(v)}`;
+    });
+    bar.push(el('span', { class: 'dt-count' }, yen(d.total) + '件'));
+    if (sumTexts.length) bar.push(el('span', { class: 'dt-sums' }, sumTexts.join('　/　')));
+    bar.push(el('button', { class: 'btn pri', onclick: () => openEditor(d, null) }, '＋ 追加'));
+    box.append(el('div', { class: 'dt-bar' }, bar));
 
-    /* 件数と金額 */
-    const sumTexts = Object.entries(d.sums)
-      .filter(([, v]) => v)
-      .map(([k, v]) => {
-        const col = d.columns.find((c) => c.k === k);
-        return `${col ? col.label : k} ${money(v)}`;
-      });
-    box.append(el('div', { class: 'dt-info' },
-      el('b', {}, yen(d.total) + '件'),
-      d.total > d.rows.length ? el('span', { class: 'dim' }, `（${yen(d.rows.length)}件を表示）`) : null,
-      sumTexts.length ? el('span', { class: 'dt-sums' }, sumTexts.join('　/　')) : null));
-
-    /* 表 */
+    /* 表：見出しは2段。上が名前と並び替え、下が絞り込み */
     if (!d.rows.length) {
-      box.append(el('div', { class: 'empty' }, active ? '条件に合う行がありません' : 'データがありません'));
+      box.append(el('div', { class: 'empty' }, n ? '条件に合う行がありません' : 'データがありません'));
     } else {
-      const th = d.columns.map((c) => el('th', {
-        class: (c.type === 'money' || c.type === 'number' ? 'r ' : '') + 'sortable',
+      const isNum = (c) => c.type === 'money' || c.type === 'number';
+      const head1 = d.columns.map((c) => el('th', {
+        class: (isNum(c) ? 'r ' : '') + 'sortable',
         style: c.w ? `width:${c.w}px` : '',
         onclick: () => {
           st.dir = st.sort === c.k && st.dir === 'asc' ? 'desc' : 'asc';
           st.sort = c.k; draw();
         },
       }, c.label + (st.sort === c.k ? (st.dir === 'asc' ? ' ↑' : ' ↓') : '')));
-      th.push(el('th', { style: 'width:52px' }, ''));
+      head1.push(el('th', { style: 'width:52px' }, ''));
+
+      const head2 = d.columns.map((c) => el('th', { class: 'fx-cell' }, filterCell(d, c)));
+      head2.push(el('th', { class: 'fx-cell' }, ''));
 
       const body = d.rows.map((row) => el('tr', { class: row.edited_at ? 'edited' : '' },
         d.columns.map((c) => el('td', {
-          class: (c.type === 'money' || c.type === 'number' ? 'r money ' : '')
+          class: (isNum(c) ? 'r money ' : '')
             + (c.type === 'date' || c.type === 'month' ? 'nowrap' : ''),
         }, fmtCell(c, row[c.k]) || el('span', { class: 'dim' }, '—'))).concat(
           el('td', { class: 'nowrap' },
             el('button', { class: 'btn tiny', onclick: () => openEditor(d, row) }, '編集')))));
 
       box.append(el('div', { class: 'scroll tall' },
-        el('table', {}, el('thead', {}, el('tr', {}, th)), el('tbody', {}, body))));
+        el('table', { class: 'dt-table' },
+          el('thead', {}, el('tr', {}, head1), el('tr', { class: 'fx-row' }, head2)),
+          el('tbody', {}, body))));
     }
 
     /* ページ送り */
@@ -262,6 +291,19 @@ const escClose = (e) => { if (e.key === 'Escape') closeDrawer(); };
 const patch = (p, body) => fetch(p, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
 const del2 = (p) => fetch(p, { method: 'DELETE' }).then((r) => r.json());
 
+
+/** 対象年のセレクタ。ツールバーに置く（画面の中に入れると操作が埋もれる） */
+function yearPicker(st, pageKey) {
+  if (!st.years || !st.years.length) return el('span');
+  return el('span', { class: 'tool-group' },
+    el('label', { class: 'tool-label' }, '対象年'),
+    el('select', { onchange: (e) => { st.year = e.target.value; render(pageKey); } },
+      st.years.map((y) => {
+        const o = el('option', { value: y }, y + '年');
+        if (y === st.year) o.selected = true;
+        return o;
+      })));
+}
 
 /* ============================================================
    画面
@@ -509,25 +551,19 @@ const PAGES = {
 
   pl: {
     icon: '▲', label: '月次損益',
-    state: { year: '' },
+    state: { year: '', years: [] },
+    tools() { return [yearPicker(PAGES.pl.state, 'pl')]; },
     async load() {
       const st = PAGES.pl.state;
       const d = await api('/api/pl' + (st.year ? '?year=' + st.year : ''));
       st.year = d.year;
       const box = el('div');
 
-      const sel = el('select', { onchange: (e) => { st.year = e.target.value; render('pl'); } },
-        d.years.map((y) => {
-          const o = el('option', { value: y }, y + '年');
-          if (y === st.year) o.selected = true;
-          return o;
-        }));
-      box.append(panel('対象年', null, sel));
-
-      box.append(panel('年ごとの推移', '売上と販管費（内訳の合計）', tableOf([
+      st.years = d.years;
+      box.append(panel('年ごとの推移', '売上と経費（内訳の合計）', tableOf([
         { k: 'y', label: '年', cls: 'nowrap' },
         { k: 'sales', label: '売上', r: true, cls: 'money in', fmt: (v) => money(v) },
-        { k: 'cost', label: '販管費', r: true, cls: 'money out', fmt: (v) => money(v) },
+        { k: 'cost', label: '経費', r: true, cls: 'money out', fmt: (v) => money(v) },
         { k: '_p', label: '差引', r: true, cls: 'money', fmt: (v, r) => {
           const n = r.sales - r.cost;
           return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
@@ -563,7 +599,7 @@ const PAGES = {
           fmt: (v) => (v ? yen(v) : '') })))
         .concat([{ k: '_sum', label: '年計', r: true, cls: 'money', fmt: (v) => money(v) }]);
 
-      for (const [sec, title] of [['売上', '売上の内訳'], ['売上原価', '売上原価'], ['販管費', '販管費の内訳']]) {
+      for (const [sec, title] of [['売上', '売上の内訳'], ['売上原価', '売上原価'], ['経費', '経費の内訳']]) {
         const rows = d.rows.filter((r) => r.section === sec && !r.is_total);
         if (!rows.length) continue;
         const g = grid(rows);
@@ -580,21 +616,15 @@ const PAGES = {
 
   plan: {
     icon: '◇', label: '計画と実績',
-    state: { year: '' },
+    state: { year: '', years: [] },
+    tools() { return [yearPicker(PAGES.plan.state, 'plan')]; },
     async load() {
       const st = PAGES.plan.state;
       const d = await api('/api/plan' + (st.year ? '?year=' + st.year : ''));
       st.year = d.year;
       const box = el('div');
 
-      const sel = el('select', { onchange: (e) => { st.year = e.target.value; render('plan'); } },
-        d.years.map((y) => {
-          const o = el('option', { value: y }, y + '年');
-          if (y === st.year) o.selected = true;
-          return o;
-        }));
-      box.append(panel('対象年', null, sel));
-
+      st.years = d.years;
       const months = d.months;
       // 目標・実績・目安 を、区分ごとに月で横に並べる
       for (const kind of ['目標', '実績', '目安']) {
@@ -678,6 +708,80 @@ const PAGES = {
     },
   },
 
+
+  cash: {
+    icon: '◐', label: '手残り',
+    async load() {
+      const d = await api('/api/cash');
+      const box = el('div');
+      const sum = (k) => d.rows.reduce((a, r) => a + r[k], 0);
+      const income = sum('income'), biz = sum('bizCost'), per = sum('personal');
+      const bizProfit = income - biz;
+      const left = bizProfit - per;
+
+      box.append(el('div', { class: 'cards' },
+        card('事業の収入', money(income), '全期間'),
+        card('事業の経費', money(biz), '事業として出たお金'),
+        card('事業の利益', (bizProfit < 0 ? '-¥' : '¥') + yen(Math.abs(bizProfit)), '収入 − 事業の経費'),
+        card('個人のお金', money(per), '返済・貯蓄・保険・住まいなど'),
+        card('手残り', (left < 0 ? '-¥' : '¥') + yen(Math.abs(left)), '事業の利益 − 個人のお金', 'accent')));
+
+      if (d.guessedPersonal) {
+        box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
+          `「個人」と判定した${d.guessedPersonal}件は、カテゴリ名からの推測です。`
+          + '「お金の区分」で実態に合わせて直してください。直した分は取り込みでも戻りません。'));
+      }
+
+      box.append(panel('月ごと', d.rows.length + 'か月', tableOf([
+        { k: 'month', label: '月', cls: 'nowrap' },
+        { k: 'income', label: '事業の収入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
+        { k: 'bizCost', label: '事業の経費', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+        { k: '_bp', label: '事業の利益', r: true, cls: 'money', fmt: (v, r) => {
+          const n = r.income - r.bizCost;
+          return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
+        } },
+        { k: 'personal', label: '個人のお金', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
+        { k: '_left', label: '手残り', r: true, cls: 'money', fmt: (v, r) => {
+          const n = r.income - r.bizCost - r.personal;
+          return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
+        } },
+      ], d.rows)));
+
+      for (const kind of ['個人', '事業']) {
+        const rows = d.byCat.filter((r) => r.kind === kind);
+        if (!rows.length) continue;
+        box.append(panel(kind + 'として出ているお金', rows.length + 'カテゴリ', tableOf([
+          { k: 'category', label: 'カテゴリ' },
+          { k: 'n', label: '件', r: true },
+          { k: 'amount', label: '合計', r: true, cls: 'money', fmt: (v) => money(v) },
+        ], rows)));
+      }
+
+      box.append(el('h2', { class: 'sec' }, 'お金の区分（ここで事業／個人を直せます）'));
+      box.append(dataTable('cost_kinds'));
+      return box;
+    },
+  },
+
+  todos: {
+    icon: '☑', label: 'やること',
+    async load() {
+      const box = el('div');
+      const d = await api('/api/table/todos?limit=500');
+      const by = (st) => d.rows.filter((r) => r.status === st).length;
+      const today = new Date().toISOString().slice(0, 10);
+      const late = d.rows.filter((r) => r.due && r.due < today && r.status !== '完了' && r.status !== '見送り').length;
+
+      box.append(el('div', { class: 'cards' },
+        card('進行中', by('進行中') + '件', '', 'accent'),
+        card('未着手', by('未着手') + '件'),
+        card('期限ぎれ', late + '件', late ? '早めに片づける' : '無し'),
+        card('完了', by('完了') + '件')));
+      box.append(dataTable('todos'));
+      return box;
+    },
+  },
+
   tables: {
     icon: '▦', label: 'そのほかのデータ',
     state: { name: 'pl_monthly' },
@@ -752,7 +856,18 @@ const PAGES = {
 
   kpi: {
     icon: '≡', label: 'KPI',
-    state: { month: '' },
+    state: { month: '', months: [] },
+    tools() {
+      const st = PAGES.kpi.state;
+      if (!st.months.length) return [];
+      return [el('label', { class: 'tool-label' }, '対象月'),
+        el('select', { onchange: (e) => { st.month = e.target.value; render('kpi'); } },
+          st.months.map((m) => {
+            const o = el('option', { value: m }, m);
+            if (m === st.month) o.selected = true;
+            return o;
+          }))];
+    },
     async load() {
       const st = PAGES.kpi.state;
       const d = await api('/api/kpi' + (st.month ? '?month=' + st.month : ''));
@@ -760,13 +875,7 @@ const PAGES = {
       if (!d.rows.length) { box.append(el('div', { class: 'empty' }, 'KPIのデータがありません')); return box; }
       if (!st.month) st.month = d.months[0];
 
-      const sel = el('select', { onchange: (e) => { st.month = e.target.value; render('kpi'); } },
-        d.months.map((m) => {
-          const o = el('option', { value: m }, m);
-          if (m === st.month) o.selected = true;
-          return o;
-        }));
-      box.append(panel('対象月', null, sel));
+      st.months = d.months;
 
       // 指標ごとに週を横に並べ直す
       const bySec = {};
@@ -853,8 +962,8 @@ const PAGES = {
    ============================================================ */
 
 const ORDER = [
-  ['お金', ['dash', 'money', 'pl', 'expenses', 'plan']],
-  ['売る', ['customers', 'events', 'facilities', 'mail']],
+  ['お金', ['dash', 'cash', 'money', 'pl', 'expenses', 'plan']],
+  ['進める', ['todos', 'customers', 'events', 'facilities', 'mail']],
   ['調べる', ['kpi', 'pricing', 'tables', 'audit']],
   ['', ['settings']],
 ];
@@ -878,11 +987,14 @@ async function render(key) {
   const p = PAGES[key];
   buildNav();
   $('#page-title').textContent = p.label;
-  $('#page-tools').replaceChildren(...(p.tools ? p.tools() : []));
+  $('#page-tools').replaceChildren();
   const view = $('#view');
   view.replaceChildren(el('div', { class: 'loading' }, '読み込み中…'));
   try {
     view.replaceChildren(await p.load());
+    // ツールバーは中身を読んだあとに組む。年や月の選択肢が
+    // load() で分かるので、先に組むと空のまま出てしまう
+    if (p.tools) $('#page-tools').replaceChildren(...p.tools());
   } catch (e) {
     view.replaceChildren(el('div', { class: 'err' }, '読み込みに失敗しました: ' + e.message));
   }

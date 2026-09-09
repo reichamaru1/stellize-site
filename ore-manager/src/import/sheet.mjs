@@ -293,6 +293,7 @@ function importPl(db, lines) {
    * 中分類の名前だけで振り分けると事故る（Uber・配達・派遣は売上だが、
    * 名前からは経費に見える）。区分が変わるのは合計行の見出しに
    * 「実績合計売上原価」「販売費及び一般管理費」が出たときだけにする。
+   * 表示上は「販管費」ではなく「経費」と呼ぶ。
    */
   const sectionOf = (cat, carried) => {
     if (/売上原価/.test(cat)) return '売上原価';
@@ -323,7 +324,7 @@ function importPl(db, lines) {
       if (totalLabel) {
         // 合計・利益の行。区分の切り替わりも兼ねている
         if (/売上原価/.test(totalLabel)) section = '売上原価';
-        else if (/販売費|一般管理費/.test(totalLabel)) section = '販管費';
+        else if (/販売費|一般管理費/.test(totalLabel)) section = '経費';
         const isMetric = /利益|達成率|目標/.test(totalLabel);
         for (const { i: ci, m } of mc) {
           const v = money(d[ci]);
@@ -688,6 +689,28 @@ function importPlan(db, lines) {
 
 /* ============================================================ */
 
+/**
+ * 経費カテゴリに「事業／個人」の初期値を入れる。
+ *
+ * 名前からの推測なので当たらないものがある。だから guessed=1 を付けておき、
+ * 人が直したもの（guessed=0）は二度と上書きしない。
+ */
+const PERSONAL_HINT = /親族|貯蓄|借金|返済|社宅|家賃|健康保険|生命|保険|水道光熱|積立|小遣|生活/;
+
+function seedCostKinds(db) {
+  const cats = new Set();
+  for (const r of db.prepare("SELECT DISTINCT category c FROM expenses WHERE category <> ''").all()) cats.add(r.c);
+  for (const r of db.prepare("SELECT DISTINCT category c FROM pl_monthly WHERE section='経費' AND category <> ''").all()) cats.add(r.c);
+  for (const r of db.prepare("SELECT DISTINCT subcategory c FROM pl_monthly WHERE section='経費' AND subcategory <> ''").all()) cats.add(r.c);
+
+  const put = db.prepare(`INSERT INTO cost_kinds (category, kind, guessed) VALUES (?,?,1)
+    ON CONFLICT(category) DO UPDATE SET kind=excluded.kind WHERE cost_kinds.guessed = 1`);
+  let n = 0;
+  for (const c of cats) { put.run(c, PERSONAL_HINT.test(c) ? '個人' : '事業'); n++; }
+  return n;
+}
+
+
 const src = process.argv[2] || join(ROOT, 'data', 'sheet-export.md');
 const lines = readFileSync(src, 'utf8').split('\n');
 const db = openDb();
@@ -712,6 +735,13 @@ const done = {
   'PDF取込ログ': importPdfLog(db, lines),
   'カテゴリ判定ルール': importCategoryRules(db, lines),
 };
+
+// 「販管費」という呼び方はしない。
+// source_key に区分名が入っているので、名前を変えるとキーが変わり、
+// 古い行が残ったまま新しい行が増えて二重になる。古いキーの行を先に消す。
+db.exec("DELETE FROM pl_monthly WHERE source_key LIKE 'pl:%:販管費:%'");
+db.exec("UPDATE pl_monthly SET section='経費' WHERE section='販管費'");
+done['経費の事業/個人 区分'] = seedCostKinds(db);
 for (const [k, v] of Object.entries(done)) {
   console.log('  ' + (v ? '✓' : '—') + ' ' + k + ' : ' + v + '件');
 }

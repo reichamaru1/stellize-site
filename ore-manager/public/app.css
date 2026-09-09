@@ -136,19 +136,29 @@ td.nowrap{white-space:nowrap}
 
 /* ---------- 一覧＋検索＋絞り込み ---------- */
 .dt{background:#fff;border:1px solid var(--line-2);border-radius:11px;overflow:hidden}
-.dt-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 14px;
+.dt-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 14px;
         background:var(--cream);border-bottom:1px solid var(--line-2)}
-.dt-search{min-width:230px;flex:0 1 300px}
-.dt-bar select{max-width:210px}
-.dt-info{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:11.5px;
-         border-bottom:1px solid var(--line-2);color:var(--muted)}
-.dt-info b{color:var(--navy);font-size:12.5px;font-variant-numeric:tabular-nums}
-.dt-sums{margin-left:auto;color:var(--navy);font-variant-numeric:tabular-nums;font-weight:600}
+.dt-search{min-width:220px;flex:0 1 280px}
+.dt-active{padding:3px 10px;border-radius:20px;background:var(--navy);color:#fff;font-size:11px}
+.dt-count{font-size:12.5px;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+.dt-sums{color:var(--gold-2);font-variant-numeric:tabular-nums;font-weight:600;font-size:12px}
 .dt-page{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px;
          border-top:1px solid var(--line-2);font-size:11.5px}
-.scroll.tall{max-height:min(62vh,760px)}
-th.sortable{cursor:pointer;user-select:none}
+.scroll.tall{max-height:min(64vh,780px)}
+
+/* 見出しは2段。上が名前と並び替え、下が絞り込み */
+.dt-table thead th{position:sticky;background:var(--cream);z-index:2}
+.dt-table thead tr:first-child th{top:0}
+.dt-table thead tr.fx-row th{top:33px;padding:5px 6px;border-bottom:1px solid var(--line)}
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
 th.sortable:hover{color:var(--navy)}
+.fx-cell{background:#F7F3EC !important}
+.fx{width:100%;min-width:64px;padding:4px 6px;font-size:11px;border:1px solid var(--line);
+    border-radius:4px;background:#fff;color:var(--ink)}
+.fx:focus{outline:2px solid #C9C2D8;outline-offset:-1px}
+select.fx{cursor:pointer}
+.fx-pair{display:flex;gap:3px}
+.fx-pair .fx{min-width:0;text-align:right;font-variant-numeric:tabular-nums}
 tr.edited td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
 .btn.tiny{padding:3px 9px;font-size:11px}
 .btn.warn{background:#fff;color:var(--ng);border-color:#EBD3DA}
@@ -176,3 +186,6 @@ tr.edited td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
 h2.sec{margin:26px 0 12px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;
        font-size:14px;font-weight:600;letter-spacing:.06em;color:var(--navy)}
 .tabs{flex-wrap:wrap}
+
+.tool-group{display:inline-flex;align-items:center;gap:7px}
+.tool-label{font-size:10.5px;letter-spacing:.08em;color:var(--muted)}

@@ -196,8 +196,14 @@ async function mailApi(payload) {
    画面から来た文字列をそのままSQLに入れない（値は必ず ? で渡す）。
    ============================================================ */
 
-/** 絞り込みの条件を組み立てる。戻りは { where, args }。 */
-function buildWhere(t, q) {
+/**
+ * 絞り込みの条件を組み立てる。
+ *
+ * exceptCol を渡すと、その列の条件だけ外す。
+ * 列見出しの選択肢を作るときに使う（自分の条件で自分の選択肢が消えると、
+ * 一度絞ったら他の値に切り替えられなくなるため）。
+ */
+function buildWhere(t, q, exceptCol) {
   const where = [], args = [];
 
   const kw = (q.get('q') || '').trim();
@@ -206,36 +212,54 @@ function buildWhere(t, q) {
     t.search.forEach(() => args.push('%' + kw + '%'));
   }
 
-  // f_<列名>=値 で1列を絞る
-  for (const [key, val] of q.entries()) {
-    if (!key.startsWith('f_') || val === '') continue;
-    const col = columnOf(t, key.slice(2));
-    if (!col) continue;
-    where.push(`${col.k} = ?`);
-    args.push(coerce(col, val));
-  }
+  for (const col of t.columns) {
+    if (col.k === exceptCol) continue;
 
-  // 期間。日付列 or 月列があるときだけ効く
-  const range = t.dateCol || t.monthCol;
-  if (range) {
-    const cut = t.dateCol ? 7 : 7;   // どちらも YYYY-MM で比べる
-    const from = q.get('from'), to = q.get('to');
-    if (from) { where.push(`substr(${range},1,${cut}) >= ?`); args.push(from); }
-    if (to) { where.push(`substr(${range},1,${cut}) <= ?`); args.push(to); }
+    // 完全一致（選択肢から選んだとき）
+    const eq = q.get('f_' + col.k);
+    if (eq != null && eq !== '') { where.push(`${col.k} = ?`); args.push(coerce(col, eq)); }
+
+    // 部分一致（見出しの入力欄に打ったとき）
+    const like = (q.get('qc_' + col.k) || '').trim();
+    if (like) { where.push(`${col.k} LIKE ?`); args.push('%' + like + '%'); }
+
+    // 月で絞る（日付・月の列）
+    const mon = q.get('m_' + col.k);
+    if (mon) { where.push(`substr(${col.k},1,7) = ?`); args.push(mon); }
+
+    // 数値・金額の範囲
+    const min = q.get('min_' + col.k), max = q.get('max_' + col.k);
+    if (min !== null && min !== '') { where.push(`${col.k} >= ?`); args.push(coerce(col, min)); }
+    if (max !== null && max !== '') { where.push(`${col.k} <= ?`); args.push(coerce(col, max)); }
   }
 
   return { where: where.length ? 'WHERE ' + where.join(' AND ') : '', args };
 }
 
-/** 絞り込みの選択肢。実際に入っている値だけを出す。 */
-function filterOptions(name, t) {
+/**
+ * 列ごとの選択肢。
+ * 種類が多すぎる列は選択肢にせず、画面側で入力欄にする（60件を超えたら null）。
+ */
+function columnOptions(name, t, q) {
   const out = {};
-  for (const key of t.filters) {
-    const col = columnOf(t, key);
-    if (!col) continue;
-    out[key] = all(
-      `SELECT ${col.k} AS v, COUNT(*) n FROM ${name}
-       WHERE ${col.k} IS NOT NULL AND ${col.k} <> '' GROUP BY 1 ORDER BY n DESC LIMIT 60`);
+  for (const col of t.columns) {
+    if (col.type === 'money' || col.type === 'number') continue;   // 範囲入力にする
+
+    const { where, args } = buildWhere(t, q, col.k);
+    const expr = (col.type === 'date' || col.type === 'month')
+      ? `substr(${col.k},1,7)`                                      // 日付は月にまとめる
+      : col.k;
+
+    // 空欄を除く条件は、既にある WHERE に足す（WHERE を2回書かない）
+    const notNull = `${col.k} IS NOT NULL AND ${col.k} <> ''`;
+    const clause = where ? `${where} AND ${notNull}` : `WHERE ${notNull}`;
+
+    const n = one(`SELECT COUNT(DISTINCT ${expr}) c FROM ${name} ${clause}`, ...args).c;
+    if (n === 0 || n > 60) { out[col.k] = null; continue; }
+
+    const order = (col.type === 'date' || col.type === 'month') ? 'v DESC' : 'n DESC, v';
+    out[col.k] = all(
+      `SELECT ${expr} AS v, COUNT(*) n FROM ${name} ${clause} GROUP BY 1 ORDER BY ${order}`, ...args);
   }
   return out;
 }
@@ -266,12 +290,18 @@ function listTable(name, q) {
     sums[col.k] = one(`SELECT COALESCE(SUM(${col.k}),0) a FROM ${name} ${where}`, ...args).a;
   }
 
+  // 金額・数値列は範囲入力のために最小最大を返す
+  const ranges = {};
+  for (const col of t.columns) {
+    if (col.type !== 'money' && col.type !== 'number') continue;
+    const r = one(`SELECT MIN(${col.k}) lo, MAX(${col.k}) hi FROM ${name}`);
+    ranges[col.k] = { lo: r.lo ?? 0, hi: r.hi ?? 0 };
+  }
+
   return {
-    name, label: t.label, columns: t.columns, filters: t.filters,
-    hasRange: !!(t.dateCol || t.monthCol),
-    rangeKind: t.dateCol ? 'date' : (t.monthCol ? 'month' : null),
-    options: filterOptions(name, t),
-    rows, total, limit, offset, sums,
+    name, label: t.label, columns: t.columns,
+    options: columnOptions(name, t, q),
+    ranges, rows, total, limit, offset, sums,
   };
 }
 
@@ -386,13 +416,37 @@ const server = createServer(async (req, res) => {
         // 年ごとの粗い形。どの年に何で稼いだかを1行で見る
         summary: all(`SELECT substr(month,1,4) y,
             COALESCE(SUM(CASE WHEN is_total=0 AND section='売上' THEN amount END),0) sales,
-            COALESCE(SUM(CASE WHEN is_total=0 AND section='販管費' THEN amount END),0) cost
+            COALESCE(SUM(CASE WHEN is_total=0 AND section='経費' THEN amount END),0) cost
           FROM pl_monthly GROUP BY 1 ORDER BY 1`),
         bySource: all(`SELECT subcategory, category, SUM(amount) amount, COUNT(*) n
           FROM pl_monthly WHERE is_total=0 AND section='売上' AND month LIKE ?
           GROUP BY 1,2 ORDER BY amount DESC`, like),
       });
     }
+    /**
+     * 手残り。
+     * 事業の収入から事業の経費を引いたものが事業の利益。
+     * そこから個人として出ていくお金（返済・貯蓄・保険・住まい）を引くと、
+     * 実際に手元に残る額になる。cost_kinds の区分で分けている。
+     */
+    if (p === '/api/cash') {
+      const kindJoin = `LEFT JOIN cost_kinds k ON k.category = e.category`;
+      const rows = all(`
+        SELECT m AS month,
+          COALESCE((SELECT SUM(income) FROM cashflow WHERE substr(date,1,7)=m),0) AS income,
+          COALESCE((SELECT SUM(e.amount) FROM expenses e ${kindJoin}
+                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='事業'),0) AS bizCost,
+          COALESCE((SELECT SUM(e.amount) FROM expenses e ${kindJoin}
+                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='個人'),0) AS personal
+        FROM (SELECT DISTINCT substr(date,1,7) m FROM expenses
+              UNION SELECT DISTINCT substr(date,1,7) FROM cashflow) ORDER BY m`);
+      const byCat = all(`
+        SELECT COALESCE(k.kind,'事業') kind, e.category, SUM(e.amount) amount, COUNT(*) n
+        FROM expenses e ${kindJoin} GROUP BY 1,2 ORDER BY amount DESC`);
+      const guessed = one("SELECT COUNT(*) c FROM cost_kinds WHERE guessed=1 AND kind='個人'").c;
+      return json(res, { rows, byCat, guessedPersonal: guessed });
+    }
+
     if (p === '/api/metrics') return json(res, { rows: all('SELECT * FROM metrics ORDER BY scope, id') });
     if (p === '/api/audit') {
       // シートの月次サマリーと、明細から計算した値を並べる。

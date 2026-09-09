@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS pl_monthly (
   id          INTEGER PRIMARY KEY,
   source_key  TEXT UNIQUE,
   month       TEXT NOT NULL,            -- YYYY-MM
-  section     TEXT NOT NULL,            -- 売上 / 売上原価 / 販管費 / 指標
+  section     TEXT NOT NULL,            -- 売上 / 売上原価 / 経費 / 指標
   category    TEXT,                     -- 中分類（顧問費用・諸会費 など）
   subcategory TEXT,                     -- 明細（会社名・費目）
   amount      INTEGER NOT NULL DEFAULT 0,
@@ -275,6 +275,32 @@ CREATE TABLE IF NOT EXISTS monthly_summary (
   profit    INTEGER NOT NULL DEFAULT 0,
   cost_rate REAL
 );
+
+-- 経費が「事業のお金」か「個人のお金」か。
+-- 名前だけでは決められない（社宅は事業のことも個人のこともある）ので、
+-- カテゴリごとに人が決められるようにして、その判断をここに残す。
+CREATE TABLE IF NOT EXISTS cost_kinds (
+  id       INTEGER PRIMARY KEY,
+  category TEXT NOT NULL UNIQUE,
+  kind     TEXT NOT NULL DEFAULT '事業',   -- 事業 / 個人
+  guessed  INTEGER NOT NULL DEFAULT 1,     -- 1 なら名前からの推測。人が直したら 0
+  memo     TEXT
+);
+
+-- やること。事業を回すための備忘。
+CREATE TABLE IF NOT EXISTS todos (
+  id         INTEGER PRIMARY KEY,
+  title      TEXT NOT NULL,
+  detail     TEXT,
+  area       TEXT,                          -- 営業 / 制作 / 経理 / 発信 / その他
+  priority   TEXT NOT NULL DEFAULT '中',    -- 高 / 中 / 低
+  due        TEXT,                          -- YYYY-MM-DD
+  status     TEXT NOT NULL DEFAULT '未着手', -- 未着手 / 進行中 / 完了 / 見送り
+  linked     TEXT,                          -- 関係する相手・案件
+  done_at    TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
+CREATE INDEX IF NOT EXISTS idx_td_status ON todos(status, due);
 
 -- ============================================================
 -- 設定（連携キーなど）
