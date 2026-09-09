@@ -3688,8 +3688,10 @@ body.lp-refined .issue-card h3,
 body.lp-refined .issue-card .inum { color: #B34866; }
 
 
+
+
 /* ============================================================
-   アプローチ節：土台の考え方を名指しせず、現場に何が起きるかで見せる
+   アプローチ節：選択理論心理学を「何か → 講座での実践 → 期待できる変化」で見せる
    ============================================================ */
 .approach { text-align: center; }
 
@@ -3713,77 +3715,134 @@ body.lp-refined .issue-card .inum { color: #B34866; }
     font-size: clamp(0.98rem, 2.1vw, 1.1rem);
     line-height: 2.05;
     color: var(--text-secondary);
-    max-width: 660px;
-    margin: 0 auto 12px;
+    max-width: 680px;
+    margin: 0 auto 38px;
 }
 .approach .choice-theory-lead strong { color: var(--color-ink); font-weight: 600; }
-/* 金の細罫で本文へ受け渡す */
-.approach .choice-theory-lead::after {
+
+/* ---- 理論そのものの説明ボックス ---- */
+.theory-box {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: left;
+    background: linear-gradient(150deg, #FBF9FF 0%, #FFFFFF 100%);
+    border: 1px solid rgba(31, 42, 84, 0.1);
+    border-radius: 18px;
+    padding: clamp(26px, 4vw, 40px);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+}
+/* 上辺に金の細線を通して「定義」であることを示す */
+.theory-box::before {
     content: '';
-    display: block;
-    width: 60px;
-    height: 1px;
-    margin: 30px auto 0;
+    position: absolute;
+    top: 0; left: 12%; right: 12%;
+    height: 2px;
+    border-radius: 2px;
     background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
 }
-
-.approach-points {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-    margin-top: 40px;
-}
-.approach-points .point-item {
-    background: none;
-    border: none;
-    padding: 0 8px;
-    text-align: center;
-}
-.approach-illust { width: clamp(104px, 24vw, 128px); margin: 0 auto 8px; }
-.approach-illust svg { width: 100%; height: auto; display: block; overflow: visible; }
-.approach-illust .il-ln {
-    fill: none;
-    stroke: var(--color-ink);
-    stroke-width: 2.3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-.approach-illust .il-ln.thin { stroke-width: 1.7; }
-.approach-illust .il-sp { fill: var(--color-gold); }
-
-.approach-illust .il-sp {
-    transform-origin: 0 0;
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), fill 0.4s ease;
-}
-.approach-points .point-item:hover .il-sp {
-    transform: scale(1.16) rotate(14deg);
-    fill: var(--color-gold-deep);
-}
-
-.approach-num {
+.theory-box-label {
     font-family: 'Noto Serif JP', serif;
-    font-size: 0.82rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    letter-spacing: 0.06em;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(31, 42, 84, 0.1);
+}
+.theory-box p {
+    font-size: 0.95rem;
+    line-height: 2.05;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+.theory-box p:last-child { margin-bottom: 0; }
+.theory-box strong { color: var(--color-ink); font-weight: 600; }
+/* 中核の一文だけ地色を変えて立たせる */
+.theory-box-key {
+    background: rgba(174, 159, 196, 0.12);
+    border-left: 3px solid var(--color-primary-deep);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 18px 0 !important;
+}
+
+.approach-bridge {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 40px 0 26px;
+}
+
+/* ---- 採用している考え方 → 実践 → 変化 ---- */
+.theory-apply {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+    text-align: left;
+}
+.apply-item {
+    background: var(--bg-white);
+    border: 1px solid rgba(31, 42, 84, 0.09);
+    border-radius: 16px;
+    padding: 26px 24px;
+    position: relative;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.apply-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(192, 161, 107, 0.5);
+}
+.apply-num {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.8rem;
     letter-spacing: 0.16em;
     color: var(--color-gold);
     margin-bottom: 6px;
 }
-.approach-points .point-item h4 {
+.apply-item h4 {
     font-family: 'Noto Serif JP', serif;
     font-size: 1.06rem;
     color: var(--color-ink);
     font-weight: 600;
-    margin-bottom: 10px;
-    letter-spacing: 0.03em;
-    display: block;
+    line-height: 1.6;
+    margin-bottom: 18px;
+    letter-spacing: 0.02em;
 }
-.approach-points .point-item p {
-    font-size: 0.92rem;
+.apply-item p {
+    font-size: 0.88rem;
     line-height: 1.95;
     color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+.apply-item p:last-child { margin-bottom: 0; }
+.apply-item strong { color: var(--color-ink); font-weight: 600; }
+
+/* 3段の役割を色分けした小さな見出しで示す */
+.apply-tag {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-primary-deep);
+    margin-bottom: 5px;
+}
+.apply-tag--do  { color: var(--color-secondary); }
+.apply-tag--res { color: var(--color-gold-deep); }
+
+/* 「期待できる変化」は結論なので、地色を敷いて締める */
+.apply-result {
+    background: rgba(192, 161, 107, 0.09);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px !important;
+    color: var(--color-ink-soft) !important;
+    font-weight: 500;
 }
 
 .approach-summary {
-    margin-top: 46px;
+    margin-top: 44px;
     font-size: clamp(0.94rem, 2vw, 1.02rem);
     line-height: 2.1;
     color: var(--text-secondary);
@@ -3793,9 +3852,4 @@ body.lp-refined .issue-card .inum { color: #B34866; }
     font-weight: 600;
     border-bottom: 1.5px solid var(--color-gold);
     padding-bottom: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .approach-illust .il-sp { transition: none; }
-    .approach-points .point-item:hover .il-sp { transform: none; }
 }
