@@ -1,0 +1,13 @@
+{
+  "name": "ore-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "俺の事業を管理せよ — Stellizeの事業を1画面にまとめる",
+  "engines": { "node": ">=22.5.0" },
+  "scripts": {
+    "start": "node --no-warnings src/server.mjs",
+    "import": "node --no-warnings src/import/sheet.mjs",
+    "test": "node --no-warnings --test test/*.test.mjs"
+  }
+}
