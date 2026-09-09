@@ -34,7 +34,7 @@ const ok = (label, fn) => { fn(); console.log('  ✓ ' + label); pass++; };
 
 console.log('\n■ シートの初期化');
 run('setupSheets()');
-ok('6枚のシートができる', () => assert.equal(book.getSheets().length, 6));
+ok('7枚のシートができる', () => assert.equal(book.getSheets().length, 7));
 ok('設定シートに既定値が入る', () => assert.equal(run(`cfg()['会社名']`), 'Stellize合同会社'));
 ok('送信キューは隠しシート', () => assert.equal(book.getSheetByName('送信キュー').hidden, true));
 
@@ -190,6 +190,85 @@ ok('送信済に変わる', () => assert.equal(run(`draftByIssue('vol002')['状�
 ok('送信済カウントが5', () => assert.equal(run(`draftByIssue('vol002')['送信済']`), 5));
 ok('トリガーが片付く', () => assert.equal(run(`ScriptApp.getProjectTriggers().length`), 0));
 
+console.log('\n■ 外部連携（メモ → 下書き）');
+// doPost にJSONで来たものが Api.gs に回るところから通しで確かめる
+const post = (obj) => JSON.parse(run(
+  `doPost({postData:{contents:${JSON.stringify(JSON.stringify(obj))}}}).getContent()`));
+const API = run(`apiToken('api')`);
+const MEMO = run(`apiToken('memo')`);
+
+ok('合言葉が無ければ通さない', () => {
+  assert.equal(post({ api: 'status' }).error, 'unauthorized');
+  assert.equal(post({ api: 'status', token: 'にせもの' }).ok, false);
+});
+ok('メモ用キーでは原稿を積めない', () => {
+  assert.equal(post({ api: 'draft', token: MEMO, body: 'x' }).error, 'unauthorized');
+  assert.equal(post({ api: 'memos', token: MEMO }).error, 'unauthorized');
+});
+ok('メモ用キーでメモは足せる', () => {
+  assert.equal(post({ api: 'memo', token: MEMO, text: 'スマホから残したメモ' }).ok, true);
+});
+
+ok('疎通確認が今日の枠を返す', () => {
+  const st = post({ api: 'status', token: API });
+  assert.equal(st.ok, true);
+  assert.match(st.today, /\d{4}年\d{1,2}月\d{1,2}日/);
+  assert.equal(st.frames.length, 4, '曜日枠は4つ');
+  // 平日なら枠があり、土日は null
+  const wd = new Date().getDay();
+  if (wd >= 1 && wd <= 5) assert.ok(st.frame && st.frame.key, '平日は枠がある');
+  else assert.equal(st.frame, null, '土日は枠なし');
+});
+
+post({ api: 'memo', token: API, text: 'クッキーの袋詰めの人が「私が作ったって書いていいんですか」と聞いてきた', frame: '現場で見たこと' });
+const memos = post({ api: 'memos', token: API }).memos;
+ok('未使用のメモが読める', () => {
+  assert.equal(memos.length, 2);
+  assert.ok(memos[1].text.includes('袋詰め'));
+  assert.equal(memos[1].frame, '現場で見たこと');
+});
+
+const drafted = post({
+  api: 'draft', token: API, template: 'daily', frame: '現場で見たこと', segment: '日刊',
+  subject: '「私が作ったって、書いていいんですか」',
+  preheader: '袋に名前を入れた日の話です。',
+  title: '「私が作ったって、書いていいんですか」',
+  body: '先週、ある事業所で袋詰めの作業を見ていたときのことです。\n\n「これ、私が作ったって書いていいんですか」と聞かれました。\n\n私は、そう聞かれた理由のほうが大事だと思っています。まだ答えは出ていません。',
+  memoRows: [memos[1].row],
+});
+ok('下書きが積まれる', () => {
+  assert.equal(drafted.ok, true);
+  assert.match(drafted.issue, /^d\d{8}$/, '日刊の号IDは日付: ' + drafted.issue);
+});
+ok('状態は必ず下書き（勝手に送らない）', () =>
+  assert.equal(run(`draftByIssue(${JSON.stringify(drafted.issue)})['状態']`), '下書き'));
+ok('書き方チェックが返ってくる', () => assert.ok(Array.isArray(drafted.voice)));
+ok('使ったメモが採用済みになる', () => {
+  assert.equal(post({ api: 'memos', token: API }).memos.length, 1);
+});
+ok('同じ号IDは二度積めない', () => {
+  const again = post({ api: 'draft', token: API, template: 'daily', issue: drafted.issue, body: 'x' });
+  assert.equal(again.ok, false);
+  assert.match(again.error, /すでに同じ号ID/);
+});
+ok('日刊で売り込むと指摘される', () => {
+  const d = post({
+    api: 'draft', token: API, template: 'daily', frame: '手を動かしてみた話',
+    subject: 'test', title: 'test',
+    body: '事業所は必ず始めましょう。\n\n:::cta 申し込む｜https://example.com/\nいまだけ\n:::',
+  });
+  const msgs = d.voice.map((v) => v.msg).join('｜');
+  assert.ok(msgs.includes('CTA帯'), 'CTAを指摘する: ' + msgs);
+  assert.ok(msgs.includes('ましょう'), '教える構えを指摘する: ' + msgs);
+});
+ok('知らないテンプレートは弾く', () =>
+  assert.equal(post({ api: 'draft', token: API, template: 'にせもの' }).ok, false));
+
+ok('スマホのメモ帳は合言葉を見る', () => {
+  assert.equal(run(`addMemoFromPage('にせもの','メモ','').error`), 'unauthorized');
+  assert.equal(run(`addMemoFromPage(${JSON.stringify(MEMO)},'画面から残したメモ','').ok`), true);
+});
+
 console.log('\n■ 読み込み順への非依存');
 // GASは編集画面の並び順で全ファイルを読む。順番が変わると落ちる書き方（トップレベルで
 // 他ファイルの定数を参照する等）が紛れ込んでいないかを、逆順で読んで確かめる
@@ -198,7 +277,7 @@ ok('ファイルを逆順で読んでも初期化できる', () => {
   const c2 = vm.createContext(other.g);
   for (const f of [...files].reverse()) vm.runInContext(readFileSync(join(DIR, f), 'utf8'), c2, { filename: f });
   vm.runInContext('setupSheets()', c2);
-  assert.equal(other.book.getSheets().length, 6);
+  assert.equal(other.book.getSheets().length, 7);
 });
 
 console.log(`\n✅ ${pass}件すべて通りました（送信 ${sent.length}通 / 宛先: ${sent.map((s) => s.to).join(', ')}）\n`);

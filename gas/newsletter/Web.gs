@@ -16,6 +16,7 @@ function doGet(e) {
       case 'u': return unsubscribePage(p);
       case 's': return confirmSubscribePage(p);
       case 'v': return webViewPage(p);
+      case 'memo': return memoPage(p.k);
       default:  return page('Stellize', '<p>このページは、Stellizeからのメール内のリンクからご利用ください。</p>');
     }
   } catch (err) {
@@ -36,6 +37,14 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
   };
   try {
+    // JSONで api を指定して来たものは、外部連携（Api.gs）に回す。
+    // サイトの購読フォームは今までどおりフォーム形式で来るので、ここで分かれる
+    if (e && e.postData && e.postData.contents) {
+      let body = null;
+      try { body = JSON.parse(e.postData.contents); } catch (err) { body = null; }
+      if (body && body.api) return out(apiHandle(body));
+    }
+
     if (p.website) return out({ ok: true });          // ハニーポット（ボット除け）
     const email = normEmail(p.email);
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return out({ ok: false, error: 'invalid_email' });

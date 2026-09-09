@@ -14,13 +14,54 @@ function onOpen() {
     .addItem('購読者をまとめて取り込む', 'showImport')
     .addItem('新しい号の行を作る', 'newDraftRow')
     .addSeparator()
+    .addItem('ネタ帳のURLと連携キーを表示', 'showKeys')
     .addItem('初期セットアップ（シートを整える）', 'runSetup')
+    .addItem('連携キーを作り直す', 'rotateKeys')
     .addToUi();
 }
 
 function runSetup() {
   const msg = setupSheets();
   SpreadsheetApp.getUi().alert('初期セットアップ', msg, SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+/**
+ * スマホ用のネタ帳URLと、手元のClaudeが使う連携キーを見せる。
+ * キーは画面に出すだけで、シートには書かない（シートを共有したときに漏れるため）。
+ */
+function showKeys() {
+  const base = cfg()['WebアプリURL'];
+  if (!base) {
+    SpreadsheetApp.getUi().alert('先に「設定」シートの WebアプリURL を入れてください。');
+    return;
+  }
+  const memoUrl = base + '?a=memo&k=' + encodeURIComponent(apiToken('memo'));
+  const html = HtmlService.createHtmlOutput(
+    '<div style="font:13px/1.9 -apple-system,\'Hiragino Kaku Gothic ProN\',sans-serif;padding:20px 22px;color:#3A3A3A">'
+    + '<p style="margin:0 0 6px;font-weight:600;color:#1F2A54">スマホのネタ帳（ホーム画面に追加して使う）</p>'
+    + '<textarea readonly style="width:100%;height:56px;font:11px/1.7 ui-monospace,monospace;padding:8px;'
+    + 'border:1px solid #E2DACD;border-radius:6px" onclick="this.select()">' + esc(memoUrl) + '</textarea>'
+    + '<p style="margin:6px 0 20px;font-size:11px;color:#8A8072">このURLは人に見せないでください。'
+    + '漏れてもメモが増えるだけですが、キーを作り直したいときは「連携キーを作り直す」を実行します。</p>'
+    + '<p style="margin:0 0 6px;font-weight:600;color:#1F2A54">連携キー（手元の設定ファイルにだけ置く）</p>'
+    + '<textarea readonly style="width:100%;height:44px;font:11px/1.7 ui-monospace,monospace;padding:8px;'
+    + 'border:1px solid #E2DACD;border-radius:6px" onclick="this.select()">'
+    + esc(JSON.stringify({ webAppUrl: base, apiToken: apiToken('api') }, null, 2)) + '</textarea>'
+    + '<p style="margin:6px 0 0;font-size:11px;color:#8A8072">プロジェクト直下の <code>.stellize-mail.json</code> に貼ります。'
+    + 'このキーは原稿を積める強い権限なので、リポジトリには入れないでください（gitignore済み）。</p>'
+    + '</div>').setWidth(560).setHeight(400);
+  SpreadsheetApp.getUi().showModalDialog(html, '連携キー');
+}
+
+/** キーを作り直す。漏れたときや、担当が変わったときに使う。 */
+function rotateKeys() {
+  const ui = SpreadsheetApp.getUi();
+  const res = ui.alert('連携キーを作り直す',
+    '作り直すと、いまのネタ帳URLと手元の設定は使えなくなります。よろしいですか？', ui.ButtonSet.OK_CANCEL);
+  if (res !== ui.Button.OK) return;
+  PropertiesService.getScriptProperties().deleteProperty('API_TOKEN');
+  PropertiesService.getScriptProperties().deleteProperty('MEMO_TOKEN');
+  showKeys();
 }
 
 function showSidebar() {

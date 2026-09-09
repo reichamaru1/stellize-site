@@ -16,6 +16,7 @@ const SHEETS = {
   queue:       '送信キュー',
   log:         '配信ログ',
   suppress:    '配信停止',
+  memos:       'ネタ帳',
 };
 
 /**
@@ -81,6 +82,44 @@ function secretKey() {
     props.setProperty('UNSUB_SECRET', s);
   }
   return s;
+}
+
+/* ------------------------------------------------------------
+   連携キー
+
+   Webアプリは「アクセス: 全員」で公開する必要がある（メールの受信者は
+   Googleにログインしていないため）。つまりURLを知っていれば誰でも叩ける。
+   そこで、外から書き込む口には合言葉を必須にしている。
+
+   キーは2本に分けてある。片方が漏れても、できることが限られるようにするため。
+     ・MEMO_TOKEN … メモを足すことだけができる。スマホのブックマークに入る
+     ・API_TOKEN  … メモを読む／原稿を積む。手元の設定ファイルにだけ置く
+   ------------------------------------------------------------ */
+
+/** 連携キーを取り出す（無ければ作る）。 */
+function apiToken(kind) {
+  const props = PropertiesService.getScriptProperties();
+  const key = kind === 'memo' ? 'MEMO_TOKEN' : 'API_TOKEN';
+  let t = props.getProperty(key);
+  if (!t) {
+    t = Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(Utilities.getUuid(), Utilities.getUuid()))
+      .replace(/[^A-Za-z0-9]/g, '').slice(0, 32);
+    props.setProperty(key, t);
+  }
+  return t;
+}
+
+/**
+ * 合言葉の照合。長さの違いだけで当たりが分かることのないよう、
+ * 早期に抜けずに最後まで比べる。
+ */
+function tokenOk(given, kind) {
+  const want = apiToken(kind);
+  const got = String(given == null ? '' : given);
+  if (got.length !== want.length) return false;
+  let diff = 0;
+  for (let i = 0; i < want.length; i++) diff |= want.charCodeAt(i) ^ got.charCodeAt(i);
+  return diff === 0;
 }
 
 /** メールアドレスから配信停止用の署名を作る。 */

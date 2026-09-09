@@ -96,6 +96,12 @@ function sheetDefs() { return [
     hidden: true,
   },
   {
+    name: SHEETS.memos,
+    header: ['受付日時', 'メモ', '枠の候補', '状態', '使った号ID', '元'],
+    widths: [140, 560, 150, 90, 110, 110],
+    frozen: 1,
+  },
+  {
     name: SHEETS.log,
     header: ['日時', '号ID', 'メールアドレス', '結果', '詳細'],
     widths: [140, 110, 230, 90, 420],
@@ -164,6 +170,12 @@ function setupSheets() {
   const frameRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(DAILY_FRAMES.map(function (f) { return f.key; }), true).setAllowInvalid(true).build();
   dr.getRange(2, headerMap(dr)['枠'] + 1, 500, 1).setDataValidation(frameRule);
+
+  const mm = sheet(SHEETS.memos);
+  mm.getRange(2, headerMap(mm)['枠の候補'] + 1, 1000, 1).setDataValidation(frameRule);
+  mm.getRange(2, headerMap(mm)['状態'] + 1, 1000, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(['未使用', '採用', '没'], true).setAllowInvalid(false).build());
+  mm.getRange(2, headerMap(mm)['メモ'] + 1, 1000, 1).setWrap(true);
 
   // 空の「シート1」が残っていたら消す
   const blank = book.getSheetByName('シート1') || book.getSheetByName('Sheet1');

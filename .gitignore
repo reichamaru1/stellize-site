@@ -8,3 +8,6 @@ __v*.html
 
 # メールのプレビューは生成物（画像を埋め込むので大きい）。node mail/build.mjs で作り直せる
 mail/preview/
+
+# メルマガの連携キー。原稿を積める強い権限なので絶対にコミットしない
+.stellize-mail.json
