@@ -108,6 +108,28 @@ CREATE TABLE IF NOT EXISTS deals (
 );
 CREATE INDEX IF NOT EXISTS idx_dl_status ON deals(status);
 
+-- 商談パイプライン。契約前の動きを追う。
+-- deals（契約一覧）とは別に持つ。見ている項目が違い、
+-- 失注したものも残す必要があるため。
+CREATE TABLE IF NOT EXISTS pipeline (
+  id           INTEGER PRIMARY KEY,
+  source_key   TEXT UNIQUE,
+  title        TEXT,                    -- 案件名
+  company      TEXT,
+  person       TEXT,
+  broker       TEXT,                    -- 仲介者
+  first_met    TEXT,                    -- 初回面談
+  status       TEXT,                    -- 進捗（契約 / 失注 / 保留 …）
+  quote_once   INTEGER DEFAULT 0,       -- 単発見積
+  quote_month  INTEGER DEFAULT 0,       -- 月額見積
+  due          TEXT,                    -- 期限
+  closed_on    TEXT,                    -- 契約締結日
+  note         TEXT,
+  lost_reason  TEXT,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
+CREATE INDEX IF NOT EXISTS idx_pl_status ON pipeline(status);
+
 -- ============================================================
 -- KPI
 -- ============================================================
