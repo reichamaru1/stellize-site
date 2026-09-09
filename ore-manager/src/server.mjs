@@ -477,7 +477,13 @@ const server = createServer(async (req, res) => {
       const id = rest[1];
 
       if (req.method === 'GET') return json(res, listTable(name, q));
-      if (req.method === 'POST') return json(res, writeRow(name, null, await readJson(req)), 201);
+      // 「シートの値に戻す」。編集の印を外すと、次の取り込みで上書きされるようになる。
+      // 汎用の POST（新規作成）より先に見ること
+      if (req.method === 'POST' && id && rest[2] === 'release') {
+        db.prepare(`UPDATE ${name} SET edited_at=NULL WHERE id=?`).run(Number(id));
+        return json(res, { ok: true });
+      }
+      if (req.method === 'POST' && !id) return json(res, writeRow(name, null, await readJson(req)), 201);
       if (req.method === 'PATCH' && id) return json(res, writeRow(name, id, await readJson(req)));
       if (req.method === 'DELETE' && id) {
         db.prepare(`DELETE FROM ${name} WHERE id=?`).run(Number(id));

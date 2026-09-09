@@ -123,11 +123,22 @@ function dataTable(name, opts = {}) {
       closeDrawer(); draw();
     } }, '削除');
 
+    // 編集済みの行は取り込みで上書きされない。戻す道も用意しておく
+    const release = (row && row.edited_at)
+      ? el('button', { class: 'btn', onclick: async () => {
+          if (!confirm('この行の編集を解除します。次にシートを取り込むと、シートの値で上書きされます。')) return;
+          await post(`/api/table/${encodeURIComponent(name)}/${row.id}/release`, {});
+          closeDrawer(); draw();
+        } }, 'シートの値に戻す')
+      : null;
+
     openDrawer((isNew ? '新しい行を追加' : d.label + ' を編集'),
       el('div', {}, fields, msg,
-        el('div', { class: 'drawer-actions' }, save, del,
+        el('div', { class: 'drawer-actions' }, save, del, release,
           el('button', { class: 'btn', onclick: closeDrawer }, 'とじる'))),
-      row && row.edited_at ? `この行は ${row.edited_at} にこのアプリで編集済みです。取り込み直しても上書きされません。` : null);
+      row && row.edited_at
+        ? `この行は ${row.edited_at} にこのアプリで編集しました。シートを取り込み直しても上書きされません。`
+        : null);
   };
 
   /* --- 画面 --- */
@@ -342,15 +353,8 @@ const PAGES = {
         { k: 'expense', label: '支出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
       ], d.byCategory)));
 
-      box.append(panel('明細', d.rows.length + '件（最大500件）', tableOf([
-        { k: 'date', label: '日付', cls: 'nowrap' },
-        { k: 'kind', label: '種別', cls: 'nowrap' },
-        { k: 'category', label: 'カテゴリ' },
-        { k: 'summary', label: '摘要' },
-        { k: 'method', label: '支払方法' },
-        { k: 'income', label: '収入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
-        { k: 'expense', label: '支出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
-      ], d.rows)));
+      box.append(el('h2', { class: 'sec' }, '明細（検索・絞り込み・編集）'));
+      box.append(dataTable('cashflow'));
       return box;
     },
   },
@@ -383,110 +387,35 @@ const PAGES = {
           { k: 'n', label: '件', r: true },
           { k: 'amount', label: '金額', r: true, cls: 'money', fmt: (v) => money(v) },
         ], d.byCategory))));
-      box.append(panel('明細', null, tableOf([
-        { k: 'date', label: '日付', cls: 'nowrap' },
-        { k: 'category', label: 'カテゴリ' },
-        { k: 'summary', label: '摘要' },
-        { k: 'amount', label: '金額', r: true, cls: 'money', fmt: (v) => money(v) },
-        { k: 'method', label: '支払方法' },
-        { k: 'account', label: '勘定科目' },
-        { k: 'tax_class', label: '税区分' },
-      ], d.rows)));
+      box.append(el('h2', { class: 'sec' }, '明細（検索・絞り込み・編集）'));
+      box.append(dataTable('expenses'));
       return box;
     },
   },
 
   customers: {
     icon: '◎', label: '顧客・案件',
-    state: { tab: 'pipeline', q: '' },
-    tools() {
-      const st = PAGES.customers.state;
-      if (st.tab !== 'contacts' && st.tab !== 'cards') return [];
-      const kw = el('input', { type: 'search', placeholder: '会社・氏名・業種で検索', value: st.q,
-        oninput: (e) => { st.q = e.target.value; },
-        onchange: () => render('customers') });
-      kw.addEventListener('keydown', (e) => { if (e.key === 'Enter') render('customers'); });
-      return [kw];
-    },
+    state: { tab: 'pipeline' },
     async load() {
       const st = PAGES.customers.state;
       const box = el('div');
-      const tabs = el('div', { class: 'tabs' },
-        [['pipeline', '商談パイプライン'], ['deals', '契約一覧'], ['contacts', '人脈台帳'],
-         ['cards', '名刺'], ['partners', '協業先']]
-          .map(([k, label]) => el('button', {
-            class: st.tab === k ? 'on' : '',
-            onclick: () => { st.tab = k; render('customers'); },
-          }, label)));
-      box.append(tabs);
+      const tabs = [
+        ['pipeline', '商談パイプライン'], ['deals', '契約一覧'], ['contacts', '人脈台帳'],
+        ['cards', '名刺'], ['partners', '協業先'],
+      ];
+      box.append(el('div', { class: 'tabs' }, tabs.map(([k, label]) =>
+        el('button', { class: st.tab === k ? 'on' : '', onclick: () => { st.tab = k; render('customers'); } }, label))));
 
-      if (st.tab === 'pipeline') {
-        const d = await api('/api/pipeline');
-        box.append(panel('商談パイプライン', d.rows.length + '件', tableOf([
-          { k: 'title', label: '案件名' },
-          { k: 'company', label: '企業名' },
-          { k: 'person', label: '担当者' },
-          { k: 'broker', label: '仲介' },
-          { k: 'status', label: '進捗', fmt: (v) => statusTag(v) },
-          { k: 'quote_once', label: '単発', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-          { k: 'quote_month', label: '月額', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-          { k: 'lost_reason', label: '失注理由' },
-        ], d.rows)));
-      } else if (st.tab === 'deals') {
+      // 契約一覧のときだけ、上に要約を出す（金額の全体像が要るため）
+      if (st.tab === 'deals') {
         const d = await api('/api/deals');
         const active = d.rows.filter((r) => r.status === '契約中');
         box.append(el('div', { class: 'cards' },
-          card('契約中', active.length + '件', '月額合計 ' + money(active.reduce((a, r) => a + r.monthly, 0)), 'accent'),
+          card('契約中', active.length + '件',
+            '月額合計 ' + money(active.reduce((a, r) => a + r.monthly, 0)), 'accent'),
           card('累計受注', money(d.rows.reduce((a, r) => a + r.amount, 0)), d.rows.length + '件')));
-        box.append(panel('契約一覧', null, tableOf([
-          { k: 'company', label: '会社名' },
-          { k: 'person', label: '担当者' },
-          { k: 'referrer', label: '紹介者' },
-          { k: 'status', label: '状況', fmt: (v) => statusTag(v) },
-          { k: 'closed_on', label: '締結日', cls: 'nowrap' },
-          { k: 'amount', label: '受注額', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-          { k: 'monthly', label: '月額', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-          { k: 'content', label: '内容' },
-        ], d.rows)));
-      } else if (st.tab === 'cards') {
-        const d = await api('/api/cards?q=' + encodeURIComponent(st.q));
-        box.append(panel('所属グループ', null, tableOf([
-          { k: 'groups', label: 'グループ' },
-          { k: 'n', label: '人数', r: true },
-        ], d.groups)));
-        box.append(panel('名刺', d.total + '件', tableOf([
-          { k: 'company', label: '会社名' },
-          { k: 'name', label: '名前', cls: 'nowrap' },
-          { k: 'title', label: '役職' },
-          { k: 'email', label: 'メール' },
-          { k: 'phone', label: '電話', cls: 'nowrap' },
-          { k: 'mobile', label: '携帯', cls: 'nowrap' },
-          { k: 'groups', label: 'グループ' },
-          { k: 'status', label: '進捗' },
-        ], d.rows)));
-      } else if (st.tab === 'partners') {
-        const d = await api('/api/partners');
-        box.append(panel('協業先', d.rows.length + '件', tableOf([
-          { k: 'company', label: '会社名' },
-          { k: 'person', label: '担当者', cls: 'nowrap' },
-          { k: 'title', label: '役職', cls: 'nowrap' },
-          { k: 'likelihood', label: '協力角度', cls: 'nowrap' },
-          { k: 'role', label: '何を任せたい' },
-          { k: 'relationship', label: '関係値', fmt: (v) => statusTag(v) },
-          { k: 'memo', label: '備考' },
-        ], d.rows)));
-      } else {
-        const d = await api('/api/contacts?q=' + encodeURIComponent(st.q));
-        box.append(panel('人脈台帳', d.total + '件', tableOf([
-          { k: 'met_on', label: '会った日', cls: 'nowrap' },
-          { k: 'company', label: '会社名' },
-          { k: 'name', label: '氏名' },
-          { k: 'industry', label: '業種' },
-          { k: 'problem', label: 'お困りごと' },
-          { k: 'next_action', label: '次のアクション' },
-          { k: 'done', label: '状況', fmt: (v) => statusTag(v) },
-        ], d.rows)));
       }
+      box.append(dataTable(st.tab));
       return box;
     },
   },
@@ -734,17 +663,8 @@ const PAGES = {
           fmt: (v, r) => (r.closings ? money(Math.round(r.fee / r.closings)) : '—') },
       ], d.byName)));
 
-      box.append(panel('参加の記録', d.rows.length + '回', tableOf([
-        { k: 'held_on', label: '日時', cls: 'nowrap' },
-        { k: 'name', label: '交流会' },
-        { k: 'place', label: '場所' },
-        { k: 'attendees', label: '人数', r: true },
-        { k: 'fee', label: '参加費', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-        { k: 'cards_got', label: '名刺', r: true },
-        { k: 'appts', label: 'アポ', r: true },
-        { k: 'closings', label: '成約', r: true },
-        { k: 'note', label: '備考' },
-      ], d.rows)));
+      box.append(el('h2', { class: 'sec' }, '参加の記録（検索・絞り込み・編集）'));
+      box.append(dataTable('events'));
       return box;
     },
   },
@@ -752,21 +672,24 @@ const PAGES = {
   pricing: {
     icon: '＄', label: '料金表',
     async load() {
-      const d = await api('/api/pricing');
       const box = el('div');
-      box.append(panel('料金表', d.rows.length + '項目', tableOf([
-        { k: 'category', label: '科目', cls: 'nowrap' },
-        { k: 'item', label: '項目' },
-        { k: 'unit', label: '単位', cls: 'nowrap' },
-        { k: 'price', label: '単価', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-        { k: 'cost', label: '原価', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-        { k: '_m', label: '粗利', r: true, cls: 'money',
-          fmt: (v, r) => (r.price ? money(r.price - r.cost) : '') },
-        { k: '_r', label: '粗利率', r: true, cls: 'num',
-          fmt: (v, r) => (r.price ? Math.round((r.price - r.cost) / r.price * 100) + '%' : '') },
-        { k: 'vendor', label: '外注先' },
-        { k: 'note', label: '備考' },
-      ], d.rows)));
+      box.append(dataTable('pricing'));
+      return box;
+    },
+  },
+
+  tables: {
+    icon: '▦', label: 'そのほかのデータ',
+    state: { name: 'pl_monthly' },
+    async load() {
+      const st = PAGES.tables.state;
+      const list = await api('/api/tables');
+      const box = el('div');
+      box.append(el('div', { class: 'tabs' }, list.map((t) =>
+        el('button', { class: st.name === t.name ? 'on' : '',
+          onclick: () => { st.name = t.name; render('tables'); } },
+          `${t.label}（${yen(t.n)}）`))));
+      box.append(dataTable(st.name));
       return box;
     },
   },
@@ -932,7 +855,7 @@ const PAGES = {
 const ORDER = [
   ['お金', ['dash', 'money', 'pl', 'expenses', 'plan']],
   ['売る', ['customers', 'events', 'facilities', 'mail']],
-  ['調べる', ['kpi', 'pricing', 'audit']],
+  ['調べる', ['kpi', 'pricing', 'tables', 'audit']],
   ['', ['settings']],
 ];
 let current = 'dash';

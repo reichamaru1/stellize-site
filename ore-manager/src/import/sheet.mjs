@@ -715,4 +715,18 @@ const done = {
 for (const [k, v] of Object.entries(done)) {
   console.log('  ' + (v ? '✓' : '—') + ' ' + k + ' : ' + v + '件');
 }
+
+// 画面で直した行は上書きしていない。黙って飛ばすと気づけないので数を出す
+const kept = Object.keys(TABLES)
+  .map((t) => {
+    try {
+      const n = db.prepare(`SELECT COUNT(*) c FROM ${t} WHERE edited_at IS NOT NULL`).get().c;
+      return n ? `${TABLES[t].label} ${n}件` : null;
+    } catch { return null; }
+  })
+  .filter(Boolean);
+if (kept.length) {
+  console.log('\n  ※ 画面で編集済みのため上書きしませんでした： ' + kept.join(' / '));
+  console.log('     シートの値に戻したいときは、その行の編集画面で「シートの値に戻す」を押してください。');
+}
 db.close();
