@@ -254,8 +254,10 @@ function columnOptions(name, t, q) {
     const notNull = `${col.k} IS NOT NULL AND ${col.k} <> ''`;
     const clause = where ? `${where} AND ${notNull}` : `WHERE ${notNull}`;
 
+    // 選択肢が多すぎると探せない。日付は月にまとまるので多めに許す
+    const cap = (col.type === 'date' || col.type === 'month') ? 60 : 25;
     const n = one(`SELECT COUNT(DISTINCT ${expr}) c FROM ${name} ${clause}`, ...args).c;
-    if (n === 0 || n > 60) { out[col.k] = null; continue; }
+    if (n === 0 || n > cap) { out[col.k] = null; continue; }
 
     const order = (col.type === 'date' || col.type === 'month') ? 'v DESC' : 'n DESC, v';
     out[col.k] = all(
@@ -444,7 +446,11 @@ const server = createServer(async (req, res) => {
         SELECT COALESCE(k.kind,'事業') kind, e.category, SUM(e.amount) amount, COUNT(*) n
         FROM expenses e ${kindJoin} GROUP BY 1,2 ORDER BY amount DESC`);
       const guessed = one("SELECT COUNT(*) c FROM cost_kinds WHERE guessed=1 AND kind='個人'").c;
-      return json(res, { rows, byCat, guessedPersonal: guessed });
+      return json(res, {
+        rows, byCat, guessedPersonal: guessed,
+        // どの表から出した数字かを画面に出す。出どころが分からない金額は使えない
+        source: { income: '入出金明細の収入', cost: '経費明細（事業／個人はお金の区分で判定）' },
+      });
     }
 
     if (p === '/api/metrics') return json(res, { rows: all('SELECT * FROM metrics ORDER BY scope, id') });

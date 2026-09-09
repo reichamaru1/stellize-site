@@ -719,8 +719,9 @@ const PAGES = {
       const bizProfit = income - biz;
       const left = bizProfit - per;
 
+      const span = d.rows.length ? `${d.rows[0].month} 〜 ${d.rows[d.rows.length - 1].month}` : '';
       box.append(el('div', { class: 'cards' },
-        card('事業の収入', money(income), '全期間'),
+        card('事業の収入', money(income), span),
         card('事業の経費', money(biz), '事業として出たお金'),
         card('事業の利益', (bizProfit < 0 ? '-¥' : '¥') + yen(Math.abs(bizProfit)), '収入 − 事業の経費'),
         card('個人のお金', money(per), '返済・貯蓄・保険・住まいなど'),
@@ -732,6 +733,8 @@ const PAGES = {
           + '「お金の区分」で実態に合わせて直してください。直した分は取り込みでも戻りません。'));
       }
 
+      box.append(el('p', { class: 'hint' },
+        `収入は「${d.source.income}」、支出は「${d.source.cost}」から出しています。`));
       box.append(panel('月ごと', d.rows.length + 'か月', tableOf([
         { k: 'month', label: '月', cls: 'nowrap' },
         { k: 'income', label: '事業の収入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
