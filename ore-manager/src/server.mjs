@@ -16,6 +16,8 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
+import { TABLES, tableOf, columnOf, coerce } from './tables.mjs';
+import { migrate } from './db/migrate.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = join(ROOT, 'public');
@@ -24,6 +26,7 @@ const SHURO = join(ROOT, '..', 'shuro-db', 'data', 'shuro.db');
 
 const db = new DatabaseSync(join(ROOT, 'data', 'ore.db'));
 db.exec(readFileSync(join(ROOT, 'src', 'db', 'schema.sql'), 'utf8'));
+migrate(db, Object.keys(TABLES));
 
 // 事業所DBは、あちらの取り込みで作り直される。こちらからは書かない。
 let shuro = null;
@@ -187,6 +190,118 @@ async function mailApi(payload) {
 }
 
 /* ============================================================
+   どの表でも使える 一覧・絞り込み・編集
+
+   表名と列名は tables.mjs に載っているものだけを通す。
+   画面から来た文字列をそのままSQLに入れない（値は必ず ? で渡す）。
+   ============================================================ */
+
+/** 絞り込みの条件を組み立てる。戻りは { where, args }。 */
+function buildWhere(t, q) {
+  const where = [], args = [];
+
+  const kw = (q.get('q') || '').trim();
+  if (kw && t.search.length) {
+    where.push('(' + t.search.map((c) => `${c} LIKE ?`).join(' OR ') + ')');
+    t.search.forEach(() => args.push('%' + kw + '%'));
+  }
+
+  // f_<列名>=値 で1列を絞る
+  for (const [key, val] of q.entries()) {
+    if (!key.startsWith('f_') || val === '') continue;
+    const col = columnOf(t, key.slice(2));
+    if (!col) continue;
+    where.push(`${col.k} = ?`);
+    args.push(coerce(col, val));
+  }
+
+  // 期間。日付列 or 月列があるときだけ効く
+  const range = t.dateCol || t.monthCol;
+  if (range) {
+    const cut = t.dateCol ? 7 : 7;   // どちらも YYYY-MM で比べる
+    const from = q.get('from'), to = q.get('to');
+    if (from) { where.push(`substr(${range},1,${cut}) >= ?`); args.push(from); }
+    if (to) { where.push(`substr(${range},1,${cut}) <= ?`); args.push(to); }
+  }
+
+  return { where: where.length ? 'WHERE ' + where.join(' AND ') : '', args };
+}
+
+/** 絞り込みの選択肢。実際に入っている値だけを出す。 */
+function filterOptions(name, t) {
+  const out = {};
+  for (const key of t.filters) {
+    const col = columnOf(t, key);
+    if (!col) continue;
+    out[key] = all(
+      `SELECT ${col.k} AS v, COUNT(*) n FROM ${name}
+       WHERE ${col.k} IS NOT NULL AND ${col.k} <> '' GROUP BY 1 ORDER BY n DESC LIMIT 60`);
+  }
+  return out;
+}
+
+function listTable(name, q) {
+  const t = tableOf(name);
+  if (!t) return null;
+  const { where, args } = buildWhere(t, q);
+  const limit = Math.min(Number(q.get('limit') || 300), 2000);
+  const offset = Math.max(Number(q.get('offset') || 0), 0);
+
+  // 並び替え。画面から来た列名は必ず照合してから使う
+  let order = t.order;
+  const sort = q.get('sort');
+  if (sort) {
+    const dir = q.get('dir') === 'desc' ? 'DESC' : 'ASC';
+    const col = columnOf(t, sort);
+    if (col) order = `${col.k} ${dir}`;
+  }
+
+  const rows = all(`SELECT * FROM ${name} ${where} ORDER BY ${order} LIMIT ? OFFSET ?`, ...args, limit, offset);
+  const total = one(`SELECT COUNT(*) c FROM ${name} ${where}`, ...args).c;
+
+  // 金額列は合計も出す。絞り込んだ結果がいくらなのかが要るため
+  const sums = {};
+  for (const col of t.columns) {
+    if (col.type !== 'money') continue;
+    sums[col.k] = one(`SELECT COALESCE(SUM(${col.k}),0) a FROM ${name} ${where}`, ...args).a;
+  }
+
+  return {
+    name, label: t.label, columns: t.columns, filters: t.filters,
+    hasRange: !!(t.dateCol || t.monthCol),
+    rangeKind: t.dateCol ? 'date' : (t.monthCol ? 'month' : null),
+    options: filterOptions(name, t),
+    rows, total, limit, offset, sums,
+  };
+}
+
+/** 1行の作成・更新。tables.mjs に無い列は捨てる。 */
+function writeRow(name, id, body) {
+  const t = tableOf(name);
+  if (!t) return { error: '不明な表です' };
+  const pairs = [];
+  for (const col of t.columns) {
+    if (!Object.prototype.hasOwnProperty.call(body, col.k)) continue;
+    pairs.push([col.k, coerce(col, body[col.k])]);
+  }
+  if (!pairs.length) return { error: '変更する内容がありません' };
+  const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  if (id) {
+    const set = pairs.map(([k]) => `${k}=?`).join(', ');
+    db.prepare(`UPDATE ${name} SET ${set}, edited_at=? WHERE id=?`)
+      .run(...pairs.map((p) => p[1]), now, Number(id));
+    return { ok: true, id: Number(id), row: one(`SELECT * FROM ${name} WHERE id=?`, Number(id)) };
+  }
+  const keys = pairs.map(([k]) => k).concat('edited_at');
+  const vals = pairs.map((p) => p[1]).concat(now);
+  const r = db.prepare(
+    `INSERT INTO ${name} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`).run(...vals);
+  const newId = Number(r.lastInsertRowid);
+  return { ok: true, id: newId, row: one(`SELECT * FROM ${name} WHERE id=?`, newId) };
+}
+
+/* ============================================================
    HTTP
    ============================================================ */
 
@@ -347,6 +462,28 @@ const server = createServer(async (req, res) => {
     if (p === '/api/mail/memo' && req.method === 'POST') {
       const b = await readJson(req);
       return json(res, await mailApi({ api: 'memo', text: b.text, frame: b.frame, from: '俺の事業を管理せよ' }));
+    }
+
+    /* 汎用の一覧・絞り込み・編集 */
+    if (p === '/api/tables') {
+      return json(res, Object.entries(TABLES).map(([k, v]) => ({
+        name: k, label: v.label, n: one(`SELECT COUNT(*) c FROM ${k}`).c,
+      })));
+    }
+    if (p.startsWith('/api/table/')) {
+      const rest = p.slice('/api/table/'.length).split('/');
+      const name = decodeURIComponent(rest[0]);
+      if (!tableOf(name)) return json(res, { error: '不明な表です' }, 404);
+      const id = rest[1];
+
+      if (req.method === 'GET') return json(res, listTable(name, q));
+      if (req.method === 'POST') return json(res, writeRow(name, null, await readJson(req)), 201);
+      if (req.method === 'PATCH' && id) return json(res, writeRow(name, id, await readJson(req)));
+      if (req.method === 'DELETE' && id) {
+        db.prepare(`DELETE FROM ${name} WHERE id=?`).run(Number(id));
+        return json(res, { ok: true });
+      }
+      return json(res, { error: '未対応の操作です' }, 405);
     }
 
     if (p.startsWith('/api/')) return json(res, { error: '不明なエンドポイント' }, 404);

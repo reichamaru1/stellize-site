@@ -16,6 +16,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { migrate } from '../db/migrate.mjs';
+import { TABLES } from '../tables.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const DB_PATH = join(ROOT, 'data', 'ore.db');
@@ -107,14 +109,28 @@ function openDb() {
   mkdirSync(join(ROOT, 'data'), { recursive: true });
   const db = new DatabaseSync(DB_PATH);
   db.exec(readFileSync(join(ROOT, 'src', 'db', 'schema.sql'), 'utf8'));
+  migrate(db, Object.keys(TABLES));
   return db;
+}
+
+/**
+ * 取り込み用のINSERT文を用意する。
+ *
+ * 画面で直した行（edited_at が入っている行）は上書きしない。
+ * これが無いと、シートを取り込み直すたびに手で直した内容が黙って消える。
+ */
+function prep(db, sql) {
+  const m = sql.match(/INSERT INTO (\w+)/);
+  const tail = sql.split('DO UPDATE SET')[1];
+  if (m && tail && !/\bWHERE\b/.test(tail)) sql += ` WHERE ${m[1]}.edited_at IS NULL`;
+  return db.prepare(sql);
 }
 
 /** 入出金明細 */
 function importCashflow(db, lines) {
   const t = table(lines, ['日付', '種別', '収入(円)', '支出(円)']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO cashflow
+  const put = prep(db, `INSERT INTO cashflow
     (source_key,date,kind,category,income,expense,method,summary,memo)
     VALUES (?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET
@@ -138,7 +154,7 @@ function importCashflow(db, lines) {
 function importExpenses(db, lines) {
   const t = table(lines, ['日付', '経費カテゴリ', '金額(円)', '勘定科目']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO expenses
+  const put = prep(db, `INSERT INTO expenses
     (source_key,date,category,summary,amount,method,account,tax_class,receipt_no,memo)
     VALUES (?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET
@@ -162,7 +178,7 @@ function importExpenses(db, lines) {
 function importContacts(db, lines) {
   const t = table(lines, ['日時', '会社名', '氏名', '出会い']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO contacts
+  const put = prep(db, `INSERT INTO contacts
     (source_key,met_on,company,name,channel,framing,industry,strength,problem,next_action,next_step,done,good_match,memo)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET
@@ -188,7 +204,7 @@ function importContacts(db, lines) {
 function importDeals(db, lines) {
   const t = table(lines, ['会社名(ジャンル)', '担当者', '契約状況']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO deals
+  const put = prep(db, `INSERT INTO deals
     (source_key,company,person,referrer,status,offer_monthly,closed_on,amount,monthly,months,cost,content,next_offer,profit_month,memo)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET
@@ -216,7 +232,7 @@ function importDeals(db, lines) {
 function importPipeline(db, lines) {
   const t = table(lines, ['案件名', '企業名', '進捗', '月額見積']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO pipeline
+  const put = prep(db, `INSERT INTO pipeline
     (source_key,title,company,person,broker,first_met,status,quote_once,quote_month,due,closed_on,note,lost_reason)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET
@@ -266,7 +282,7 @@ function monthColumns(c) {
  * 売上と経費が同じ表に縦に並んでいるので、区分を取り違えると売上に経費が混ざる。
  */
 function importPl(db, lines) {
-  const put = db.prepare(`INSERT INTO pl_monthly (source_key,month,section,category,subcategory,amount,is_total)
+  const put = prep(db, `INSERT INTO pl_monthly (source_key,month,section,category,subcategory,amount,is_total)
     VALUES (?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET amount=excluded.amount, section=excluded.section,
       category=excluded.category, subcategory=excluded.subcategory, is_total=excluded.is_total`);
@@ -344,7 +360,7 @@ function importPl(db, lines) {
 function importPricing(db, lines) {
   const t = table(lines, ['科目', '項目', '単価', '原価']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO pricing (source_key,category,item,unit,price,cost,profit,vendor,note)
+  const put = prep(db, `INSERT INTO pricing (source_key,category,item,unit,price,cost,profit,vendor,note)
     VALUES (?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET category=excluded.category, item=excluded.item,
       unit=excluded.unit, price=excluded.price, cost=excluded.cost, profit=excluded.profit,
@@ -365,7 +381,7 @@ function importPricing(db, lines) {
 function importCards(db, lines) {
   const t = table(lines, ['会社名', '名前', '電子メール', '会社電話']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO cards
+  const put = prep(db, `INSERT INTO cards
     (source_key,company,name,dept,title,email,zip,address,phone,fax,mobile,groups,wants,status,memo)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET company=excluded.company, name=excluded.name,
@@ -389,7 +405,7 @@ function importCards(db, lines) {
 function importEvents(db, lines) {
   const t = table(lines, ['交流会', '参加費用', '名刺交換数', '成約数']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO events
+  const put = prep(db, `INSERT INTO events
     (source_key,name,place,held_on,hours,attendees,fee,cards_got,line_got,appts,closings,collabs,referrals,cost_per_appt,cost_per_closing,note)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET name=excluded.name, place=excluded.place, held_on=excluded.held_on,
@@ -415,7 +431,7 @@ function importEvents(db, lines) {
 function importPartners(db, lines) {
   const t = table(lines, ['協力角度', '何を任せたい', '自社との関係値']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO partners
+  const put = prep(db, `INSERT INTO partners
     (source_key,company,person,title,likelihood,role,industry,strength,relationship,memo)
     VALUES (?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET company=excluded.company, person=excluded.person,
@@ -436,7 +452,7 @@ function importPartners(db, lines) {
 
 /** 事業のパラメータ（〈企業情報〉〈目標売上〉〈現状〉〈売上見込〉） */
 function importMetrics(db, lines) {
-  const put = db.prepare(`INSERT INTO metrics (scope,key,value) VALUES (?,?,?)
+  const put = prep(db, `INSERT INTO metrics (scope,key,value) VALUES (?,?,?)
     ON CONFLICT(scope,key) DO UPDATE SET value=excluded.value`);
   let n = 0;
   // 〈企業情報〉と〈目標売上〉が左右に並んでいるので、行ごとに両方を読む
@@ -465,7 +481,7 @@ function importMetrics(db, lines) {
 
 /** 目安数値（月次の売上見通し）。plan_monthly に kind='目安' で入れる。 */
 function importForecast(db, lines) {
-  const put = db.prepare(`INSERT INTO plan_monthly (month,kind,side,category,subcategory,amount)
+  const put = prep(db, `INSERT INTO plan_monthly (month,kind,side,category,subcategory,amount)
     VALUES (?,?,?,?,?,?)
     ON CONFLICT(month,kind,side,category,subcategory) DO UPDATE SET amount=excluded.amount`);
   let n = 0;
@@ -520,7 +536,7 @@ function importMonthlySummary(db, lines) {
   }
   if (head < 0) return 0;
 
-  const put = db.prepare(`INSERT INTO monthly_summary (month,income,expense,profit,cost_rate)
+  const put = prep(db, `INSERT INTO monthly_summary (month,income,expense,profit,cost_rate)
     VALUES (?,?,?,?,?)
     ON CONFLICT(month) DO UPDATE SET income=excluded.income, expense=excluded.expense,
       profit=excluded.profit, cost_rate=excluded.cost_rate`);
@@ -541,7 +557,7 @@ function importMonthlySummary(db, lines) {
 function importPdfLog(db, lines) {
   const t = table(lines, ['取込日時', 'ファイル名', '銀行種別', '収入合計']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO pdf_log (source_key,imported_at,filename,bank,count,income,expense,memo)
+  const put = prep(db, `INSERT INTO pdf_log (source_key,imported_at,filename,bank,count,income,expense,memo)
     VALUES (?,?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET imported_at=excluded.imported_at, count=excluded.count,
       income=excluded.income, expense=excluded.expense, memo=excluded.memo`);
@@ -562,7 +578,7 @@ function importPdfLog(db, lines) {
 function importCategoryRules(db, lines) {
   const t = table(lines, ['代表キーワード', 'サブカテゴリ']);
   if (!t) return 0;
-  const put = db.prepare(`INSERT INTO category_rules (source_key,keyword,side,subcategory)
+  const put = prep(db, `INSERT INTO category_rules (source_key,keyword,side,subcategory)
     VALUES (?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET side=excluded.side, subcategory=excluded.subcategory`);
   let n = 0;
@@ -581,7 +597,7 @@ function importCategoryRules(db, lines) {
  * 〈…〉の行が区分の切り替わり。
  */
 function importKpi(db, lines) {
-  const put = db.prepare(`INSERT INTO kpi (month,week,section,metric,target,actual)
+  const put = prep(db, `INSERT INTO kpi (month,week,section,metric,target,actual)
     VALUES (?,?,?,?,?,?)
     ON CONFLICT(month,week,section,metric) DO UPDATE SET target=excluded.target, actual=excluded.actual`);
   let month = null, section = null, inBlock = false, n = 0;
@@ -639,7 +655,7 @@ function importPlan(db, lines) {
   const head = cols(lines[headIdx]);
   const monthCols = head.map((h, i) => (/^(\d{1,2})月$/.test(h) ? { i, m: Number(h.replace('月', '')) } : null)).filter(Boolean);
 
-  const put = db.prepare(`INSERT INTO plan_monthly (month,kind,side,category,subcategory,amount)
+  const put = prep(db, `INSERT INTO plan_monthly (month,kind,side,category,subcategory,amount)
     VALUES (?,?,?,?,?,?)
     ON CONFLICT(month,kind,side,category,subcategory) DO UPDATE SET amount=excluded.amount`);
   let side = null, kind = '目標', n = 0;

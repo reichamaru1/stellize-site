@@ -56,6 +56,202 @@ const statusTag = (s) => {
   return el('span', { class: 'tag ' + cls }, t || '—');
 };
 
+
+/* ============================================================
+   どの表でも使える 一覧＋検索＋絞り込み＋編集
+
+   サーバの /api/table/<表名> を叩くだけなので、表が増えても
+   ここは触らなくてよい（列の定義は src/tables.mjs にある）。
+   ============================================================ */
+
+const fmtCell = (col, v) => {
+  if (v == null || v === '') return '';
+  if (col.type === 'money') return money(v);
+  if (col.type === 'bool') return v ? '✓' : '';
+  if (col.type === 'number') return String(v);
+  return String(v);
+};
+
+function dataTable(name, opts = {}) {
+  const st = { q: '', f: {}, from: '', to: '', offset: 0, limit: 200, sort: '', dir: 'asc' };
+  const root = el('div', { class: 'dt' });
+
+  const draw = async () => {
+    const p = new URLSearchParams({ q: st.q, limit: st.limit, offset: st.offset });
+    for (const [k, v] of Object.entries(st.f)) if (v) p.set('f_' + k, v);
+    if (st.from) p.set('from', st.from);
+    if (st.to) p.set('to', st.to);
+    if (st.sort) { p.set('sort', st.sort); p.set('dir', st.dir); }
+
+    root.replaceChildren(el('div', { class: 'loading' }, '読み込み中…'));
+    const d = await api(`/api/table/${encodeURIComponent(name)}?` + p);
+    root.replaceChildren(render(d));
+    if (opts.onLoaded) opts.onLoaded(d);
+  };
+
+  /* --- 1行を直す（右から出るフォーム） --- */
+  const openEditor = (d, row) => {
+    const isNew = !row;
+    const vals = {};
+    const fields = d.columns.map((c) => {
+      const v = row ? (row[c.k] ?? '') : '';
+      const input = c.type === 'bool'
+        ? el('select', {}, el('option', { value: '0' }, 'いいえ'), el('option', { value: '1' }, 'はい'))
+        : el('input', { type: c.type === 'date' ? 'date' : c.type === 'month' ? 'month' : 'text', value: v });
+      if (c.type === 'bool') input.value = String(v ? 1 : 0);
+      vals[c.k] = input;
+      return el('div', { class: 'fld' },
+        el('label', {}, c.label + (c.type === 'money' ? '（円）' : '')), input);
+    });
+
+    const msg = el('div', { class: 'hint' });
+    const save = el('button', { class: 'btn pri', onclick: async () => {
+      const body = {};
+      for (const [k, input] of Object.entries(vals)) body[k] = input.value;
+      save.disabled = true;
+      const r = isNew
+        ? await post(`/api/table/${encodeURIComponent(name)}`, body)
+        : await patch(`/api/table/${encodeURIComponent(name)}/${row.id}`, body);
+      save.disabled = false;
+      if (r.error) { msg.textContent = r.error; return; }
+      closeDrawer(); draw();
+    } }, isNew ? '追加する' : '保存する');
+
+    const del = isNew ? null : el('button', { class: 'btn warn', onclick: async () => {
+      if (!confirm('この行を削除します。取り消せません。よろしいですか？')) return;
+      await del2(`/api/table/${encodeURIComponent(name)}/${row.id}`);
+      closeDrawer(); draw();
+    } }, '削除');
+
+    openDrawer((isNew ? '新しい行を追加' : d.label + ' を編集'),
+      el('div', {}, fields, msg,
+        el('div', { class: 'drawer-actions' }, save, del,
+          el('button', { class: 'btn', onclick: closeDrawer }, 'とじる'))),
+      row && row.edited_at ? `この行は ${row.edited_at} にこのアプリで編集済みです。取り込み直しても上書きされません。` : null);
+  };
+
+  /* --- 画面 --- */
+  const render = (d) => {
+    const box = el('div');
+
+    /* 検索と絞り込み */
+    const kw = el('input', { type: 'search', class: 'dt-search',
+      placeholder: (d.columns.slice(0, 3).map((c) => c.label).join('・')) + ' などで検索',
+      value: st.q });
+    kw.addEventListener('keydown', (e) => { if (e.key === 'Enter') { st.q = kw.value; st.offset = 0; draw(); } });
+    kw.addEventListener('search', () => { st.q = kw.value; st.offset = 0; draw(); });
+
+    const controls = [kw];
+    for (const key of d.filters) {
+      const col = d.columns.find((c) => c.k === key);
+      const opts = d.options[key] || [];
+      if (!col || !opts.length) continue;
+      const sel = el('select', { onchange: (e) => { st.f[key] = e.target.value; st.offset = 0; draw(); } },
+        el('option', { value: '' }, col.label + '：すべて'),
+        opts.map((o) => {
+          const label = col.type === 'bool' ? (o.v ? 'はい' : 'いいえ') : String(o.v);
+          const op = el('option', { value: String(o.v) }, `${label.slice(0, 22)}（${o.n}）`);
+          if (String(st.f[key] ?? '') === String(o.v)) op.selected = true;
+          return op;
+        }));
+      controls.push(sel);
+    }
+    if (d.hasRange) {
+      const t = d.rangeKind === 'month' ? 'month' : 'month';
+      controls.push(el('input', { type: t, value: st.from, title: '開始',
+        onchange: (e) => { st.from = e.target.value; st.offset = 0; draw(); } }));
+      controls.push(el('span', { class: 'dim' }, '〜'));
+      controls.push(el('input', { type: t, value: st.to, title: '終了',
+        onchange: (e) => { st.to = e.target.value; st.offset = 0; draw(); } }));
+    }
+    const active = st.q || st.from || st.to || Object.values(st.f).some(Boolean);
+    if (active) {
+      controls.push(el('button', { class: 'btn', onclick: () => {
+        st.q = ''; st.f = {}; st.from = ''; st.to = ''; st.offset = 0; draw();
+      } }, '条件をクリア'));
+    }
+    controls.push(el('span', { style: 'flex:1' }));
+    controls.push(el('button', { class: 'btn pri', onclick: () => openEditor(d, null) }, '＋ 追加'));
+    box.append(el('div', { class: 'dt-bar' }, controls));
+
+    /* 件数と金額 */
+    const sumTexts = Object.entries(d.sums)
+      .filter(([, v]) => v)
+      .map(([k, v]) => {
+        const col = d.columns.find((c) => c.k === k);
+        return `${col ? col.label : k} ${money(v)}`;
+      });
+    box.append(el('div', { class: 'dt-info' },
+      el('b', {}, yen(d.total) + '件'),
+      d.total > d.rows.length ? el('span', { class: 'dim' }, `（${yen(d.rows.length)}件を表示）`) : null,
+      sumTexts.length ? el('span', { class: 'dt-sums' }, sumTexts.join('　/　')) : null));
+
+    /* 表 */
+    if (!d.rows.length) {
+      box.append(el('div', { class: 'empty' }, active ? '条件に合う行がありません' : 'データがありません'));
+    } else {
+      const th = d.columns.map((c) => el('th', {
+        class: (c.type === 'money' || c.type === 'number' ? 'r ' : '') + 'sortable',
+        style: c.w ? `width:${c.w}px` : '',
+        onclick: () => {
+          st.dir = st.sort === c.k && st.dir === 'asc' ? 'desc' : 'asc';
+          st.sort = c.k; draw();
+        },
+      }, c.label + (st.sort === c.k ? (st.dir === 'asc' ? ' ↑' : ' ↓') : '')));
+      th.push(el('th', { style: 'width:52px' }, ''));
+
+      const body = d.rows.map((row) => el('tr', { class: row.edited_at ? 'edited' : '' },
+        d.columns.map((c) => el('td', {
+          class: (c.type === 'money' || c.type === 'number' ? 'r money ' : '')
+            + (c.type === 'date' || c.type === 'month' ? 'nowrap' : ''),
+        }, fmtCell(c, row[c.k]) || el('span', { class: 'dim' }, '—'))).concat(
+          el('td', { class: 'nowrap' },
+            el('button', { class: 'btn tiny', onclick: () => openEditor(d, row) }, '編集')))));
+
+      box.append(el('div', { class: 'scroll tall' },
+        el('table', {}, el('thead', {}, el('tr', {}, th)), el('tbody', {}, body))));
+    }
+
+    /* ページ送り */
+    if (d.total > d.limit) {
+      const page = Math.floor(d.offset / d.limit) + 1;
+      const last = Math.ceil(d.total / d.limit);
+      box.append(el('div', { class: 'dt-page' },
+        el('button', { class: 'btn', disabled: d.offset === 0 ? '' : null,
+          onclick: () => { st.offset = Math.max(0, st.offset - st.limit); draw(); } }, '← 前'),
+        el('span', { class: 'dim' }, `${page} / ${last} ページ`),
+        el('button', { class: 'btn', disabled: page >= last ? '' : null,
+          onclick: () => { st.offset += st.limit; draw(); } }, '次 →')));
+    }
+    return box;
+  };
+
+  draw();
+  return root;
+}
+
+/* --- 右から出るフォーム --- */
+function openDrawer(title, body, note) {
+  closeDrawer();
+  const back = el('div', { class: 'drawer-back', onclick: closeDrawer });
+  const box = el('div', { class: 'drawer' },
+    el('h3', {}, title),
+    note ? el('div', { class: 'drawer-note' }, note) : null,
+    el('div', { class: 'drawer-body' }, body));
+  document.body.append(back, box);
+  requestAnimationFrame(() => box.classList.add('open'));
+  document.addEventListener('keydown', escClose);
+}
+function closeDrawer() {
+  document.querySelectorAll('.drawer, .drawer-back').forEach((n) => n.remove());
+  document.removeEventListener('keydown', escClose);
+}
+const escClose = (e) => { if (e.key === 'Escape') closeDrawer(); };
+
+const patch = (p, body) => fetch(p, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+const del2 = (p) => fetch(p, { method: 'DELETE' }).then((r) => r.json());
+
+
 /* ============================================================
    画面
    ============================================================ */
