@@ -605,8 +605,10 @@ body {
 
 /* フッター */
 .footer {
-    /* ユーザー指定：ボタンと同系の明るいラベンダーグラデーション */
-    background: linear-gradient(135deg, #AE9FC4 0%, #C9C2D8 100%);
+    /* 深めのパープル。淡いラベンダー(#AE9FC4→#C9C2D8)は
+       グレー寄りの濁った遷移になっていたため、彩度と濃度を上げて澄ませた。
+       この濃さなら白文字が全域で4.5:1以上を確保できる */
+    background: linear-gradient(135deg, #5B4B85 0%, #7B6BA8 100%);
     color: white;
     padding: 60px 0 30px;
 }
@@ -3604,30 +3606,32 @@ body.lp-refined .step6:hover .sicon .il-sp {
 }
 .mission .mission-statement { color: var(--color-primary-deep); }
 
-/* フッター：背景のラベンダーは指定どおり残し、文字側を紺にして読めるようにする
-   （白文字だとこの明るさの地に対して約2.5:1しか出ない） */
-.footer { color: var(--color-ink); }
-.footer-col h4 { color: var(--color-ink); }
-.footer-col p  { color: var(--color-ink-soft); }
+/* フッター：地を深めたので文字は白。見出しに金の細線を添えて本文と揃える */
+.footer { color: #FFFFFF; }
+.footer-col h4 {
+    color: #FFFFFF;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(230, 211, 168, 0.4);
+}
+.footer-col p { color: rgba(255, 255, 255, 0.82); }
 .footer-col a {
-    color: var(--color-ink);
-    opacity: 0.82;
-    transition: opacity 0.25s ease, color 0.25s ease;
+    color: rgba(255, 255, 255, 0.86);
+    opacity: 1;
+    transition: color 0.25s ease;
 }
 .footer-col a:hover,
 .footer-col a:focus-visible {
-    opacity: 1;
-    color: var(--color-ink-deep);
+    color: var(--color-gold-light);
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 .footer-bottom {
-    border-top-color: rgba(31, 42, 84, 0.22);
-    color: var(--color-ink);
-    opacity: 0.85;
+    border-top-color: rgba(255, 255, 255, 0.24);
+    color: rgba(255, 255, 255, 0.82);
+    opacity: 1;
 }
-.footer-bottom a { color: var(--color-ink) !important; opacity: 0.85 !important; }
-.footer-bottom a:hover { opacity: 1 !important; text-decoration: underline; }
+.footer-bottom a { color: rgba(255, 255, 255, 0.86) !important; opacity: 1 !important; }
+.footer-bottom a:hover { color: var(--color-gold-light) !important; text-decoration: underline; }
 
 
 /* ---- CTAボタン：白文字が乗る面は濃度を上げる ----
@@ -3681,8 +3685,8 @@ body.lp-refined {
     --lp-pink: #C2607A;   /* 白文字を乗せるバッジ地。淡いままだと2.2:1 */
     --lp-red:  #A34832;   /* クリーム地の強調文字 */
 }
-body.lp-refined .ba-after .ba-label,
-body.lp-refined .after-label { color: #A85A1E; }
+/* Before/After の「AFTER」ラベル。淡いピーチ地にオレンジで2.7:1しか出ていなかった */
+body.lp-refined .ba .after .lbl { color: #A0521A; }
 body.lp-refined .flow-badge--subsidy .n { color: #9C4A66; }
 body.lp-refined .issue-card h3,
 body.lp-refined .issue-card .inum { color: #B34866; }
@@ -3852,4 +3856,24 @@ body.lp-refined .issue-card .inum { color: #B34866; }
     font-weight: 600;
     border-bottom: 1.5px solid var(--color-gold);
     padding-bottom: 2px;
+}
+
+/* 「Coming Soon」バッジ：濃色フッター上で沈まないよう縁と字色を調整し、
+   長いリンク名（X（旧Twitter）など）で行が割れないように改行を抑える */
+.footer .coming-soon {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.footer .coming-soon span {
+    margin-left: 0;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(230, 211, 168, 0.35);
+    padding: 2px 9px;
 }
