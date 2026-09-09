@@ -599,17 +599,18 @@ const PAGES = {
           fmt: (v) => (v ? yen(v) : '') })))
         .concat([{ k: '_sum', label: '年計', r: true, cls: 'money', fmt: (v) => money(v) }]);
 
-      for (const [sec, title] of [['売上', '売上の内訳'], ['売上原価', '売上原価'], ['経費', '経費の内訳']]) {
+      for (const [sec, title] of [
+        ['売上', '売上の内訳'], ['売上原価', '売上原価'],
+        ['事業経費', '事業の経費'], ['個人支出', '個人のお金']]) {
         const rows = d.rows.filter((r) => r.section === sec && !r.is_total);
         if (!rows.length) continue;
         const g = grid(rows);
         box.append(panel(title, g.length + '項目', tableOf(monthCols(), g)));
       }
-
+      // 合計と利益は、内訳と混ぜずに最後にまとめて出す
       const totals = d.rows.filter((r) => r.is_total);
-      if (totals.length) {
-        box.append(panel('合計・利益（シート側の集計値）', null, tableOf(monthCols(), grid(totals))));
-      }
+      if (totals.length) box.append(panel('合計と利益', 'シート側の集計値', tableOf(monthCols(), grid(totals))));
+
       return box;
     },
   },

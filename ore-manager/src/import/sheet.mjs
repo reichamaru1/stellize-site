@@ -273,33 +273,41 @@ function monthColumns(c) {
 /**
  * 月次損益（着金ベース）。年ごとに1枚のP/Lが並んでいる。
  *
- * 行の形は3種類。
- *   ['', '実績合計売上高', '',           '',            ¥…]  ← 合計・指標（2列目にラベル）
- *   ['', '',             '実績売上高',  'SNS運用代行',  ¥…]  ← 売上の内訳
- *   ['', '',             '諸会費',      '真誓会',       ¥…]  ← 販管費の内訳
- *   ['', '',             '',           '水道光熱費',   ¥…]  ← 中分類が結合セルで空（上から引き継ぐ）
+ * 縦の並びはこうなっている（2026年の例）。
  *
- * 売上と経費が同じ表に縦に並んでいるので、区分を取り違えると売上に経費が混ざる。
+ *   実績合計売上高            ← 売上の合計
+ *     実績売上高 | 福祉研修     ← 売上の内訳
+ *     Uber / 派遣            ← これも売上
+ *   総売上                    ← 売上の総合計
+ *   目標売上 / 達成率          ← 指標
+ *   販売費及び一般管理費        ← ここから支出
+ *     外注費 | コンサル費 | KLP  ← 事業の経費
+ *     通信費 | ケータイ
+ *   経費合計                  ← 事業の経費の合計。★ここから下は個人のお金
+ *     家賃光熱費 | | 家賃
+ *     借金返済 | | 親族
+ *     積立保険 / 貯蓄
+ *   支出合計                  ← 事業＋個人の合計
+ *   利益 / 利益率             ← 指標
+ *
+ * 大事なのは「経費合計」と「支出合計」に挟まれた部分が個人のお金だということ。
+ * 名前から推測しなくても、シートの並びがそれを表している。
+ *
+ * 列の使い方は年によって違う（2024年は c[2] に中分類、2026年は c[1] に大分類）。
+ * どちらでも読めるように、c[1] が「合計・指標の名前」かどうかで見分ける。
  */
+
+/** 合計・指標として扱う行の名前。これ以外が c[1] に来たら分類名とみなす。 */
+const PL_TOTALS = /^(実績合計売上高|実績合計売上原価|総売上|経費合計|支出合計|合計|営業利益|利益|利益率|目標売上|達成率|売上総利益|販売費及び一般管理費)(\(web\))?$/;
+/** そのうち、金額ではなく指標として扱うもの。 */
+const PL_METRICS = /^(利益|利益率|営業利益|目標売上|達成率|売上総利益)(\(web\))?$/;
+
 function importPl(db, lines) {
   const put = prep(db, `INSERT INTO pl_monthly (source_key,month,section,category,subcategory,amount,is_total)
     VALUES (?,?,?,?,?,?,?)
     ON CONFLICT(source_key) DO UPDATE SET amount=excluded.amount, section=excluded.section,
       category=excluded.category, subcategory=excluded.subcategory, is_total=excluded.is_total`);
   let n = 0;
-
-  /**
-   * 区分の判定。
-   * 中分類の名前だけで振り分けると事故る（Uber・配達・派遣は売上だが、
-   * 名前からは経費に見える）。区分が変わるのは合計行の見出しに
-   * 「実績合計売上原価」「販売費及び一般管理費」が出たときだけにする。
-   * 表示上は「販管費」ではなく「経費」と呼ぶ。
-   */
-  const sectionOf = (cat, carried) => {
-    if (/売上原価/.test(cat)) return '売上原価';
-    if (/売上高/.test(cat)) return '売上';
-    return carried;
-  };
 
   for (let i = 0; i < lines.length; i++) {
     const head = cols(lines[i]);
@@ -314,43 +322,47 @@ function importPl(db, lines) {
     }
     if (!mc) continue;
 
-    let category = '', section = '売上';
+    let section = '売上';
+    let carried = '';            // c[1] は結合セルで下に続く。空なら前の値を使う
+
     for (let j = start; j < lines.length; j++) {
       const d = cols(lines[j]);
       if (!d.length) break;
-      if (d.includes('着金ベース')) break;            // 次の年のブロック
+      if (d.includes('着金ベース')) break;                 // 次の年のブロック
 
-      const totalLabel = d[1];
-      if (totalLabel) {
-        // 合計・利益の行。区分の切り替わりも兼ねている
-        if (/売上原価/.test(totalLabel)) section = '売上原価';
-        else if (/販売費|一般管理費/.test(totalLabel)) section = '経費';
-        const isMetric = /利益|達成率|目標/.test(totalLabel);
+      const write = (sec, cat, sub, isTotal) => {
         for (const { i: ci, m } of mc) {
           const v = money(d[ci]);
           if (!v) continue;
           const month = year + '-' + String(m).padStart(2, '0');
-          put.run('pl:' + month + ':T:' + totalLabel, month, isMetric ? '指標' : section,
-            totalLabel, '', v, 1);
+          put.run(`pl:${month}:${sec}:${cat}:${sub}`, month, sec, cat, sub, v, isTotal ? 1 : 0);
           n++;
         }
-        if (/営業利益/.test(totalLabel)) break;        // このブロックの最後
-        category = '';
+      };
+
+      const head1 = d[1] || '';
+      if (PL_TOTALS.test(head1)) {
+        // 「支出合計」は事業＋個人の総計なので、どちらか一方の区分に入れると
+        // その区分の内訳と合わなくなる。指標として別に置く
+        const isMetric = PL_METRICS.test(head1) || /^支出合計/.test(head1);
+        // 合計行そのものを記録してから、区分を切り替える
+        write(isMetric ? '指標' : section, head1, '', true);
+
+        if (/実績合計売上原価/.test(head1)) section = '売上原価';
+        else if (/販売費及び一般管理費/.test(head1)) section = '事業経費';
+        else if (/^経費合計/.test(head1)) section = '個人支出';   // ここから下は個人のお金
+        else if (/^支出合計/.test(head1)) section = '指標';
+        else if (/^合計$/.test(head1)) section = '指標';           // 2024年の書き方
+        carried = '';
         continue;
       }
 
-      if (d[2]) category = d[2];                      // 中分類。空なら上から引き継ぐ
-      section = sectionOf(d[2], section);
-      const sub = d[3] || '';
+      // 分類の行。c[1] が大分類（結合セルで続く）、c[2] c[3] が中分類と明細
+      if (head1) carried = head1;
+      const category = carried;
+      const sub = [d[2], d[3]].filter(Boolean).join('／');
       if (!category && !sub) continue;
-      for (const { i: ci, m } of mc) {
-        const v = money(d[ci]);
-        if (!v) continue;
-        const month = year + '-' + String(m).padStart(2, '0');
-        put.run('pl:' + month + ':' + section + ':' + category + ':' + sub,
-          month, section, category, sub, v, 0);
-        n++;
-      }
+      write(section, category, sub, false);
     }
     i = start;
   }
@@ -739,8 +751,12 @@ const done = {
 // 「販管費」という呼び方はしない。
 // source_key に区分名が入っているので、名前を変えるとキーが変わり、
 // 古い行が残ったまま新しい行が増えて二重になる。古いキーの行を先に消す。
-db.exec("DELETE FROM pl_monthly WHERE source_key LIKE 'pl:%:販管費:%'");
-db.exec("UPDATE pl_monthly SET section='経費' WHERE section='販管費'");
+// source_key に区分名が入っているので、区分の呼び方を変えると古い行が残る。
+// 取り込みのたびに、いまの区分名でない行を掃除する。
+db.exec(`DELETE FROM pl_monthly WHERE edited_at IS NULL AND section NOT IN
+  ('売上','売上原価','事業経費','個人支出','指標')`);
+db.exec(`DELETE FROM pl_monthly WHERE edited_at IS NULL AND source_key NOT LIKE
+  'pl:%:' || section || ':%'`);
 done['経費の事業/個人 区分'] = seedCostKinds(db);
 for (const [k, v] of Object.entries(done)) {
   console.log('  ' + (v ? '✓' : '—') + ' ' + k + ' : ' + v + '件');

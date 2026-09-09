@@ -154,9 +154,9 @@ console.log('\n■ 月次損益（合計行 vs 内訳の足し算）');
   const cases = [
     ['実績合計売上高', "section='売上' AND category='実績売上高'"],
     ['総売上', "section='売上'"],
-    ['経費の合計', "section='経費'"],
+    ['経費合計 ← 事業経費', "section='事業経費'"],
   ];
-  const totalName = { '実績合計売上高': '実績合計売上高', '総売上': '総売上', '経費の合計': '合計' };
+  const totalName = { '実績合計売上高': '実績合計売上高', '総売上': '総売上', '経費合計 ← 事業経費': '経費合計' };
   for (const [label, where] of cases) {
     const rows = db.prepare(`SELECT month,
         COALESCE(SUM(CASE WHEN is_total=1 AND category=? THEN amount END),0) t,
@@ -170,7 +170,7 @@ console.log('\n■ 月次損益（合計行 vs 内訳の足し算）');
   }
   const years = db.prepare("SELECT DISTINCT substr(month,1,4) y FROM pl_monthly ORDER BY y").all().map((r) => r.y);
   say('✓', '対象年', years.join(' / '));
-  const sec = db.prepare("SELECT section, COUNT(*) n, SUM(amount) a FROM pl_monthly WHERE is_total=0 GROUP BY 1").all();
+  const sec = db.prepare("SELECT section, COUNT(*) n, SUM(amount) a FROM pl_monthly WHERE is_total=0 GROUP BY 1 ORDER BY 1").all();
   for (const r of sec) console.log(`     ${r.section.padEnd(8)} ${String(r.n).padStart(4)}件  ${yen(r.a)}`);
 }
 
