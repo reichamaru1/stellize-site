@@ -302,6 +302,36 @@ CREATE TABLE IF NOT EXISTS todos (
 );
 CREATE INDEX IF NOT EXISTS idx_td_status ON todos(status, due);
 
+-- 「お金の流れ管理」から取り込んだ実取引。
+-- 事業か個人かは、あちらで既に仕分けてある（entity）。
+-- こちらで名前から推測するより確かなので、手残りの計算はこれを使う。
+CREATE TABLE IF NOT EXISTS mf_tx (
+  id         TEXT PRIMARY KEY,          -- 向こうのID。取り込み直しても重複しない
+  date       TEXT NOT NULL,
+  entity     TEXT NOT NULL,             -- business / personal
+  type       TEXT NOT NULL,             -- income / expense
+  category   TEXT,
+  amount     INTEGER NOT NULL DEFAULT 0,
+  memo       TEXT,
+  recurring  INTEGER NOT NULL DEFAULT 0,
+  src        TEXT,                      -- csv / manual など
+  uncertain  INTEGER NOT NULL DEFAULT 0, -- 向こうで自動仕分けの確信が低かったもの
+  import_id  TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mf_date ON mf_tx(date);
+CREATE INDEX IF NOT EXISTS idx_mf_ent ON mf_tx(entity, type);
+
+-- 取り込み元ファイルの記録。どの時点のデータかを追えるようにする。
+CREATE TABLE IF NOT EXISTS mf_imports (
+  id    TEXT PRIMARY KEY,
+  name  TEXT,
+  entity TEXT,
+  rows  INTEGER,
+  from_date TEXT,
+  to_date   TEXT,
+  at    TEXT
+);
+
 -- ============================================================
 -- 設定（連携キーなど）
 -- ============================================================

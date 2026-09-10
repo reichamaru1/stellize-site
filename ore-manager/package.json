@@ -11,6 +11,7 @@
     "start": "node --no-warnings src/server.mjs",
     "import": "node --no-warnings src/import/sheet.mjs",
     "test": "node --no-warnings --test test/*.test.mjs",
-    "verify": "node --no-warnings src/verify.mjs"
+    "verify": "node --no-warnings src/verify.mjs",
+    "import:money": "node --no-warnings src/import/money.mjs"
   }
 }

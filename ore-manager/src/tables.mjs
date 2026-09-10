@@ -127,7 +127,8 @@ export const TABLES = {
       { k: 'quote_once', label: '単発見積', type: 'money' },
       { k: 'quote_month', label: '月額見積', type: 'money' },
       { k: 'due', label: '期限', type: 'text', w: 90 },
-      { k: 'closed_on', label: '締結日', type: 'date', w: 110 },
+      // 「5月」「夏以降」も入るので日付欄にしない
+      { k: 'closed_on', label: '締結日', type: 'text', w: 110 },
       { k: 'note', label: '備考', type: 'text' },
       { k: 'lost_reason', label: '失注理由', type: 'text' },
     ],
@@ -265,6 +266,24 @@ export const TABLES = {
       { k: 'keyword', label: '代表キーワード', type: 'text' },
       { k: 'side', label: '収入/支出', type: 'text', w: 100 },
       { k: 'subcategory', label: 'サブカテゴリ', type: 'text' },
+    ],
+  }),
+
+  mf_tx: T('お金の流れ（実取引）', {
+    order: 'date DESC, id',
+    dateCol: 'date',
+    search: ['memo', 'category'],
+    filters: ['entity', 'type', 'category', 'src'],
+    columns: [
+      { k: 'date', label: '日付', type: 'date', w: 110 },
+      { k: 'entity', label: '事業/個人', type: 'text', w: 90 },
+      { k: 'type', label: '収支', type: 'text', w: 80 },
+      { k: 'category', label: 'カテゴリ', type: 'text' },
+      { k: 'amount', label: '金額', type: 'money' },
+      { k: 'memo', label: 'メモ', type: 'text' },
+      { k: 'recurring', label: '定期', type: 'bool', w: 70 },
+      { k: 'uncertain', label: '要確認', type: 'bool', w: 80 },
+      { k: 'src', label: '取込元', type: 'text', w: 90 },
     ],
   }),
 

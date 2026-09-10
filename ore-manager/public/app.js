@@ -437,7 +437,18 @@ const PAGES = {
 
   customers: {
     icon: '◎', label: '顧客・案件',
-    state: { tab: 'pipeline' },
+    state: { tab: 'pipeline', month: '', months: [] },
+    tools() {
+      const st = PAGES.customers.state;
+      if (st.tab !== 'pipeline' || !st.months.length) return [];
+      return [el('label', { class: 'tool-label' }, '対象月'),
+        el('select', { onchange: (e) => { st.month = e.target.value; render('customers'); } },
+          st.months.map((m) => {
+            const o = el('option', { value: m }, m);
+            if (m === st.month) o.selected = true;
+            return o;
+          }))];
+    },
     async load() {
       const st = PAGES.customers.state;
       const box = el('div');
@@ -447,6 +458,37 @@ const PAGES = {
       ];
       box.append(el('div', { class: 'tabs' }, tabs.map(([k, label]) =>
         el('button', { class: st.tab === k ? 'on' : '', onclick: () => { st.tab = k; render('customers'); } }, label))));
+
+      // 商談は「いまどの月に何が動いているか」で見る。累計では判断できない
+      if (st.tab === 'pipeline') {
+        const q = st.month ? '?month=' + st.month : '';
+        const d = await api('/api/pipeline/months' + q);
+        st.month = d.month;
+        st.months = d.months;
+        if (d.byStatus.length) {
+          box.append(panel(d.month + ' の状況',
+            `初回面談 ${d.met.length}件 / 締結 ${d.closed.length}件`, tableOf([
+            { k: 'status', label: '進捗', fmt: (v) => statusTag(v) },
+            { k: 'n', label: '件数', r: true },
+            { k: 'once', label: '単発見積', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+            { k: 'monthly', label: '月額見積', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+          ], d.byStatus, { scroll: false })));
+        } else {
+          box.append(el('div', { class: 'empty' }, d.month + ' に動いた商談はありません'));
+        }
+        const cols = [
+          { k: 'title', label: '案件名' }, { k: 'company', label: '企業名' },
+          { k: 'person', label: '担当者' }, { k: 'status', label: '進捗', fmt: (v) => statusTag(v) },
+          { k: 'quote_once', label: '単発', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+          { k: 'quote_month', label: '月額', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+          { k: 'note', label: '備考' },
+        ];
+        if (d.met.length) box.append(panel('この月に初回面談', null, tableOf(cols, d.met)));
+        if (d.closed.length) box.append(panel('この月に締結', null, tableOf(cols, d.closed)));
+        box.append(el('h2', { class: 'sec' }, 'すべての商談（検索・絞り込み・編集）'));
+        box.append(dataTable('pipeline'));
+        return box;
+      }
 
       // 契約一覧のときだけ、上に要約を出す（金額の全体像が要るため）
       if (st.tab === 'deals') {
@@ -716,53 +758,75 @@ const PAGES = {
       const d = await api('/api/cash');
       const box = el('div');
       const sum = (k) => d.rows.reduce((a, r) => a + r[k], 0);
-      const income = sum('income'), biz = sum('bizCost'), per = sum('personal');
-      const bizProfit = income - biz;
-      const left = bizProfit - per;
-
+      const bizIn = sum('bizIn'), bizOut = sum('bizOut');
+      const perIn = sum('perIn'), perOut = sum('perOut');
+      const bizProfit = bizIn - bizOut;
+      const left = bizProfit + perIn - perOut;
       const span = d.rows.length ? `${d.rows[0].month} 〜 ${d.rows[d.rows.length - 1].month}` : '';
-      box.append(el('div', { class: 'cards' },
-        card('事業の収入', money(income), span),
-        card('事業の経費', money(biz), '事業として出たお金'),
-        card('事業の利益', (bizProfit < 0 ? '-¥' : '¥') + yen(Math.abs(bizProfit)), '収入 − 事業の経費'),
-        card('個人のお金', money(per), '返済・貯蓄・保険・住まいなど'),
-        card('手残り', (left < 0 ? '-¥' : '¥') + yen(Math.abs(left)), '事業の利益 − 個人のお金', 'accent')));
 
-      if (d.guessedPersonal) {
-        box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
-          `「個人」と判定した${d.guessedPersonal}件は、カテゴリ名からの推測です。`
-          + '「お金の区分」で実態に合わせて直してください。直した分は取り込みでも戻りません。'));
-      }
+      box.append(el('div', { class: 'cards' },
+        card('事業の収入', money(bizIn), span),
+        card('事業の支出', money(bizOut)),
+        card('事業の利益', (bizProfit < 0 ? '-¥' : '¥') + yen(Math.abs(bizProfit)), '収入 − 支出'),
+        card('個人の収支', (perIn - perOut < 0 ? '-¥' : '¥') + yen(Math.abs(perIn - perOut)),
+          `収入 ${money(perIn)} / 支出 ${money(perOut)}`),
+        card('手残り', (left < 0 ? '-¥' : '¥') + yen(Math.abs(left)), '事業と個人を合わせた残り', 'accent')));
 
       box.append(el('p', { class: 'hint' },
-        `収入は「${d.source.income}」、支出は「${d.source.cost}」から出しています。`));
+        `収入は「${d.source.income}」、支出は「${d.source.cost}」から出しています。`
+        + (d.from === 'money' && d.uncertain
+          ? `　自動仕分けの確信が低い取引が ${d.uncertain} 件あります（「お金の流れ（実取引）」の要確認で絞れます）。`
+          : '')));
+
+      if (d.from === 'sheet') {
+        box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
+          '「お金の流れ管理」をまだ取り込んでいません。ターミナルで npm run import:money を実行すると、'
+          + '実際の取引にもとづいた事業／個人の仕分けに切り替わります。'));
+      }
+
       box.append(panel('月ごと', d.rows.length + 'か月', tableOf([
         { k: 'month', label: '月', cls: 'nowrap' },
-        { k: 'income', label: '事業の収入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
-        { k: 'bizCost', label: '事業の経費', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+        { k: 'bizIn', label: '事業の収入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
+        { k: 'bizOut', label: '事業の支出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
         { k: '_bp', label: '事業の利益', r: true, cls: 'money', fmt: (v, r) => {
-          const n = r.income - r.bizCost;
+          const n = r.bizIn - r.bizOut;
           return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
         } },
-        { k: 'personal', label: '個人のお金', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
+        { k: 'perIn', label: '個人の収入', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+        { k: 'perOut', label: '個人の支出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
         { k: '_left', label: '手残り', r: true, cls: 'money', fmt: (v, r) => {
-          const n = r.income - r.bizCost - r.personal;
+          const n = r.bizIn - r.bizOut + r.perIn - r.perOut;
           return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
         } },
       ], d.rows)));
 
-      for (const kind of ['個人', '事業']) {
-        const rows = d.byCat.filter((r) => r.kind === kind);
+      for (const [ent, ty, title] of [
+        ['business', 'expense', '事業として出ているお金'],
+        ['personal', 'expense', '個人として出ているお金'],
+        ['business', 'income', '事業の収入の内訳'],
+      ]) {
+        const rows = d.byCat.filter((r) => r.entity === ent && r.type === ty).slice(0, 25);
         if (!rows.length) continue;
-        box.append(panel(kind + 'として出ているお金', rows.length + 'カテゴリ', tableOf([
+        box.append(panel(title, rows.length + 'カテゴリ', tableOf([
           { k: 'category', label: 'カテゴリ' },
           { k: 'n', label: '件', r: true },
           { k: 'amount', label: '合計', r: true, cls: 'money', fmt: (v) => money(v) },
         ], rows)));
       }
 
-      box.append(el('h2', { class: 'sec' }, 'お金の区分（ここで事業／個人を直せます）'));
-      box.append(dataTable('cost_kinds'));
+      if (d.imports.length) {
+        box.append(panel('取り込み元のファイル', null, tableOf([
+          { k: 'name', label: 'ファイル' },
+          { k: 'entity', label: '区分', cls: 'nowrap' },
+          { k: 'rows', label: '件数', r: true },
+          { k: 'from_date', label: '開始', cls: 'nowrap' },
+          { k: 'to_date', label: '終了', cls: 'nowrap' },
+          { k: 'at', label: '取込日時', cls: 'nowrap' },
+        ], d.imports, { scroll: false })));
+      }
+
+      box.append(el('h2', { class: 'sec' }, '取引の明細（検索・絞り込み・編集）'));
+      box.append(dataTable(d.from === 'money' ? 'mf_tx' : 'expenses'));
       return box;
     },
   },

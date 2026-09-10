@@ -228,7 +228,20 @@ function importDeals(db, lines) {
   return n;
 }
 
-/** 商談パイプライン（契約前の動き） */
+/**
+ * 商談パイプライン（契約前の動き）
+ *
+ * 日付が「4/3」「5/11」のように月日だけで、年が入っていない。
+ * そこで、行の並び順に沿って年を推定する。月が大きく戻ったら年をまたいだとみなす。
+ *
+ * 起点が2023年であることは、P/Lと突き合わせて確かめてある。
+ *   商談 No.8「株式会社Rush 面談5/1 締結5月 月額¥49,000」
+ *   P/L  「(株)Rush」の売上が 2023-05 から ¥49,000/月 で立っている
+ *
+ * 推定なので、違っていたら画面で直せる（直した行は取り込みで上書きされない）。
+ */
+const PIPELINE_START_YEAR = 2023;
+
 function importPipeline(db, lines) {
   const t = table(lines, ['案件名', '企業名', '進捗', '月額見積']);
   if (!t) return 0;
@@ -240,33 +253,64 @@ function importPipeline(db, lines) {
       first_met=excluded.first_met, status=excluded.status, quote_once=excluded.quote_once,
       quote_month=excluded.quote_month, due=excluded.due, closed_on=excluded.closed_on,
       note=excluded.note, lost_reason=excluded.lost_reason`);
-  let n = 0;
+
+  let year = PIPELINE_START_YEAR, lastMonth = 0, n = 0;
+
+  /** 「4/3」→ {m,d}。年が無い月日だけを拾う。 */
+  const md = (v) => {
+    const m = cell(v).match(/^(\d{1,2})[/\-月](\d{1,2})/);
+    return m ? { m: Number(m[1]), d: Number(m[2]) } : null;
+  };
+
   for (const r of t.rows) {
     const title = cell(r['案件名']), company = cell(r['企業名']);
     if (!title && !company) continue;
-    const key = 'pl:' + (r['No'] || hash(title, company, cell(r['担当者名'])));
+
+    const met = md(r['初回面談']);
+    const clo = md(r['契約締結日']);
+    const lead = met || clo;
+    if (lead) {
+      /*
+       * 年をまたいだとみなすのは「12月あたり → 1〜3月」に落ちたときだけ。
+       * 実データを見ると、月が1〜2か月戻るのは入力の並びのゆらぎで、
+       * 本当の年またぎは 12月→2月 / 12月→1月 の形をしていた。
+       * 緩く判定すると年が増えすぎて、ありもしない未来の年ができる。
+       */
+      if (lastMonth >= 10 && lead.m <= 3) year++;
+      // 過去の商談の表なので、今年より先には進まない
+      const thisYear = new Date().getFullYear();
+      if (year > thisYear) year = thisYear;
+      lastMonth = lead.m;
+    }
+    const iso = (x) => (x ? year + '-' + String(x.m).padStart(2, '0') + '-' + String(x.d).padStart(2, '0') : '');
+
+    // 締結日は「5月」「夏以降」「未定」も入る。月だけ分かるものは年月にし、
+    // それ以外は書かれたまま残す（勝手に日付にしない）
+    let closed = iso(clo);
+    if (!closed) {
+      const onlyMonth = cell(r['契約締結日']).match(/^(\d{1,2})月$/);
+      closed = onlyMonth ? year + '-' + String(onlyMonth[1]).padStart(2, '0') : cell(r['契約締結日']);
+    }
+
+    const key = 'pl2:' + (r['No'] || hash(title, company, cell(r['担当者名'])));
     put.run(key, title, company, cell(r['担当者名']), cell(r['仲介者氏名']),
-      date(r['初回面談']), cell(r['進捗']), money(r['単発見積']), money(r['月額見積']),
-      cell(r['期限']), date(r['契約締結日']), cell(r['備考(進捗含む)']), cell(r['失注理由']));
+      iso(met), cell(r['進捗']), money(r['単発見積']), money(r['月額見積']),
+      cell(r['期限']), closed, cell(r['備考(進捗含む)']), cell(r['失注理由']));
     n++;
   }
   return n;
 }
 
-
-/* ------------------------------------------------------------
-   ここから下は「月を横に並べた表」を読むもの。
-   見出し行の 1月…12月 や 1…12 の位置を拾って、そこから縦に読む。
-   ------------------------------------------------------------ */
-
-/** 「月」の行から、列位置→月 の対応を作る。 */
+/**
+ * 「月」の行から、列位置→月 の対応を作る。
+ * 期の途中から始まる年（2023年は3月〜）もあるので、12か月ちょうどは求めない。
+ */
 function monthColumns(c) {
   const out = [];
   c.forEach((v, i) => {
     const m = String(v).match(/^(\d{1,2})月?$/);
     if (m) { const n = Number(m[1]); if (n >= 1 && n <= 12) out.push({ i, m: n }); }
   });
-  // 期の途中から始まる年（2023年は3月〜）もあるので、12か月ちょうどは求めない
   return out.length >= 3 ? out : null;
 }
 
@@ -357,10 +401,22 @@ function importPl(db, lines) {
         continue;
       }
 
-      // 分類の行。c[1] が大分類（結合セルで続く）、c[2] c[3] が中分類と明細
+      /*
+       * 分類の行。列の使い方は3通りある。
+       *   外注費 | コンサル費 | KLP   → 大分類 c[1]、中分類 c[2]、明細 c[3]
+       *          | ソフト経費 |        → c[1] は結合セルで空。大分類は上から引き継ぐ
+       *          | 実績売上高 | 福祉研修 → 大分類が無い並び。c[2] が分類、c[3] が明細
+       * 引き継ぐ大分類が無いときだけ、c[2] を分類として扱う。
+       */
       if (head1) carried = head1;
-      const category = carried;
-      const sub = [d[2], d[3]].filter(Boolean).join('／');
+      let category, sub;
+      if (carried) {
+        category = carried;
+        sub = [d[2], d[3]].filter(Boolean).join('／');
+      } else {
+        category = d[2] || '';
+        sub = d[3] || '';
+      }
       if (!category && !sub) continue;
       write(section, category, sub, false);
     }

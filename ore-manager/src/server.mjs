@@ -427,29 +427,75 @@ const server = createServer(async (req, res) => {
     }
     /**
      * 手残り。
-     * 事業の収入から事業の経費を引いたものが事業の利益。
-     * そこから個人として出ていくお金（返済・貯蓄・保険・住まい）を引くと、
-     * 実際に手元に残る額になる。cost_kinds の区分で分けている。
+     *
+     * 「お金の流れ管理」から取り込んだ実取引を使う。あちらは1件ずつ
+     * 事業か個人かを仕分けてあるので、カテゴリ名から推測する必要がない。
+     * まだ取り込んでいないときだけ、経費明細＋区分表で代用する。
      */
     if (p === '/api/cash') {
+      const hasMf = one('SELECT COUNT(*) c FROM mf_tx').c > 0;
+
+      if (hasMf) {
+        const rows = all(`SELECT substr(date,1,7) month,
+            COALESCE(SUM(CASE WHEN entity='business' AND type='income'  THEN amount END),0) bizIn,
+            COALESCE(SUM(CASE WHEN entity='business' AND type='expense' THEN amount END),0) bizOut,
+            COALESCE(SUM(CASE WHEN entity='personal' AND type='income'  THEN amount END),0) perIn,
+            COALESCE(SUM(CASE WHEN entity='personal' AND type='expense' THEN amount END),0) perOut
+          FROM mf_tx GROUP BY 1 ORDER BY 1`);
+        const byCat = all(`SELECT entity, type, category, SUM(amount) amount, COUNT(*) n
+          FROM mf_tx GROUP BY 1,2,3 ORDER BY amount DESC`);
+        return json(res, {
+          from: 'money',
+          rows, byCat,
+          uncertain: one('SELECT COUNT(*) c FROM mf_tx WHERE uncertain=1').c,
+          imports: all('SELECT * FROM mf_imports ORDER BY at DESC'),
+          source: { income: 'お金の流れ管理（実取引）', cost: 'お金の流れ管理（事業／個人は向こうの仕分け）' },
+        });
+      }
+
+      // 代用：経費明細とカテゴリ区分から出す
       const kindJoin = `LEFT JOIN cost_kinds k ON k.category = e.category`;
       const rows = all(`
         SELECT m AS month,
-          COALESCE((SELECT SUM(income) FROM cashflow WHERE substr(date,1,7)=m),0) AS income,
+          COALESCE((SELECT SUM(income) FROM cashflow WHERE substr(date,1,7)=m),0) AS bizIn,
           COALESCE((SELECT SUM(e.amount) FROM expenses e ${kindJoin}
-                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='事業'),0) AS bizCost,
+                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='事業'),0) AS bizOut,
+          0 AS perIn,
           COALESCE((SELECT SUM(e.amount) FROM expenses e ${kindJoin}
-                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='個人'),0) AS personal
+                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='個人'),0) AS perOut
         FROM (SELECT DISTINCT substr(date,1,7) m FROM expenses
               UNION SELECT DISTINCT substr(date,1,7) FROM cashflow) ORDER BY m`);
-      const byCat = all(`
-        SELECT COALESCE(k.kind,'事業') kind, e.category, SUM(e.amount) amount, COUNT(*) n
-        FROM expenses e ${kindJoin} GROUP BY 1,2 ORDER BY amount DESC`);
-      const guessed = one("SELECT COUNT(*) c FROM cost_kinds WHERE guessed=1 AND kind='個人'").c;
       return json(res, {
-        rows, byCat, guessedPersonal: guessed,
-        // どの表から出した数字かを画面に出す。出どころが分からない金額は使えない
-        source: { income: '入出金明細の収入', cost: '経費明細（事業／個人はお金の区分で判定）' },
+        from: 'sheet', rows, byCat: [], uncertain: 0, imports: [],
+        guessedPersonal: one("SELECT COUNT(*) c FROM cost_kinds WHERE guessed=1 AND kind='個人'").c,
+        source: { income: '入出金明細の収入', cost: '経費明細（事業／個人はカテゴリ名からの推測）' },
+      });
+    }
+
+    /**
+     * 商談パイプラインを月で見る。
+     * 累計だと「いま何が動いているか」が分からないので、月ごとに切る。
+     */
+    if (p === '/api/pipeline/months') {
+      const months = all(`SELECT m, COUNT(*) n FROM (
+          SELECT substr(first_met,1,7) m FROM pipeline WHERE first_met <> ''
+          UNION ALL
+          SELECT substr(closed_on,1,7) m FROM pipeline WHERE closed_on <> ''
+        ) WHERE m <> '' GROUP BY m ORDER BY m DESC`);
+      const month = q.get('month') || (months[0] && months[0].m) || '';
+      // 月が決まらないときに '%' を渡すと全件に当たってしまう。空なら何も返さない
+      if (!month) {
+        return json(res, { months: [], month: '', met: [], closed: [], byStatus: [] });
+      }
+      const like = month + '%';
+      return json(res, {
+        months: months.map((r) => r.m), month,
+        met: all(`SELECT * FROM pipeline WHERE first_met LIKE ? ORDER BY first_met`, like),
+        closed: all(`SELECT * FROM pipeline WHERE closed_on LIKE ? ORDER BY closed_on`, like),
+        byStatus: all(`SELECT status, COUNT(*) n, COALESCE(SUM(quote_month),0) monthly,
+            COALESCE(SUM(quote_once),0) once
+          FROM pipeline WHERE first_met LIKE ? OR closed_on LIKE ?
+          GROUP BY status ORDER BY n DESC`, like, like),
       });
     }
 
