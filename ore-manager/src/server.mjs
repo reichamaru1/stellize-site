@@ -477,11 +477,12 @@ const server = createServer(async (req, res) => {
      * 累計だと「いま何が動いているか」が分からないので、月ごとに切る。
      */
     if (p === '/api/pipeline/months') {
+      // 締結日は「未定」「夏以降」も入る。年月の形をしているものだけを月として扱う
       const months = all(`SELECT m, COUNT(*) n FROM (
           SELECT substr(first_met,1,7) m FROM pipeline WHERE first_met <> ''
           UNION ALL
           SELECT substr(closed_on,1,7) m FROM pipeline WHERE closed_on <> ''
-        ) WHERE m <> '' GROUP BY m ORDER BY m DESC`);
+        ) WHERE m GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]' GROUP BY m ORDER BY m DESC`);
       const month = q.get('month') || (months[0] && months[0].m) || '';
       // 月が決まらないときに '%' を渡すと全件に当たってしまう。空なら何も返さない
       if (!month) {
