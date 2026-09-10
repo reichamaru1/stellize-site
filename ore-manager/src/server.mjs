@@ -571,6 +571,106 @@ const server = createServer(async (req, res) => {
       return json(res, await mailApi({ api: 'memo', text: b.text, frame: b.frame, from: '俺の事業を管理せよ' }));
     }
 
+    /* ------------------------------------------------------------
+       SNS運用
+       ------------------------------------------------------------ */
+
+    if (p === '/api/sns/overview') {
+      const today = new Date().toISOString().slice(0, 10);
+      return json(res, {
+        accounts: all('SELECT * FROM sns_accounts ORDER BY platform, handle'),
+        counts: all(`SELECT status, COUNT(*) n FROM sns_posts GROUP BY 1`),
+        upcoming: all(`SELECT * FROM sns_posts
+          WHERE status <> '公開' AND status <> '見送り' AND planned_on >= ?
+          ORDER BY planned_on LIMIT 12`, today),
+        overdue: all(`SELECT * FROM sns_posts
+          WHERE status <> '公開' AND status <> '見送り' AND planned_on <> '' AND planned_on < ?
+          ORDER BY planned_on LIMIT 12`, today),
+        recent: all(`SELECT * FROM sns_posts WHERE status='公開'
+          ORDER BY posted_on DESC LIMIT 10`),
+        refs: one('SELECT COUNT(*) c FROM sns_refs').c,
+        untried: one("SELECT COUNT(*) c FROM sns_refs WHERE tried <> '試した' AND borrow <> ''").c,
+      });
+    }
+
+    // 投稿カレンダー。月の枡に予定と実績を並べる
+    if (p === '/api/sns/calendar') {
+      const month = q.get('month') || new Date().toISOString().slice(0, 7);
+      return json(res, {
+        month,
+        months: all(`SELECT m FROM (
+            SELECT DISTINCT substr(planned_on,1,7) m FROM sns_posts WHERE planned_on <> ''
+            UNION SELECT DISTINCT substr(posted_on,1,7) FROM sns_posts WHERE posted_on <> ''
+          ) WHERE m <> '' ORDER BY m DESC`).map((r) => r.m),
+        posts: all(`SELECT * FROM sns_posts
+          WHERE substr(COALESCE(NULLIF(posted_on,''), planned_on),1,7) = ?
+          ORDER BY COALESCE(NULLIF(posted_on,''), planned_on)`, month),
+      });
+    }
+
+    /**
+     * 数値の分析。
+     * 平均や率を出すだけで、判断は人に委ねる。
+     * 保存率は「保存 ÷ リーチ」。リーチが0の投稿は率の計算から外す
+     * （0で割ると無限になり、平均が壊れるため）。
+     */
+    if (p === '/api/sns/analysis') {
+      const acc = q.get('account') || '';
+      const where = acc ? `AND account = ?` : '';
+      const args = acc ? [acc] : [];
+
+      const agg = (groupBy, label) => all(`
+        SELECT ${groupBy} AS key, COUNT(*) n,
+          AVG(reach) reach, AVG(views) views,
+          AVG(likes) likes, AVG(saves) saves, AVG(follows) follows,
+          AVG(CASE WHEN reach > 0 THEN saves * 100.0 / reach END) saveRate,
+          AVG(CASE WHEN reach > 0 THEN (likes + comments + saves + shares) * 100.0 / reach END) engRate
+        FROM sns_posts WHERE status='公開' ${where}
+        GROUP BY 1 HAVING key <> '' ORDER BY saveRate DESC`, ...args);
+
+      const posts = all(`SELECT * FROM sns_posts WHERE status='公開' ${where}
+        ORDER BY posted_on DESC`, ...args);
+
+      const rate = (r) => (r.reach > 0 ? (r.saves + r.likes + r.comments + r.shares) * 100 / r.reach : null);
+      const ranked = posts.filter((r) => rate(r) != null)
+        .map((r) => ({ ...r, engRate: rate(r), saveRate: r.reach > 0 ? r.saves * 100 / r.reach : 0 }))
+        .sort((a, b) => b.saveRate - a.saveRate);
+
+      return json(res, {
+        account: acc,
+        accounts: all("SELECT DISTINCT account FROM sns_posts WHERE account <> ''").map((r) => r.account),
+        total: posts.length,
+        byFormat: agg('format'),
+        byPillar: agg('pillar'),
+        byWeekday: agg(`CASE CAST(strftime('%w', posted_on) AS INTEGER)
+          WHEN 0 THEN '日' WHEN 1 THEN '月' WHEN 2 THEN '火' WHEN 3 THEN '水'
+          WHEN 4 THEN '木' WHEN 5 THEN '金' ELSE '土' END`),
+        byMonth: all(`SELECT substr(posted_on,1,7) key, COUNT(*) n,
+            AVG(reach) reach, SUM(follows) follows,
+            AVG(CASE WHEN reach > 0 THEN saves * 100.0 / reach END) saveRate
+          FROM sns_posts WHERE status='公開' AND posted_on <> '' ${where}
+          GROUP BY 1 ORDER BY 1`, ...args),
+        best: ranked.slice(0, 5),
+        worst: ranked.slice(-5).reverse(),
+      });
+    }
+
+    /**
+     * 台本を書くための材料をまとめる。
+     * このアプリ自身は文章を作らない。作るのはClaude側なので、
+     * アカウント設計とテーマを組み合わせた「渡す文面」を返す。
+     */
+    if (p === '/api/sns/brief') {
+      const id = Number(q.get('id') || 0);
+      const post = id ? one('SELECT * FROM sns_posts WHERE id=?', id) : null;
+      if (!post) return json(res, { error: '投稿が見つかりません' }, 404);
+      const acc = one('SELECT * FROM sns_accounts WHERE handle=?', post.account || '')
+        || one('SELECT * FROM sns_accounts LIMIT 1');
+      const refs = all(`SELECT account, hook, why, borrow FROM sns_refs
+        WHERE borrow <> '' ORDER BY id DESC LIMIT 5`);
+      return json(res, { post, account: acc, refs });
+    }
+
     /* 汎用の一覧・絞り込み・編集 */
     if (p === '/api/tables') {
       return json(res, Object.entries(TABLES).map(([k, v]) => ({

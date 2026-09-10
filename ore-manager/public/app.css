@@ -189,3 +189,18 @@ h2.sec{margin:26px 0 12px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;
 
 .tool-group{display:inline-flex;align-items:center;gap:7px}
 .tool-label{font-size:10.5px;letter-spacing:.08em;color:var(--muted)}
+
+/* ---------- 投稿カレンダー ---------- */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line-2);
+     border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.cal-h{background:var(--cream);padding:7px 0;text-align:center;font-size:10.5px;
+       letter-spacing:.1em;color:var(--muted);font-weight:600}
+.cal-d{background:#fff;min-height:84px;padding:5px 6px}
+.cal-d.empty{background:#FBF9F5}
+.cal-n{display:block;font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums;margin-bottom:3px}
+.cal-p{margin-bottom:3px;padding:3px 6px;border-radius:4px;font-size:10.5px;line-height:1.5;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default}
+.cal-p.idea{background:#F1EEE8;color:#6E6558}
+.cal-p.plan{background:#F6EBD6;color:#7A5F22}
+.cal-p.done{background:#E7EFEA;color:#3E5A4C}
+@media (max-width:760px){ .cal-d{min-height:60px} .cal-p{font-size:9.5px} }

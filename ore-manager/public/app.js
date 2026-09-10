@@ -233,7 +233,7 @@ function dataTable(name, opts = {}) {
           st.sort = c.k; draw();
         },
       }, c.label + (st.sort === c.k ? (st.dir === 'asc' ? ' ↑' : ' ↓') : '')));
-      head1.push(el('th', { style: 'width:52px' }, ''));
+      head1.push(el('th', { style: `width:${opts.rowAction ? 108 : 52}px` }, ''));
 
       const head2 = d.columns.map((c) => el('th', { class: 'fx-cell' }, filterCell(d, c)));
       head2.push(el('th', { class: 'fx-cell' }, ''));
@@ -244,6 +244,10 @@ function dataTable(name, opts = {}) {
             + (c.type === 'date' || c.type === 'month' ? 'nowrap' : ''),
         }, fmtCell(c, row[c.k]) || el('span', { class: 'dim' }, '—'))).concat(
           el('td', { class: 'nowrap' },
+            opts.rowAction
+              ? el('button', { class: 'btn tiny', style: 'margin-right:4px',
+                  onclick: () => opts.rowAction.fn(row) }, opts.rowAction.label)
+              : null,
             el('button', { class: 'btn tiny', onclick: () => openEditor(d, row) }, '編集')))));
 
       box.append(el('div', { class: 'scroll tall' },
@@ -850,6 +854,55 @@ const PAGES = {
     },
   },
 
+
+  sns: {
+    icon: '◉', label: 'SNS運用',
+    state: { tab: 'overview', month: '', months: [], account: '' },
+    tools() {
+      const st = PAGES.sns.state;
+      if (st.tab === 'calendar' && st.months.length) {
+        return [el('label', { class: 'tool-label' }, '対象月'),
+          el('select', { onchange: (e) => { st.month = e.target.value; render('sns'); } },
+            st.months.map((m) => {
+              const o = el('option', { value: m }, m);
+              if (m === st.month) o.selected = true;
+              return o;
+            }))];
+      }
+      return [];
+    },
+    async load() {
+      const st = PAGES.sns.state;
+      const box = el('div');
+      const tabs = [
+        ['overview', '今の状況'], ['calendar', '投稿カレンダー'], ['posts', '投稿'],
+        ['analysis', '数字と改善'], ['refs', '参考事例'], ['design', 'アカウント設計'],
+      ];
+      box.append(el('div', { class: 'tabs' }, tabs.map(([k, label]) =>
+        el('button', { class: st.tab === k ? 'on' : '', onclick: () => { st.tab = k; render('sns'); } }, label))));
+
+      if (st.tab === 'overview') return snsOverview(box);
+      if (st.tab === 'calendar') return snsCalendar(box, st);
+      if (st.tab === 'analysis') return snsAnalysis(box, st);
+      if (st.tab === 'posts') {
+        box.append(el('p', { class: 'hint' },
+          '「台本」を押すと、その投稿の台本を書くための材料が出ます。Claudeに渡して、返ってきたものを台本欄に貼ってください。'));
+        box.append(dataTable('sns_posts', { rowAction: { label: '台本', fn: openScript } }));
+        return box;
+      }
+      if (st.tab === 'refs') {
+        box.append(el('p', { class: 'hint' },
+          'URLと数字だけ集めても使えません。「なぜ伸びたか」と「取り込む要素」を書いて、はじめて次の投稿に効きます。'));
+        box.append(dataTable('sns_refs'));
+        return box;
+      }
+      box.append(el('p', { class: 'hint' },
+        'ここを先に決めます。台本を書くときも、投稿を出すか迷ったときも、判断はこの内容に照らして行います。'));
+      box.append(dataTable('sns_accounts'));
+      return box;
+    },
+  },
+
   tables: {
     icon: '▦', label: 'そのほかのデータ',
     state: { name: 'pl_monthly' },
@@ -1025,13 +1078,249 @@ const PAGES = {
   },
 };
 
+
+/* ============================================================
+   SNS運用の各タブ
+   ============================================================ */
+
+async function snsOverview(box) {
+  const d = await api('/api/sns/overview');
+  const n = (st) => (d.counts.find((c) => c.status === st) || { n: 0 }).n;
+
+  box.append(el('div', { class: 'cards' },
+    card('公開済み', n('公開') + '本', '', 'accent'),
+    card('台本ができている', n('台本') + n('予約') + '本', `案 ${n('案')}本`),
+    card('期限をすぎた予定', d.overdue.length + '本', d.overdue.length ? '出すか、日を動かす' : '無し'),
+    card('参考事例', d.refs + '件', d.untried ? `まだ試していない ${d.untried}件` : '')));
+
+  if (!d.accounts.length) {
+    box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
+      'アカウント設計がまだありません。「アカウント設計」から、誰に何を届けるかを先に決めてください。'
+      + '台本の良し悪しは、ここが決まっていないと判断できません。'));
+  } else {
+    for (const a of d.accounts) {
+      box.append(panel(`${a.platform}　@${a.handle || '—'}`, a.concept || '', el('div', {},
+        el('table', {}, el('tbody', {}, [
+          ['ターゲット', a.target], ['相手の困りごと', a.target_pain],
+          ['持ち帰れるもの', a.value], ['投稿の柱', a.pillars],
+          ['話し方', a.tone], ['してほしいこと', a.cta],
+          ['追う指標', a.kpi ? `${a.kpi}（目標 ${a.kpi_target || '未設定'}）` : ''],
+        ].filter(([, v]) => v).map(([k, v]) =>
+          el('tr', {}, el('td', { style: 'width:150px;color:var(--muted)' }, k), el('td', {}, v))))))));
+    }
+  }
+
+  const cols = [
+    { k: 'planned_on', label: '予定日', cls: 'nowrap' },
+    { k: 'status', label: '状態', fmt: (v) => statusTag(v) },
+    { k: 'format', label: '形式', cls: 'nowrap' },
+    { k: 'pillar', label: '柱' },
+    { k: 'theme', label: 'テーマ' },
+  ];
+  if (d.overdue.length) box.append(panel('期限をすぎた予定', '出すか、日を動かす', tableOf(cols, d.overdue)));
+  box.append(panel('これから出す予定', null, tableOf(cols, d.upcoming, { empty: '予定がありません' })));
+
+  box.append(panel('直近の投稿', null, tableOf([
+    { k: 'posted_on', label: '公開日', cls: 'nowrap' },
+    { k: 'format', label: '形式', cls: 'nowrap' },
+    { k: 'theme', label: 'テーマ' },
+    { k: 'reach', label: 'リーチ', r: true, cls: 'num' },
+    { k: 'saves', label: '保存', r: true, cls: 'num' },
+    { k: '_sr', label: '保存率', r: true, cls: 'num',
+      fmt: (v, r) => (r.reach ? (r.saves * 100 / r.reach).toFixed(1) + '%' : '—') },
+    { k: 'follows', label: 'フォロー増', r: true, cls: 'num' },
+  ], d.recent, { empty: 'まだ公開した投稿がありません' })));
+  return box;
+}
+
+async function snsCalendar(box, st) {
+  const d = await api('/api/sns/calendar' + (st.month ? '?month=' + st.month : ''));
+  st.month = d.month;
+  st.months = d.months.length ? d.months : [d.month];
+
+  // 月の枡を作る。予定と実績を同じ枡に置く
+  const [y, m] = d.month.split('-').map(Number);
+  const first = new Date(y, m - 1, 1);
+  const days = new Date(y, m, 0).getDate();
+  const head = ['日', '月', '火', '水', '木', '金', '土'];
+  const cells = [];
+  for (let i = 0; i < first.getDay(); i++) cells.push(null);
+  for (let dd = 1; dd <= days; dd++) cells.push(dd);
+
+  const byDay = {};
+  for (const p of d.posts) {
+    const key = Number((p.posted_on || p.planned_on || '').slice(8, 10));
+    (byDay[key] ||= []).push(p);
+  }
+
+  const grid = el('div', { class: 'cal' },
+    head.map((h) => el('div', { class: 'cal-h' }, h)),
+    cells.map((dd) => {
+      if (dd == null) return el('div', { class: 'cal-d empty' });
+      const items = byDay[dd] || [];
+      return el('div', { class: 'cal-d' },
+        el('span', { class: 'cal-n' }, dd),
+        items.map((p) => el('div', {
+          class: 'cal-p ' + (p.status === '公開' ? 'done' : p.status === '案' ? 'idea' : 'plan'),
+          title: `${p.status}／${p.format || ''}／${p.theme || ''}`,
+        }, (p.format ? p.format.slice(0, 2) + ' ' : '') + (p.theme || '（テーマ未記入）').slice(0, 12))));
+    }));
+  box.append(panel(d.month + ' の投稿', d.posts.length + '本', grid));
+  box.append(el('p', { class: 'hint' }, '色は状態です。灰＝案、金＝台本と予約、緑＝公開済み。'));
+  box.append(el('h2', { class: 'sec' }, 'この月の投稿'));
+  box.append(dataTable('sns_posts'));
+  return box;
+}
+
+async function snsAnalysis(box, st) {
+  const d = await api('/api/sns/analysis' + (st.account ? '?account=' + encodeURIComponent(st.account) : ''));
+  if (!d.total) {
+    box.append(el('div', { class: 'empty' },
+      '公開済みの投稿がまだありません。投稿を「公開」にして数字を入れると、ここに傾向が出ます。'));
+    return box;
+  }
+
+  const pct = (v) => (v == null ? '—' : Number(v).toFixed(1) + '%');
+  const num = (v) => (v == null ? '—' : Math.round(v).toLocaleString('ja-JP'));
+  const aggCols = (label) => [
+    { k: 'key', label },
+    { k: 'n', label: '本数', r: true, cls: 'num' },
+    { k: 'reach', label: '平均リーチ', r: true, cls: 'num', fmt: (v) => num(v) },
+    { k: 'saveRate', label: '保存率', r: true, cls: 'num', fmt: (v) => pct(v) },
+    { k: 'engRate', label: '反応率', r: true, cls: 'num', fmt: (v) => pct(v) },
+    { k: 'follows', label: '平均フォロー増', r: true, cls: 'num', fmt: (v) => num(v) },
+  ];
+
+  // 気づきは断定せず、数字と一緒に置く。判断は人がする
+  const notes = [];
+  const top = (rows) => rows.filter((r) => r.n >= 2 && r.saveRate != null);
+  const fmts = top(d.byFormat), pillars = top(d.byPillar);
+  if (fmts.length >= 2) {
+    const [a, b] = [fmts[0], fmts[fmts.length - 1]];
+    if (a.saveRate > b.saveRate * 1.5) {
+      notes.push(`形式では「${a.key}」の保存率が ${pct(a.saveRate)} で、「${b.key}」の ${pct(b.saveRate)} を大きく上回っています。`);
+    }
+  }
+  if (pillars.length >= 2) {
+    const a = pillars[0];
+    notes.push(`柱では「${a.key}」の保存率が最も高く ${pct(a.saveRate)}（${a.n}本）です。`);
+  }
+  const noFollow = d.best.filter((r) => !r.follows).length;
+  if (d.best.length && noFollow === d.best.length) {
+    notes.push('保存率が高い投稿でもフォロー増が0です。投稿は届いていても、プロフィールに寄る理由が置けていない可能性があります。');
+  }
+  const months = d.byMonth;
+  if (months.length >= 2) {
+    const last = months[months.length - 1], prev = months[months.length - 2];
+    if (last.n < prev.n) notes.push(`投稿数が ${prev.key} の ${prev.n}本 から ${last.key} は ${last.n}本 に減っています。`);
+  }
+
+  box.append(el('div', { class: 'cards' },
+    card('公開した投稿', d.total + '本', '', 'accent'),
+    card('平均保存率', pct(d.byFormat.reduce((a, r) => a + (r.saveRate || 0) * r.n, 0) / Math.max(1, d.total))),
+    card('フォロー増の合計', num(d.byMonth.reduce((a, r) => a + (r.follows || 0), 0)))));
+
+  if (notes.length) {
+    box.append(panel('数字から言えること', '判断の材料。ここから何をするかは決めていません',
+      el('ul', { style: 'margin:0;padding-left:20px;line-height:2' },
+        notes.map((t) => el('li', {}, t)))));
+  }
+
+  box.append(panel('形式別', null, tableOf(aggCols('形式'), d.byFormat, { scroll: false })));
+  box.append(panel('投稿の柱別', null, tableOf(aggCols('柱'), d.byPillar, { scroll: false })));
+  box.append(panel('曜日別', null, tableOf(aggCols('曜日'), d.byWeekday, { scroll: false })));
+  box.append(panel('月ごと', null, tableOf([
+    { k: 'key', label: '月', cls: 'nowrap' },
+    { k: 'n', label: '本数', r: true, cls: 'num' },
+    { k: 'reach', label: '平均リーチ', r: true, cls: 'num', fmt: (v) => num(v) },
+    { k: 'saveRate', label: '保存率', r: true, cls: 'num', fmt: (v) => pct(v) },
+    { k: 'follows', label: 'フォロー増', r: true, cls: 'num' },
+  ], d.byMonth, { scroll: false })));
+
+  const postCols = [
+    { k: 'posted_on', label: '公開日', cls: 'nowrap' },
+    { k: 'format', label: '形式', cls: 'nowrap' },
+    { k: 'theme', label: 'テーマ' },
+    { k: 'hook', label: 'フック' },
+    { k: 'reach', label: 'リーチ', r: true, cls: 'num' },
+    { k: 'saveRate', label: '保存率', r: true, cls: 'num', fmt: (v) => pct(v) },
+    { k: 'follows', label: 'フォロー増', r: true, cls: 'num' },
+  ];
+  box.append(el('div', { class: 'split' },
+    panel('保存率が高い投稿', '真似する対象', tableOf(postCols, d.best, { scroll: false })),
+    panel('保存率が低い投稿', 'やめるか、変える対象', tableOf(postCols, d.worst, { scroll: false }))));
+  return box;
+}
+
+/** 台本を書くための材料を、そのままClaudeに渡せる形で出す */
+async function openScript(row) {
+  const d = await api('/api/sns/brief?id=' + row.id);
+  if (d.error) { alert(d.error); return; }
+  const a = d.account || {};
+  const lines = [
+    'Stellizeの' + (a.platform || 'Instagram') + '投稿の台本を書いてください。',
+    '',
+    '# アカウント設計',
+    `- 目的: ${a.purpose || '（未記入）'}`,
+    `- ターゲット: ${a.target || '（未記入）'}`,
+    `- 相手の困りごと: ${a.target_pain || '（未記入）'}`,
+    `- コンセプト: ${a.concept || '（未記入）'}`,
+    `- 見た人が持ち帰れるもの: ${a.value || '（未記入）'}`,
+    `- 話し方: ${a.tone || '（未記入）'}`,
+    `- やらないこと: ${a.ng || '（未記入）'}`,
+    `- 最終的にしてほしいこと: ${a.cta || '（未記入）'}`,
+    '',
+    '# この投稿',
+    `- 形式: ${row.format || '（未定）'}`,
+    `- 柱: ${row.pillar || '（未定）'}`,
+    `- テーマ: ${row.theme || '（未記入）'}`,
+    row.hook ? `- 考えているフック: ${row.hook}` : null,
+    row.memo ? `- メモ: ${row.memo}` : null,
+    '',
+  ];
+  if (d.refs.length) {
+    lines.push('# 参考にしている事例（取り込みたい要素）');
+    d.refs.forEach((r) => lines.push(`- ${r.account}: ${r.borrow}（伸びた理由: ${r.why}）`));
+    lines.push('');
+  }
+  lines.push('# 守ること',
+    '- 教える構えにしない。「こうしましょう」ではなく「こうしたら、こうだった」',
+    '- 自分が分からなかったこと、うまくいかなかったことも書く',
+    '- 誇張しない。数字は実際のものだけ使う',
+    '', '# 出してほしいもの',
+    '- フック（最初の1秒・1行）を3案',
+    '- 本編の台本',
+    '- キャプション',
+    '- ハッシュタグ');
+
+  // 段落の区切りに使う空行は残す。省略した項目（null）だけ落とす
+  const text = lines.filter((l) => l !== null).join('\n');
+  const ta = el('textarea', { rows: '18', style: 'width:100%;font:12px/1.8 ui-monospace,monospace' });
+  ta.value = text;
+  const msg = el('div', { class: 'hint' });
+  openDrawer('台本を書くための材料', el('div', {},
+    el('p', { class: 'hint', style: 'margin:0 0 10px' },
+      'この文面をClaudeに渡すと台本が返ってきます。返ってきたものは投稿の「台本」欄に貼ってください。'),
+    ta,
+    el('div', { class: 'drawer-actions' },
+      el('button', { class: 'btn pri', onclick: () => {
+        navigator.clipboard.writeText(ta.value).then(
+          () => { msg.textContent = 'コピーしました。'; },
+          () => { msg.textContent = 'コピーできませんでした。手で選んでコピーしてください。'; });
+      } }, 'コピーする'),
+      el('button', { class: 'btn', onclick: closeDrawer }, 'とじる')),
+    msg));
+}
+
+
 /* ============================================================
    骨組み
    ============================================================ */
 
 const ORDER = [
   ['お金', ['dash', 'cash', 'money', 'pl', 'expenses', 'plan']],
-  ['進める', ['todos', 'customers', 'events', 'facilities', 'mail']],
+  ['進める', ['todos', 'customers', 'events', 'facilities']],
+  ['発信', ['sns', 'mail']],
   ['調べる', ['kpi', 'pricing', 'tables', 'audit']],
   ['', ['settings']],
 ];

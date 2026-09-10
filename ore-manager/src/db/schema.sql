@@ -333,6 +333,88 @@ CREATE TABLE IF NOT EXISTS mf_imports (
 );
 
 -- ============================================================
+-- SNS運用
+-- ============================================================
+
+-- アカウント設計。誰に何を届けるかを先に決めて、台本と投稿の判断基準にする。
+CREATE TABLE IF NOT EXISTS sns_accounts (
+  id          INTEGER PRIMARY KEY,
+  platform    TEXT NOT NULL DEFAULT 'Instagram',
+  handle      TEXT,                      -- @なしのID
+  name        TEXT,                      -- 表示名
+  purpose     TEXT,                      -- このアカウントで何を達成するのか
+  target      TEXT,                      -- 誰に向けるか
+  target_pain TEXT,                      -- その人が困っていること
+  concept     TEXT,                      -- 一言でいうと何のアカウントか
+  value       TEXT,                      -- 見た人が持ち帰れるもの
+  tone        TEXT,                      -- 話し方。上から教えないなど
+  pillars     TEXT,                      -- 投稿の柱（3〜5本）
+  ng          TEXT,                      -- やらないこと
+  cta         TEXT,                      -- 最終的にしてほしい行動
+  kpi         TEXT,                      -- 追う指標
+  kpi_target  TEXT,
+  memo        TEXT,
+  edited_at   TEXT
+);
+
+-- 投稿。案の段階から公開後の数字まで、1行で通して持つ。
+-- 予定と実績を別表にすると、予定が実績に化けるときに転記が要って必ずずれる。
+CREATE TABLE IF NOT EXISTS sns_posts (
+  id           INTEGER PRIMARY KEY,
+  account      TEXT,                     -- sns_accounts.handle
+  platform     TEXT NOT NULL DEFAULT 'Instagram',
+  status       TEXT NOT NULL DEFAULT '案', -- 案 / 台本 / 予約 / 公開 / 見送り
+  planned_on   TEXT,                      -- 出す予定の日 YYYY-MM-DD
+  posted_on    TEXT,                      -- 実際に出した日
+  format       TEXT,                      -- リール / フィード / カルーセル / ストーリー
+  pillar       TEXT,                      -- 投稿の柱
+  theme        TEXT,                      -- この投稿のテーマ
+  hook         TEXT,                      -- 最初の1行・1秒
+  script       TEXT,                      -- 台本
+  caption      TEXT,
+  hashtags     TEXT,
+  url          TEXT,
+  reach        INTEGER DEFAULT 0,
+  impressions  INTEGER DEFAULT 0,
+  views        INTEGER DEFAULT 0,
+  likes        INTEGER DEFAULT 0,
+  comments     INTEGER DEFAULT 0,
+  saves        INTEGER DEFAULT 0,
+  shares       INTEGER DEFAULT 0,
+  profile_hits INTEGER DEFAULT 0,        -- プロフィールへの遷移
+  follows      INTEGER DEFAULT 0,        -- この投稿から増えたフォロワー
+  memo         TEXT,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  edited_at    TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_sp_plan ON sns_posts(planned_on);
+CREATE INDEX IF NOT EXISTS idx_sp_status ON sns_posts(status);
+
+-- 参考事例。伸びている他社の投稿を、理由まで書いて残す。
+-- URLと数字だけ集めても使えない。「なぜ伸びたか」「自社なら何を借りるか」が本体。
+CREATE TABLE IF NOT EXISTS sns_refs (
+  id         INTEGER PRIMARY KEY,
+  platform   TEXT NOT NULL DEFAULT 'Instagram',
+  account    TEXT,                       -- 相手のアカウント
+  industry   TEXT,                       -- 業種。同業か、参考にする他業種か
+  url        TEXT,
+  posted_on  TEXT,
+  format     TEXT,
+  theme      TEXT,
+  followers  INTEGER DEFAULT 0,
+  views      INTEGER DEFAULT 0,
+  likes      INTEGER DEFAULT 0,
+  comments   INTEGER DEFAULT 0,
+  hook       TEXT,                       -- 最初の1行・1秒に何を置いていたか
+  why        TEXT,                       -- なぜ伸びたと考えるか
+  borrow     TEXT,                       -- 自社に取り込むならどの要素か
+  tried      TEXT,                       -- 試した / まだ
+  memo       TEXT,
+  edited_at  TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_sr_acc ON sns_refs(account);
+
+-- ============================================================
 -- 設定（連携キーなど）
 -- ============================================================
 
