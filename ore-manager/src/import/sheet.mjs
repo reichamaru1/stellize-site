@@ -566,10 +566,12 @@ function importForecast(db, lines) {
         const d = cols(lines[k]);
         const label = d[0];
         if (!label) break;
+        // 目安の表にも「営業利益」が並ぶ。売上として足すと二重に数えるので分ける
+        const side = PLAN_METRIC.test(label) ? '指標' : '売上';
         for (const { i: ci, m } of mc) {
           const v = money(d[ci]);
           if (!v) continue;
-          put.run(year + '-' + String(m).padStart(2, '0'), '目安', '売上', label, '', v);
+          put.run(year + '-' + String(m).padStart(2, '0'), '目安', side, label, '', v);
           n++;
         }
       }
@@ -707,9 +709,44 @@ function importKpi(db, lines) {
 }
 
 /**
- * 月次の収支計画。「1月…12月」の見出し行を基準に読む。
- * 年はその手前に出てくる「20xx年」を使う。
+ * 月次の収支計画（目標と実績）。
+ *
+ * 「1月…12月」の見出し行から下に、目標と実績が縦に並んでいる。
+ *
+ *   【目標数値】
+ *     〈売上〉  面談アポ数・オファー率…（件数と率）／ 研修売上・総売上…（金額）
+ *     〈支出〉  借金返済・外注費・通信費…／ 家賃光熱費・食費・生活費…
+ *   〈結果数値〉                      ← ここから実績
+ *     〈売上〉  …
+ *     販売費及び一般管理費             ← 事業の経費
+ *     経費合計 ★                     ← ここから下は個人のお金
+ *     支出合計
+ *     利益 / 内部留保 / 残額           ← 指標
+ *
+ * 気をつける点が3つある。
+ *
+ * 1. 実績側は〈支出〉ではなく「販売費及び一般管理費」で始まる。
+ *    〈〉だけを見ていると、経費が売上の続きとして入ってしまう。
+ * 2. 目標側には「経費合計」の区切りが無い。そこで、実績側で経費合計より
+ *    下に出てきた項目を覚えておき、目標側もそれで分ける。名前から推測する
+ *    より確かで、シートを直せば自動で追従する。
+ * 3. この表の下には料金表が続く。月の列位置が同じなので、止めないと
+ *    単価が「◯月の金額」として入ってくる。罫線行で切る。
  */
+
+/**
+ * 件数・率・利益の行。金額の集計に混ぜない。
+ * 「研修件数(累計)」のように後ろに注記が付く形があるので、末尾だけを見ない。
+ * ただし「研修売上」「その他売上」を巻き込まないよう、語は絞る。
+ */
+const PLAN_METRIC = /件数|回数|人数|率|利益|内部留保|残額|貯金|仕送り|税金積立|社会還元|数$/;
+
+/** 罫線だけの行か（表の切れ目） */
+const isRule = (c) => {
+  const v = c.filter(Boolean);
+  return v.length > 2 && v.every((x) => /^:-+:?$/.test(x));
+};
+
 function importPlan(db, lines) {
   let headIdx = -1, year = new Date().getFullYear();
   for (let i = 0; i < lines.length; i++) {
@@ -721,39 +758,80 @@ function importPlan(db, lines) {
     const m = lines[i].match(/(\d{4})年/);
     if (m) { year = Number(m[1]); break; }
   }
-  const head = cols(lines[headIdx]);
-  const monthCols = head.map((h, i) => (/^(\d{1,2})月$/.test(h) ? { i, m: Number(h.replace('月', '')) } : null)).filter(Boolean);
+  const monthCols = monthColumns(cols(lines[headIdx]));
+  if (!monthCols) return 0;
 
-  const put = prep(db, `INSERT INTO plan_monthly (month,kind,side,category,subcategory,amount)
-    VALUES (?,?,?,?,?,?)
-    ON CONFLICT(month,kind,side,category,subcategory) DO UPDATE SET amount=excluded.amount`);
-  let side = null, kind = '目標', n = 0;
+  // ---- 1回目：実績側を読んで、個人のお金にあたる項目名を覚える ----
+  const personal = new Set();
+  {
+    let inActual = false, afterKeihi = false;
+    for (let i = headIdx + 1; i < lines.length; i++) {
+      const c = cols(lines[i]);
+      if (isRule(c)) break;
+      if (/〈結果数値〉/.test(c.join(''))) { inActual = true; continue; }
+      if (!inActual) continue;
+      const h = (c[0] || '') + (c[1] || '');
+      if (/^経費合計/.test(c[0] || '') || /^経費合計/.test(c[1] || '')) { afterKeihi = true; continue; }
+      if (/^支出合計/.test(c[0] || '') || /^支出合計/.test(c[1] || '')) break;
+      if (!afterKeihi) continue;
+      const label = c[0] || c[1] || '';
+      if (label && !PLAN_METRIC.test(label)) personal.add(label);
+    }
+  }
+
+  const put = prep(db, `INSERT INTO plan_monthly (month,kind,side,category,subcategory,amount,is_total)
+    VALUES (?,?,?,?,?,?,?)
+    ON CONFLICT(month,kind,side,category,subcategory) DO UPDATE SET
+      amount=excluded.amount, is_total=excluded.is_total`);
+
+  let kind = '目標', side = '売上', carried = '', n = 0;
 
   for (let i = headIdx + 1; i < lines.length; i++) {
     const c = cols(lines[i]);
     if (!c.length) continue;
-    const joined = c.join('');
-    // 〈結果数値〉から下は同じ形の実績。目標と並べて比べられるよう kind で分ける
-    if (/〈結果数値〉/.test(joined)) { kind = '実績'; side = null; continue; }
-    if (/〈(企業情報|目標売上|目安数値)〉/.test(joined)) break;
-    const sec = joined.match(/〈(売上|支出)〉/);
-    if (sec) { side = sec[1]; continue; }
-    if (!side) continue;
+    if (isRule(c)) break;                     // ここから下は料金表など別の表
 
-    // 科目が結合セルで空になっている行がある。空のまま入れると分類が消えるので寄せる
-    let category = c[1] || '';
-    let subcategory = (c[2] && c[2] !== category) ? c[2] : '';
-    if (!category && subcategory) { category = subcategory; subcategory = ''; }
-    if (!category) continue;
+    const joined = c.join('');
+    if (/〈結果数値〉/.test(joined)) { kind = '実績'; side = '売上'; carried = ''; continue; }
+
+    const sec = joined.match(/〈(売上|支出)〉/);
+    if (sec) { side = sec[1] === '売上' ? '売上' : '事業経費'; carried = ''; continue; }
+
+    const head0 = c[0] || '', head1 = c[1] || '';
+    if (/販売費及び一般管理費/.test(head0 + head1)) { side = '事業経費'; carried = ''; continue; }
+    if (/^経費合計/.test(head0) || /^経費合計/.test(head1)) { side = '個人支出'; carried = ''; continue; }
+    if (/^支出合計/.test(head0) || /^支出合計/.test(head1)) { side = '指標'; carried = ''; continue; }
+
+    // 分類名。1列目が大分類（結合セルで下に続く）、2・3列目が中分類と明細
+    if (head0) carried = head0;
+    let category, subcategory;
+    if (carried) {
+      category = carried;
+      subcategory = [c[1], c[2]].filter((v) => v && v !== carried).join('／');
+    } else {
+      category = c[1] || '';
+      subcategory = (c[2] && c[2] !== category) ? c[2] : '';
+    }
+    if (!category && !subcategory) continue;
+
+    const label = subcategory || category;
+    let rowSide = side;
+    if (PLAN_METRIC.test(label) || PLAN_METRIC.test(category)) rowSide = '指標';
+    else if (side === '事業経費' && (personal.has(category) || personal.has(label))) rowSide = '個人支出';
+
+    // 「総売上」は内訳の合計。印を付けないと内訳と一緒に足して二重に数える
+    const isTotal = /^(総売上|合計)$/.test(label) ? 1 : 0;
+
     for (const mc of monthCols) {
       const v = money(c[mc.i]);
       if (!v) continue;
-      put.run(year + '-' + String(mc.m).padStart(2, '0'), kind, side, category, subcategory, v);
+      put.run(year + '-' + String(mc.m).padStart(2, '0'), kind, rowSide, category, subcategory, v, isTotal);
       n++;
     }
   }
   return n;
 }
+
 
 /* ============================================================ */
 

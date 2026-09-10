@@ -673,31 +673,45 @@ const PAGES = {
 
       st.years = d.years;
       const months = d.months;
-      // 目標・実績・目安 を、区分ごとに月で横に並べる
+      // 月を横に並べた表を作る。区分ごとに同じ形で出すので関数にまとめる
+      const gridOf = (rows) => {
+        const keys = [...new Set(rows.map((r) => (r.category || '') + '｜' + (r.subcategory || '')))];
+        return keys.map((k) => {
+          const [cat, sub] = k.split('｜');
+          const row = { label: sub ? cat + '／' + sub : cat };
+          let sum = 0;
+          for (const m of months) {
+            const hit = rows.find((r) => r.month === m
+              && (r.category || '') === cat && (r.subcategory || '') === sub);
+            row[m] = hit ? hit.amount : 0;
+            sum += row[m];
+          }
+          row._sum = sum;
+          return row;
+        });
+      };
+      const monthCols = () => [{ k: 'label', label: '項目', cls: 'nowrap' }]
+        .concat(months.map((m) => ({ k: m, label: m.slice(5) + '月', r: true, cls: 'money',
+          fmt: (v) => (v ? yen(v) : '') })))
+        .concat([{ k: '_sum', label: '年計', r: true, cls: 'money', fmt: (v) => money(v) }]);
+
+      // 目標・実績・目安を、区分ごとに並べる。
+      // 合計行（総売上など）は内訳と混ぜない。混ぜると同じ金額を二度数える
       for (const kind of ['目標', '実績', '目安']) {
-        for (const side of ['売上', '支出']) {
-          const rows = d.rows.filter((r) => r.kind === kind && r.side === side);
+        const mine = d.rows.filter((r) => r.kind === kind);
+        if (!mine.length) continue;
+        for (const side of ['売上', '事業経費', '個人支出', '指標']) {
+          const rows = mine.filter((r) => r.side === side && !r.is_total);
           if (!rows.length) continue;
-          const keys = [...new Set(rows.map((r) => (r.category || '') + '｜' + (r.subcategory || '')))];
-          const grid = keys.map((k) => {
-            const [cat, sub] = k.split('｜');
-            const row = { label: sub ? cat + '／' + sub : cat };
-            let sum = 0;
-            for (const m of months) {
-              const hit = rows.find((r) => r.month === m && (r.category || '') === cat && (r.subcategory || '') === sub);
-              row[m] = hit ? hit.amount : 0;
-              sum += row[m];
-            }
-            row._sum = sum;
-            return row;
-          });
-          const cols2 = [{ k: 'label', label: '項目', cls: 'nowrap' }]
-            .concat(months.map((m) => ({ k: m, label: m.slice(5) + '月', r: true, cls: 'money',
-              fmt: (v) => (v ? yen(v) : '') })))
-            .concat([{ k: '_sum', label: '年計', r: true, cls: 'money', fmt: (v) => money(v) }]);
-          box.append(panel(`${kind}　${side}`, grid.length + '項目', tableOf(cols2, grid)));
+          const g = gridOf(rows);
+          box.append(panel(`${kind}　${side}`, g.length + '項目', tableOf(monthCols(), g)));
+        }
+        const totals = mine.filter((r) => r.is_total);
+        if (totals.length) {
+          box.append(panel(`${kind}　合計`, '内訳の足し算にあたるもの', tableOf(monthCols(), gridOf(totals))));
         }
       }
+
 
       const met = await api('/api/metrics');
       const scopes = [...new Set(met.rows.map((r) => r.scope))];

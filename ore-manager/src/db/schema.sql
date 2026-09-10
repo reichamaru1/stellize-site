@@ -54,10 +54,11 @@ CREATE TABLE IF NOT EXISTS plan_monthly (
   id          INTEGER PRIMARY KEY,
   month       TEXT NOT NULL,            -- YYYY-MM
   kind        TEXT NOT NULL DEFAULT '目標',  -- 目標 / 実績 / 目安
-  side        TEXT NOT NULL,            -- 売上 / 支出
+  side        TEXT NOT NULL,            -- 売上 / 事業経費 / 個人支出 / 指標
   category    TEXT NOT NULL,
   subcategory TEXT,
   amount      INTEGER NOT NULL DEFAULT 0,
+  is_total    INTEGER NOT NULL DEFAULT 0,
   UNIQUE(month, kind, side, category, subcategory)
 );
 
