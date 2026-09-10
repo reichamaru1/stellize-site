@@ -367,7 +367,8 @@ function importPl(db, lines) {
     if (!mc) continue;
 
     let section = '売上';
-    let carried = '';            // c[1] は結合セルで下に続く。空なら前の値を使う
+    // 結合セルは下に続く。大分類と中分類の2段を覚えておく
+    let carriedBig = '', carriedMid = '';
 
     for (let j = start; j < lines.length; j++) {
       const d = cols(lines[j]);
@@ -397,26 +398,24 @@ function importPl(db, lines) {
         else if (/^経費合計/.test(head1)) section = '個人支出';   // ここから下は個人のお金
         else if (/^支出合計/.test(head1)) section = '指標';
         else if (/^合計$/.test(head1)) section = '指標';           // 2024年の書き方
-        carried = '';
+        carriedBig = ''; carriedMid = '';
         continue;
       }
 
       /*
-       * 分類の行。列の使い方は3通りある。
-       *   外注費 | コンサル費 | KLP   → 大分類 c[1]、中分類 c[2]、明細 c[3]
-       *          | ソフト経費 |        → c[1] は結合セルで空。大分類は上から引き継ぐ
-       *          | 実績売上高 | 福祉研修 → 大分類が無い並び。c[2] が分類、c[3] が明細
-       * 引き継ぐ大分類が無いときだけ、c[2] を分類として扱う。
+       * 分類の行。結合セルは大分類だけでなく中分類にも掛かる。
+       *   外注費 | コンサル費 | KLP   → 大 c[1]、中 c[2]、明細 c[3]
+       *          | ソフト経費 |        → 大は上から引き継ぐ
+       *          | 諸会費   | Kクラブ  → 大が無い並び。中 c[2]、明細 c[3]
+       *          |          | 真誓会   → 中も空。中を上から引き継がないと分類が消える
+       * 1段しか引き継がないと、最後の形で分類が空になる。
        */
-      if (head1) carried = head1;
-      let category, sub;
-      if (carried) {
-        category = carried;
-        sub = [d[2], d[3]].filter(Boolean).join('／');
-      } else {
-        category = d[2] || '';
-        sub = d[3] || '';
-      }
+      if (head1) { carriedBig = head1; carriedMid = ''; }
+      if (d[2]) carriedMid = d[2];
+      const big = carriedBig, mid = carriedMid, detail = d[3] || '';
+      const category = big || mid;
+      const sub = (big ? [mid, detail].filter(Boolean).join('／') : detail)
+        .split('／').filter((v) => v && v !== category).join('／');
       if (!category && !sub) continue;
       write(section, category, sub, false);
     }
@@ -774,8 +773,10 @@ function importPlan(db, lines) {
       if (/^経費合計/.test(c[0] || '') || /^経費合計/.test(c[1] || '')) { afterKeihi = true; continue; }
       if (/^支出合計/.test(c[0] || '') || /^支出合計/.test(c[1] || '')) break;
       if (!afterKeihi) continue;
-      const label = c[0] || c[1] || '';
-      if (label && !PLAN_METRIC.test(label)) personal.add(label);
+      // 「借金返済 / 親族」のように明細まで見ないと、目標側で拾えない
+      for (const v of [c[0], c[1], c[2]]) {
+        if (v && !PLAN_METRIC.test(v)) personal.add(v);
+      }
     }
   }
 
@@ -784,7 +785,7 @@ function importPlan(db, lines) {
     ON CONFLICT(month,kind,side,category,subcategory) DO UPDATE SET
       amount=excluded.amount, is_total=excluded.is_total`);
 
-  let kind = '目標', side = '売上', carried = '', n = 0;
+  let kind = '目標', side = '売上', carriedBig = '', carriedMid = '', n = 0;
 
   for (let i = headIdx + 1; i < lines.length; i++) {
     const c = cols(lines[i]);
@@ -792,32 +793,32 @@ function importPlan(db, lines) {
     if (isRule(c)) break;                     // ここから下は料金表など別の表
 
     const joined = c.join('');
-    if (/〈結果数値〉/.test(joined)) { kind = '実績'; side = '売上'; carried = ''; continue; }
+    const reset = () => { carriedBig = ''; carriedMid = ''; };
+    if (/〈結果数値〉/.test(joined)) { kind = '実績'; side = '売上'; reset(); continue; }
 
     const sec = joined.match(/〈(売上|支出)〉/);
-    if (sec) { side = sec[1] === '売上' ? '売上' : '事業経費'; carried = ''; continue; }
+    if (sec) { side = sec[1] === '売上' ? '売上' : '事業経費'; reset(); continue; }
 
     const head0 = c[0] || '', head1 = c[1] || '';
-    if (/販売費及び一般管理費/.test(head0 + head1)) { side = '事業経費'; carried = ''; continue; }
-    if (/^経費合計/.test(head0) || /^経費合計/.test(head1)) { side = '個人支出'; carried = ''; continue; }
-    if (/^支出合計/.test(head0) || /^支出合計/.test(head1)) { side = '指標'; carried = ''; continue; }
+    if (/販売費及び一般管理費/.test(head0 + head1)) { side = '事業経費'; reset(); continue; }
+    if (/^経費合計/.test(head0) || /^経費合計/.test(head1)) { side = '個人支出'; reset(); continue; }
+    if (/^支出合計/.test(head0) || /^支出合計/.test(head1)) { side = '指標'; reset(); continue; }
 
-    // 分類名。1列目が大分類（結合セルで下に続く）、2・3列目が中分類と明細
-    if (head0) carried = head0;
-    let category, subcategory;
-    if (carried) {
-      category = carried;
-      subcategory = [c[1], c[2]].filter((v) => v && v !== carried).join('／');
-    } else {
-      category = c[1] || '';
-      subcategory = (c[2] && c[2] !== category) ? c[2] : '';
-    }
+    // 分類名。結合セルは大分類にも中分類にも掛かるので、2段とも引き継ぐ
+    if (head0) { carriedBig = head0; carriedMid = ''; }
+    if (c[1]) carriedMid = c[1];
+    const big = carriedBig, mid = carriedMid, detail = c[2] || '';
+    const category = big || mid;
+    // 結合セルのせいで同じ語が2列に入ることがある。分類と同じ明細は出さない
+    const subcategory = (big ? [mid, detail].filter(Boolean).join('／') : detail)
+      .split('／').filter((v) => v && v !== category).join('／');
     if (!category && !subcategory) continue;
 
     const label = subcategory || category;
     let rowSide = side;
     if (PLAN_METRIC.test(label) || PLAN_METRIC.test(category)) rowSide = '指標';
-    else if (side === '事業経費' && (personal.has(category) || personal.has(label))) rowSide = '個人支出';
+    else if (side === '事業経費'
+      && (personal.has(category) || personal.has(label) || personal.has(subcategory))) rowSide = '個人支出';
 
     // 「総売上」は内訳の合計。印を付けないと内訳と一緒に足して二重に数える
     const isTotal = /^(総売上|合計)$/.test(label) ? 1 : 0;

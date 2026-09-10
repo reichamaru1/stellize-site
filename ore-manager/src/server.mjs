@@ -61,17 +61,29 @@ const thisMonth = () => new Date().toISOString().slice(0, 7);
 function summary() {
   // 暦の「今月」ではなく、記帳がある最後の月を見せる。
   // 月初や取り込み前は暦の今月が空になり、¥0 が並んで実態と食い違うため。
-  const latest = one("SELECT MAX(substr(date,1,7)) m FROM cashflow");
+  // 「お金の流れ管理」を取り込んでいれば、そちらのほうが新しい
+  const hasMf = one('SELECT COUNT(*) c FROM mf_tx').c > 0;
+  const latest = hasMf
+    ? one("SELECT MAX(substr(date,1,7)) m FROM mf_tx")
+    : one("SELECT MAX(substr(date,1,7)) m FROM cashflow");
   const m = (latest && latest.m) || thisMonth();
   const year = m.slice(0, 4);
   const stale = m !== thisMonth();
 
-  const cf = one(`SELECT
-      COALESCE(SUM(CASE WHEN substr(date,1,7)=? THEN income END),0)  AS mIn,
-      COALESCE(SUM(CASE WHEN substr(date,1,7)=? THEN expense END),0) AS mOut,
-      COALESCE(SUM(CASE WHEN substr(date,1,4)=? THEN income END),0)  AS yIn,
-      COALESCE(SUM(CASE WHEN substr(date,1,4)=? THEN expense END),0) AS yOut
-    FROM cashflow`, m, m, year, year);
+  // 事業のお金だけを見る。個人の返済や貯蓄が混ざると事業の調子が読めない
+  const cf = hasMf
+    ? one(`SELECT
+        COALESCE(SUM(CASE WHEN substr(date,1,7)=? AND type='income'  THEN amount END),0) AS mIn,
+        COALESCE(SUM(CASE WHEN substr(date,1,7)=? AND type='expense' THEN amount END),0) AS mOut,
+        COALESCE(SUM(CASE WHEN substr(date,1,4)=? AND type='income'  THEN amount END),0) AS yIn,
+        COALESCE(SUM(CASE WHEN substr(date,1,4)=? AND type='expense' THEN amount END),0) AS yOut
+      FROM mf_tx WHERE entity='business'`, m, m, year, year)
+    : one(`SELECT
+        COALESCE(SUM(CASE WHEN substr(date,1,7)=? THEN income END),0)  AS mIn,
+        COALESCE(SUM(CASE WHEN substr(date,1,7)=? THEN expense END),0) AS mOut,
+        COALESCE(SUM(CASE WHEN substr(date,1,4)=? THEN income END),0)  AS yIn,
+        COALESCE(SUM(CASE WHEN substr(date,1,4)=? THEN expense END),0) AS yOut
+      FROM cashflow`, m, m, year, year);
 
   const planIn = one(`SELECT COALESCE(SUM(amount),0) a FROM plan_monthly
     WHERE month=? AND side='売上' AND category LIKE '%総売上%'`, m);
@@ -95,9 +107,27 @@ function summary() {
       todo: one("SELECT COUNT(*) c FROM contacts WHERE done <> '済み' AND next_action <> ''").c,
     },
     facilities: shuro ? one2(shuro, 'SELECT COUNT(*) c FROM facilities').c : null,
+    from: hasMf ? 'money' : 'sheet',
     // 直近の動き。ダッシュボードで「最後に何をしたか」が見えるようにする
-    recentCash: all(`SELECT date, kind, category, income, expense, summary
-      FROM cashflow ORDER BY date DESC, id DESC LIMIT 8`),
+    recentCash: hasMf
+      ? all(`SELECT date, entity AS kind, category,
+               CASE WHEN type='income' THEN amount ELSE 0 END income,
+               CASE WHEN type='expense' THEN amount ELSE 0 END expense,
+               memo AS summary
+             FROM mf_tx ORDER BY date DESC, id DESC LIMIT 8`)
+      : all(`SELECT date, kind, category, income, expense, summary
+             FROM cashflow ORDER BY date DESC, id DESC LIMIT 8`),
+    // 商談は「今どの月に何が動いているか」。累計は判断に使えない
+    pipelineMonth: (() => {
+      // 今月より先の月は出さない。先の予定を「動いた月」として見せると読み違える
+      const mm = one(`SELECT MAX(substr(first_met,1,7)) m FROM pipeline
+        WHERE first_met GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]*' AND substr(first_met,1,7) <= ?`,
+        thisMonth());
+      const target = (mm && mm.m) || '';
+      return target ? { month: target, rows: all(`SELECT status, COUNT(*) n,
+          COALESCE(SUM(quote_month),0) monthly FROM pipeline
+        WHERE substr(first_met,1,7)=? GROUP BY 1 ORDER BY n DESC`, target) } : null;
+    })(),
   };
 }
 
@@ -513,14 +543,10 @@ const server = createServer(async (req, res) => {
         summaryRows,
         pdfLog: all('SELECT * FROM pdf_log ORDER BY imported_at DESC'),
         rules: all('SELECT * FROM category_rules ORDER BY side, subcategory'),
-        counts: [
-          ['入出金明細', 'cashflow'], ['経費明細', 'expenses'], ['人脈台帳', 'contacts'],
-          ['契約一覧', 'deals'], ['商談パイプライン', 'pipeline'], ['名刺', 'cards'],
-          ['交流会', 'events'], ['協業先', 'partners'], ['料金表', 'pricing'],
-          ['月次損益', 'pl_monthly'], ['月次数値', 'plan_monthly'], ['週次KPI', 'kpi'],
-          ['事業パラメータ', 'metrics'], ['月次収支サマリー', 'monthly_summary'],
-          ['PDF取込ログ', 'pdf_log'], ['カテゴリ判定ルール', 'category_rules'],
-        ].map(([label, t]) => ({ label, n: one(`SELECT COUNT(*) c FROM ${t}`).c })),
+        // 表が増えたときに書き忘れないよう、定義から作る
+        counts: Object.entries(TABLES).map(([t, def]) => ({
+          label: def.label, n: one(`SELECT COUNT(*) c FROM ${t}`).c,
+        })).sort((a, b) => b.n - a.n),
         // 明細が正しく取り込めている根拠として、差引残高の到達点を出す
         balance: one('SELECT COALESCE(SUM(income),0)-COALESCE(SUM(expense),0) a FROM cashflow').a,
         cashflowIncome: one('SELECT COALESCE(SUM(income),0) a FROM cashflow').a,

@@ -323,12 +323,16 @@ const PAGES = {
       const net = s.money.monthNet;
       if (s.stale) {
         box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
-          `記帳は ${s.month} までです。最新の月を出すには、スプレッドシートを書き出して npm run import を実行してください。`));
+          `記帳は ${s.month} までです。最新にするには、`
+          + (s.from === 'money'
+            ? '「お金の流れ管理」でバックアップを書き出して npm run import:money を実行してください。'
+            : 'スプレッドシートを書き出して npm run import を実行してください。')));
       }
       box.append(el('div', { class: 'cards' },
-        card(s.month + ' の収支', (net < 0 ? '-¥' : '¥') + yen(Math.abs(net)),
+        card(s.month + ' の事業の収支', (net < 0 ? '-¥' : '¥') + yen(Math.abs(net)),
           '収入 ' + money(s.money.monthIncome) + ' / 支出 ' + money(s.money.monthExpense), 'accent'),
-        card(s.month.slice(0, 4) + '年の収入', money(s.money.yearIncome), '支出 ' + money(s.money.yearExpense)),
+        card(s.month.slice(0, 4) + '年の事業の収入', money(s.money.yearIncome),
+          '支出 ' + money(s.money.yearExpense)),
         card('契約中の月額', money(s.deals.monthlyRevenue), s.deals.active + '件が稼働中'),
         card('フォロー待ち', s.contacts.todo + '件', '人脈 ' + s.contacts.total + '件のうち'),
         card('事業所リスト', s.facilities == null ? '—' : yen(s.facilities) + '件', '全国の就労支援事業所')));
@@ -336,7 +340,7 @@ const PAGES = {
       const cols = [
         { k: 'status', label: '進捗', fmt: (v) => statusTag(v) },
         { k: 'n', label: '件数', r: true },
-        { k: 'amount', label: '月額見積', r: true, cls: 'money', fmt: (v) => money(v) },
+        { k: 'monthly', label: '月額見積', r: true, cls: 'money', fmt: (v) => money(v) },
       ];
       const recent = [
         { k: 'date', label: '日付', cls: 'nowrap' },
@@ -346,7 +350,11 @@ const PAGES = {
         { k: 'expense', label: '出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
       ];
       box.append(el('div', { class: 'split' },
-        panel('商談パイプライン', s.pipeline.reduce((a, b) => a + b.n, 0) + '件', tableOf(cols, s.pipeline)),
+        s.pipelineMonth
+          ? panel('商談（' + s.pipelineMonth.month + '）',
+              s.pipelineMonth.rows.reduce((a, b) => a + b.n, 0) + '件が動いた',
+              tableOf(cols, s.pipelineMonth.rows, { scroll: false }))
+          : panel('商談', null, el('div', { class: 'empty' }, '日付の入った商談がありません')),
         panel('直近の入出金', null, tableOf(recent, s.recentCash))));
       return box;
     },
@@ -510,13 +518,24 @@ const PAGES = {
 
   facilities: {
     icon: '⌘', label: '事業所リスト',
-    state: { q: '', pref: '' },
+    state: { q: '', pref: '', prefs: [] },
     tools() {
       const st = PAGES.facilities.state;
       const kw = el('input', { type: 'search', placeholder: '事業所名・法人名・住所', value: st.q,
         oninput: (e) => { st.q = e.target.value; } });
       kw.addEventListener('keydown', (e) => { if (e.key === 'Enter') render('facilities'); });
-      return [kw, el('button', { class: 'btn', onclick: () => render('facilities') }, '検索')];
+      const out = [kw, el('button', { class: 'btn', onclick: () => render('facilities') }, '検索')];
+      // 都道府県の選択も画面の中ではなくツールバーに置く
+      if (st.prefs && st.prefs.length) {
+        out.unshift(el('select', { onchange: (e) => { st.pref = e.target.value; render('facilities'); } },
+          el('option', { value: '' }, 'すべての都道府県'),
+          st.prefs.map((p) => {
+            const o = el('option', { value: p.prefecture }, `${p.prefecture}（${yen(p.n)}）`);
+            if (p.prefecture === st.pref) o.selected = true;
+            return o;
+          })));
+      }
+      return out;
     },
     async load() {
       const st = PAGES.facilities.state;
@@ -524,16 +543,9 @@ const PAGES = {
       const box = el('div');
       if (d.error) { box.append(el('div', { class: 'err' }, d.error)); return box; }
 
-      const sel = el('select', { onchange: (e) => { st.pref = e.target.value; render('facilities'); } },
-        el('option', { value: '' }, 'すべての都道府県'),
-        d.prefs.map((p) => {
-          const o = el('option', { value: p.prefecture }, `${p.prefecture}（${yen(p.n)}）`);
-          if (p.prefecture === st.pref) o.selected = true;
-          return o;
-        }));
+      st.prefs = d.prefs;
       box.append(el('div', { class: 'cards' },
         card('該当件数', yen(d.total) + '件', '最大200件を表示', 'accent')));
-      box.append(panel('絞り込み', null, sel));
       box.append(panel('事業所', d.rows.length + '件を表示', tableOf([
         { k: 'name', label: '事業所名' },
         { k: 'corp_name', label: '法人名' },
