@@ -14,4 +14,11 @@ export function migrate(db, tableNames) {
       db.exec(`ALTER TABLE ${t} ADD COLUMN edited_at TEXT`);
     }
   }
+  // 取引1件だけ区分を変えたいときの上書き列
+  try {
+    const cols = db.prepare('PRAGMA table_info(mf_tx)').all();
+    if (cols.length && !cols.some((c) => c.name === 'kind')) {
+      db.exec('ALTER TABLE mf_tx ADD COLUMN kind TEXT');
+    }
+  } catch { /* mf_tx がまだ無いだけ */ }
 }

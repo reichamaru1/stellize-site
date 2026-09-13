@@ -64,12 +64,16 @@ const statusTag = (s) => {
    ここは触らなくてよい（列の定義は src/tables.mjs にある）。
    ============================================================ */
 
+// 取り込んだままの business / income といった英語をそのまま出すと読めない。
+// 表の定義に map があればそれを通す。
+const label4 = (col, v) => (col.map && col.map[v]) || String(v);
+
 const fmtCell = (col, v) => {
-  if (v == null || v === '') return '';
+  if (v == null || v === '') return col.blank ? el('span', { class: 'dim' }, col.blank) : '';
   if (col.type === 'money') return money(v);
   if (col.type === 'bool') return v ? '✓' : '';
   if (col.type === 'number') return String(v);
-  return String(v);
+  return label4(col, v);
 };
 
 function dataTable(name, opts = {}) {
@@ -112,10 +116,23 @@ function dataTable(name, opts = {}) {
     const vals = {};
     const fields = d.columns.map((c) => {
       const v = row ? (row[c.k] ?? '') : '';
-      const input = c.type === 'bool'
-        ? el('select', {}, el('option', { value: '0' }, 'いいえ'), el('option', { value: '1' }, 'はい'))
-        : el('input', { type: c.type === 'date' ? 'date' : c.type === 'month' ? 'month' : 'text', value: v });
-      if (c.type === 'bool') input.value = String(v ? 1 : 0);
+      let input;
+      if (c.type === 'bool') {
+        input = el('select', {}, el('option', { value: '0' }, 'いいえ'), el('option', { value: '1' }, 'はい'));
+        input.value = String(v ? 1 : 0);
+      } else if (c.opts && c.opts.length) {
+        // 決まった値しか入らない列。自由入力だと表記ゆれで集計が割れる
+        input = el('select', {},
+          el('option', { value: '' }, c.blank || '（空）'),
+          c.opts.map((o) => el('option', { value: o }, o)));
+        input.value = v == null ? '' : String(v);
+      } else if (c.map) {
+        input = el('select', {},
+          Object.entries(c.map).map(([k2, lb]) => el('option', { value: k2 }, lb)));
+        input.value = v == null ? '' : String(v);
+      } else {
+        input = el('input', { type: c.type === 'date' ? 'date' : c.type === 'month' ? 'month' : 'text', value: v });
+      }
       vals[c.k] = input;
       return el('div', { class: 'fld' },
         el('label', {}, c.label + (c.type === 'money' ? '（円）' : '')), input);
@@ -177,7 +194,7 @@ function dataTable(name, opts = {}) {
       const sel = el('select', { class: 'fx', onchange: (e) => set(c.k, key, e.target.value) },
         el('option', { value: '' }, 'すべて'),
         opts.map((o) => {
-          const label = c.type === 'bool' ? (o.v ? 'はい' : 'いいえ') : String(o.v);
+          const label = c.type === 'bool' ? (o.v ? 'はい' : 'いいえ') : label4(c, o.v);
           const op = el('option', { value: String(o.v) }, `${label.slice(0, 18)}（${o.n}）`);
           if (String(cur[key] ?? '') === String(o.v)) op.selected = true;
           return op;
@@ -321,21 +338,42 @@ const PAGES = {
       const s = await api('/api/summary');
       const box = el('div');
       const net = s.money.monthNet;
-      if (s.stale) {
+      const signed = (n) => (n < 0 ? '-¥' : '¥') + yen(Math.abs(n));
+
+      // 「9月の収支」と出しながら中身が3日分、ということが起きる。
+      // 何日時点の数字なのかを、数字より先に出す
+      if (s.behindDays != null && s.behindDays > 2) {
         box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
-          `記帳は ${s.month} までです。最新にするには、`
+          `いちばん新しい記帳は ${s.asOf}。今日まで ${s.behindDays}日ぶん入っていません。`
+          + '下の数字はその時点までのものです。最新にするには、'
           + (s.from === 'money'
             ? '「お金の流れ管理」でバックアップを書き出して npm run import:money を実行してください。'
             : 'スプレッドシートを書き出して npm run import を実行してください。')));
       }
+
       box.append(el('div', { class: 'cards' },
-        card(s.month + ' の事業の収支', (net < 0 ? '-¥' : '¥') + yen(Math.abs(net)),
-          '収入 ' + money(s.money.monthIncome) + ' / 支出 ' + money(s.money.monthExpense), 'accent'),
-        card(s.month.slice(0, 4) + '年の事業の収入', money(s.money.yearIncome),
-          '支出 ' + money(s.money.yearExpense)),
+        card(s.month + ' の事業の利益', signed(net),
+          '売上 ' + money(s.money.monthIncome) + ' / 経費 ' + money(s.money.monthExpense)
+          + (s.asOf ? `（${s.asOf} まで）` : ''), 'accent'),
+        card(s.month.slice(0, 4) + '年の売上', money(s.money.yearIncome),
+          '経費 ' + money(s.money.yearExpense) + ' / 利益 ' + signed(s.money.yearNet)),
         card('契約中の月額', money(s.deals.monthlyRevenue), s.deals.active + '件が稼働中'),
         card('フォロー待ち', s.contacts.todo + '件', '人脈 ' + s.contacts.total + '件のうち'),
         card('事業所リスト', s.facilities == null ? '—' : yen(s.facilities) + '件', '全国の就労支援事業所')));
+
+      // 追うべき案件をいちばん上に。契約・失注は終わった話なので出さない
+      if (s.live && s.live.length) {
+        box.append(panel('いま追う案件', s.live.length + '件', tableOf([
+          { k: 'status', label: '進捗', cls: 'nowrap', fmt: (v) => statusTag(v) },
+          { k: 'company', label: '相手', fmt: (v, r) => v || r.title },
+          { k: 'title', label: '案件' },
+          { k: 'person', label: '担当者', cls: 'nowrap' },
+          { k: 'first_met', label: '初回面談', cls: 'nowrap', fmt: (v) => v || '—' },
+          { k: 'quote_month', label: '月額見積', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+          { k: 'quote_once', label: '単発見積', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+          { k: 'note', label: '状況' },
+        ], s.live, { scroll: true })));
+      }
 
       const cols = [
         { k: 'status', label: '進捗', fmt: (v) => statusTag(v) },
@@ -346,6 +384,7 @@ const PAGES = {
         { k: 'date', label: '日付', cls: 'nowrap' },
         { k: 'summary', label: '摘要' },
         { k: 'category', label: 'カテゴリ' },
+        { k: 'kind', label: '区分', cls: 'nowrap' },
         { k: 'income', label: '入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
         { k: 'expense', label: '出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
       ];
@@ -618,14 +657,18 @@ const PAGES = {
       const box = el('div');
 
       st.years = d.years;
-      box.append(panel('年ごとの推移', '売上と経費（内訳の合計）', tableOf([
+      box.append(panel('年ごとの推移', '内訳の合計（シートの合計行とは別に、明細から足したもの）', tableOf([
         { k: 'y', label: '年', cls: 'nowrap' },
         { k: 'sales', label: '売上', r: true, cls: 'money in', fmt: (v) => money(v) },
-        { k: 'cost', label: '経費', r: true, cls: 'money out', fmt: (v) => money(v) },
-        { k: '_p', label: '差引', r: true, cls: 'money', fmt: (v, r) => {
+        { k: 'cost', label: '事業の経費', r: true, cls: 'money out',
+          fmt: (v) => (v ? money(v) : el('span', { class: 'dim' }, 'シートに記載なし')) },
+        { k: '_p', label: '事業の利益', r: true, cls: 'money', fmt: (v, r) => {
+          if (!r.cost) return el('span', { class: 'dim' }, '—');
           const n = r.sales - r.cost;
           return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
         } },
+        { k: 'personal', label: '個人のお金', r: true, cls: 'money out',
+          fmt: (v) => (v ? money(v) : '') },
       ], d.summary, { scroll: false })));
 
       box.append(panel('売上の出どころ', st.year + '年', tableOf([
@@ -675,59 +718,126 @@ const PAGES = {
 
   plan: {
     icon: '◇', label: '計画と実績',
-    state: { year: '', years: [] },
+    state: { year: '', years: [], detail: '' },
     tools() { return [yearPicker(PAGES.plan.state, 'plan')]; },
     async load() {
       const st = PAGES.plan.state;
       const d = await api('/api/plan' + (st.year ? '?year=' + st.year : ''));
       st.year = d.year;
-      const box = el('div');
-
       st.years = d.years;
+      const box = el('div');
       const months = d.months;
-      // 月を横に並べた表を作る。区分ごとに同じ形で出すので関数にまとめる
-      const gridOf = (rows) => {
-        const keys = [...new Set(rows.map((r) => (r.category || '') + '｜' + (r.subcategory || '')))];
-        return keys.map((k) => {
-          const [cat, sub] = k.split('｜');
-          const row = { label: sub ? cat + '／' + sub : cat };
-          let sum = 0;
-          for (const m of months) {
-            const hit = rows.find((r) => r.month === m
-              && (r.category || '') === cat && (r.subcategory || '') === sub);
-            row[m] = hit ? hit.amount : 0;
-            sum += row[m];
-          }
-          row._sum = sum;
-          return row;
-        });
-      };
-      const monthCols = () => [{ k: 'label', label: '項目', cls: 'nowrap' }]
-        .concat(months.map((m) => ({ k: m, label: m.slice(5) + '月', r: true, cls: 'money',
-          fmt: (v) => (v ? yen(v) : '') })))
-        .concat([{ k: '_sum', label: '年計', r: true, cls: 'money', fmt: (v) => money(v) }]);
+      const signed = (n) => (n < 0 ? '-¥' : '¥') + yen(Math.abs(n));
 
-      // 目標・実績・目安を、区分ごとに並べる。
-      // 合計行（総売上など）は内訳と混ぜない。混ぜると同じ金額を二度数える
-      for (const kind of ['目標', '実績', '目安']) {
-        const mine = d.rows.filter((r) => r.kind === kind);
-        if (!mine.length) continue;
-        for (const side of ['売上', '事業経費', '個人支出', '指標']) {
-          const rows = mine.filter((r) => r.side === side && !r.is_total);
-          if (!rows.length) continue;
-          const g = gridOf(rows);
-          box.append(panel(`${kind}　${side}`, g.length + '項目', tableOf(monthCols(), g)));
-        }
-        const totals = mine.filter((r) => r.is_total);
-        if (totals.length) {
-          box.append(panel(`${kind}　合計`, '内訳の足し算にあたるもの', tableOf(monthCols(), gridOf(totals))));
+      // 区分ごと・月ごとの合計。合計行（総売上など）は内訳と混ぜない
+      const total = (kind, side, month) => d.rows
+        .filter((r) => r.kind === kind && r.side === side && !r.is_total
+          && (!month || r.month === month))
+        .reduce((a, r) => a + r.amount, 0);
+      /*
+       * 比べてよいのは「もう終わった月」だけ。
+       * シートの実績欄は、先の月にも見込みの数字が入っている（10〜12月に
+       * 同じ金額が並ぶ）。これを実績として混ぜると、達成率が実態とずれる。
+       */
+      const now = thisMonth();
+      const done = months.filter((m) => m <= now && d.rows
+        .some((r) => r.kind === '実績' && r.month === m && r.amount));
+      const ahead = (m) => m > now;
+
+      /* --- いちばん上：目標と実績を横に並べる --- */
+      const sides = ['売上', '事業経費', '個人支出'];
+      const head = sides.map((side) => {
+        const plan = done.reduce((a, m) => a + total('目標', side, m), 0);
+        const act = done.reduce((a, m) => a + total('実績', side, m), 0);
+        return { label: side, plan, act, diff: act - plan,
+          rate: plan ? Math.round((act / plan) * 100) : null };
+      });
+      const profit = (k) => done.reduce((a, m) => a + total(k, '売上', m) - total(k, '事業経費', m), 0);
+      head.push({ label: '事業の利益', plan: profit('目標'), act: profit('実績'),
+        diff: profit('実績') - profit('目標'),
+        rate: profit('目標') ? Math.round((profit('実績') / profit('目標')) * 100) : null });
+
+      box.append(panel('目標と実績',
+        done.length ? `実績が入っている ${done[0].slice(5)}月〜${done[done.length - 1].slice(5)}月の合計` : null,
+        tableOf([
+          { k: 'label', label: '区分', cls: 'nowrap' },
+          { k: 'plan', label: '目標', r: true, cls: 'money', fmt: (v) => money(v) },
+          { k: 'act', label: '実績', r: true, cls: 'money', fmt: (v) => money(v) },
+          { k: 'diff', label: '差', r: true, cls: 'money',
+            fmt: (v) => el('span', { class: v < 0 ? 'out' : 'in' }, signed(v)) },
+          { k: 'rate', label: '達成率', r: true, cls: 'num',
+            fmt: (v) => (v == null ? '—' : v + '%') },
+        ], head, { scroll: false })));
+
+      /* --- 月ごとに目標と実績を並べる --- */
+      for (const side of sides) {
+        const rows = months.map((m) => {
+          const plan = total('目標', side, m), act = total('実績', side, m);
+          return { month: m, plan, act, diff: act - plan, has: done.includes(m), ahead: ahead(m),
+            rate: plan && done.includes(m) ? Math.round((act / plan) * 100) : null };
+        }).filter((r) => r.plan || r.act);
+        if (!rows.length) continue;
+        box.append(panel(side + '　月ごと', null, tableOf([
+          { k: 'month', label: '月', cls: 'nowrap', fmt: (v, r) => (r.has ? v
+            : el('span', { class: 'dim' }, v + (r.ahead ? '（先の見込み）' : '（実績まだ）'))) },
+          { k: 'plan', label: '目標', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+          { k: 'act', label: '実績', r: true, cls: 'money',
+            fmt: (v, r) => (!v ? '' : r.ahead ? el('span', { class: 'dim' }, money(v)) : money(v)) },
+          { k: 'diff', label: '差', r: true, cls: 'money', fmt: (v, r) => (r.has
+            ? el('span', { class: v < 0 ? 'out' : 'in' }, signed(v)) : '') },
+          { k: 'rate', label: '達成率', r: true, cls: 'num',
+            fmt: (v) => (v == null ? '' : v + '%') },
+        ], rows, { scroll: false })));
+      }
+
+      /* --- 月を選んで、項目ごとに目標と実績を突き合わせる --- */
+      const pick = st.detail || done[done.length - 1] || months[0] || '';
+      if (pick) {
+        const sel = el('select', { onchange: (e) => { st.detail = e.target.value; render('plan'); } },
+          months.map((m) => {
+            const o = el('option', { value: m }, m + (done.includes(m) ? '' : '（実績まだ）'));
+            if (m === pick) o.selected = true;
+            return o;
+          }));
+        const keyOf = (r) => r.side + '｜' + (r.subcategory ? r.category + '／' + r.subcategory : r.category);
+        const keys = [...new Set(d.rows
+          .filter((r) => r.month === pick && !r.is_total && r.side !== '指標'
+            && (r.kind === '目標' || r.kind === '実績'))
+          .map(keyOf))];
+        const rows = keys.map((k) => {
+          const find = (kind) => d.rows.find((r) => r.month === pick && r.kind === kind && keyOf(r) === k);
+          const plan = find('目標'), act = find('実績');
+          const p = plan ? plan.amount : 0, a2 = act ? act.amount : 0;
+          return { side: k.split('｜')[0], label: k.split('｜')[1], plan: p, act: a2, diff: a2 - p };
+        }).sort((x, y) => sides.indexOf(x.side) - sides.indexOf(y.side) || y.plan - x.plan);
+
+        box.append(panel(el('span', {}, '項目ごとの突き合わせ　', sel),
+          rows.length + '項目', tableOf([
+            { k: 'side', label: '区分', cls: 'nowrap' },
+            { k: 'label', label: '項目' },
+            { k: 'plan', label: '目標', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '—') },
+            { k: 'act', label: '実績', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '—') },
+            { k: 'diff', label: '差', r: true, cls: 'money',
+              fmt: (v) => el('span', { class: v < 0 ? 'out' : 'in' }, signed(v)) },
+          ], rows)));
+      }
+
+      // シート側の「総売上」が内訳の足し算と合わないことがある。黙って直さず、出す
+      for (const kind of ['目標', '実績']) {
+        const t = d.rows.filter((r) => r.kind === kind && r.is_total && r.side === '売上')
+          .reduce((a, r) => a + r.amount, 0);
+        const parts = d.rows.filter((r) => r.kind === kind && !r.is_total && r.side === '売上')
+          .reduce((a, r) => a + r.amount, 0);
+        if (t && Math.abs(t - parts) > 1) {
+          box.append(el('p', { class: 'hint' },
+            `※ シートの「${kind} 総売上」は ${money(t)} ですが、内訳を足すと ${money(parts)} です`
+            + `（差 ${signed(t - parts)}）。内訳に無いものが総売上に入っています。`
+            + '上の表は内訳の足し算で出しています。'));
         }
       }
 
-
       const met = await api('/api/metrics');
-      const scopes = [...new Set(met.rows.map((r) => r.scope))];
-      if (scopes.length) {
+      if (met.rows.length) {
         box.append(panel('事業のパラメータ', null, tableOf([
           { k: 'scope', label: '区分', cls: 'nowrap' },
           { k: 'key', label: '項目' },
@@ -787,73 +897,92 @@ const PAGES = {
     async load() {
       const d = await api('/api/cash');
       const box = el('div');
-      const sum = (k) => d.rows.reduce((a, r) => a + r[k], 0);
-      const bizIn = sum('bizIn'), bizOut = sum('bizOut');
-      const perIn = sum('perIn'), perOut = sum('perOut');
-      const bizProfit = bizIn - bizOut;
-      const left = bizProfit + perIn - perOut;
+      const sum = (k) => d.rows.reduce((a, r) => a + (r[k] || 0), 0);
+      const sales = sum('sales'), cost = sum('cost'), personal = sum('personal');
+      const raised = sum('raised'), repaid = sum('repaid');
+      const profit = sales - cost;
+      const left = profit - personal + raised - repaid;
       const span = d.rows.length ? `${d.rows[0].month} 〜 ${d.rows[d.rows.length - 1].month}` : '';
+      const signed = (n) => (n < 0 ? '-¥' : '¥') + yen(Math.abs(n));
 
       box.append(el('div', { class: 'cards' },
-        card('事業の収入', money(bizIn), span),
-        card('事業の支出', money(bizOut)),
-        card('事業の利益', (bizProfit < 0 ? '-¥' : '¥') + yen(Math.abs(bizProfit)), '収入 − 支出'),
-        card('個人の収支', (perIn - perOut < 0 ? '-¥' : '¥') + yen(Math.abs(perIn - perOut)),
-          `収入 ${money(perIn)} / 支出 ${money(perOut)}`),
-        card('手残り', (left < 0 ? '-¥' : '¥') + yen(Math.abs(left)), '事業と個人を合わせた残り', 'accent')));
+        card('事業の売上', money(sales), span),
+        card('事業の経費', money(cost)),
+        card('事業の利益', signed(profit), '売上 − 経費'),
+        card('生活に出たお金', money(personal), '事業の損益には入れない'),
+        card('手残り', signed(left), '利益 − 生活 ＋ 借入 − 返済', 'accent')));
 
       box.append(el('p', { class: 'hint' },
-        `収入は「${d.source.income}」、支出は「${d.source.cost}」から出しています。`
-        + (d.from === 'money' && d.uncertain
-          ? `　自動仕分けの確信が低い取引が ${d.uncertain} 件あります（「お金の流れ（実取引）」の要確認で絞れます）。`
-          : '')));
+        '口座間の移し替え・現金引き出し・自分あての送金は、稼いだお金でも使ったお金でもないので'
+        + `外してあります（この期間で 入 ${money(sum('moveIn'))} / 出 ${money(sum('moveOut'))}）。`
+        + `借入・ファクタリングは 調達 ${money(raised)} / 返済 ${money(repaid)} として別に見ています。`
+        + ' どのカテゴリを何とみなすかは「お金の区分表」で変えられます。'));
+
+      // 人が見ていない区分が残っていると、上の数字はそのぶん当てにならない
+      if (d.unsure && d.unsure.length) {
+        const amt = d.unsure.reduce((a, r) => a + r.amount, 0);
+        box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
+          `区分をこちらで当てたままのカテゴリが ${d.unsure.length}件（${money(amt)}）あります: `
+          + d.unsure.slice(0, 6).map((r) => `${r.category}→${r.kind}`).join('、')
+          + '。下の「お金の区分表」で直すと、上の数字に反映されます。'));
+      }
 
       if (d.from === 'sheet') {
         box.append(el('div', { class: 'err', style: 'background:#FDF6E7;color:#7A5F22' },
           '「お金の流れ管理」をまだ取り込んでいません。ターミナルで npm run import:money を実行すると、'
-          + '実際の取引にもとづいた事業／個人の仕分けに切り替わります。'));
+          + '実際の取引にもとづいた仕分けに切り替わります。'));
       }
 
       box.append(panel('月ごと', d.rows.length + 'か月', tableOf([
         { k: 'month', label: '月', cls: 'nowrap' },
-        { k: 'bizIn', label: '事業の収入', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
-        { k: 'bizOut', label: '事業の支出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
+        { k: 'sales', label: '売上', r: true, cls: 'money in', fmt: (v) => (v ? money(v) : '') },
+        { k: 'cost', label: '経費', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
         { k: '_bp', label: '事業の利益', r: true, cls: 'money', fmt: (v, r) => {
-          const n = r.bizIn - r.bizOut;
-          return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
+          const n = r.sales - r.cost;
+          return el('span', { class: n < 0 ? 'out' : 'in' }, signed(n));
         } },
-        { k: 'perIn', label: '個人の収入', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
-        { k: 'perOut', label: '個人の支出', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
+        { k: 'personal', label: '生活', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
+        { k: 'raised', label: '借入', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+        { k: 'repaid', label: '返済', r: true, cls: 'money out', fmt: (v) => (v ? money(v) : '') },
         { k: '_left', label: '手残り', r: true, cls: 'money', fmt: (v, r) => {
-          const n = r.bizIn - r.bizOut + r.perIn - r.perOut;
-          return el('span', { class: n < 0 ? 'out' : 'in' }, (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
+          const n = r.sales - r.cost - r.personal + r.raised - r.repaid;
+          return el('span', { class: n < 0 ? 'out' : 'in' }, signed(n));
         } },
       ], d.rows)));
 
-      for (const [ent, ty, title] of [
-        ['business', 'expense', '事業として出ているお金'],
-        ['personal', 'expense', '個人として出ているお金'],
-        ['business', 'income', '事業の収入の内訳'],
+      for (const [kind, ty, title] of [
+        ['売上', 'income', '何で稼いだか'],
+        ['経費', 'expense', '事業のために出たお金'],
+        ['個人', 'expense', '生活に出たお金'],
+        ['資金調達', 'income', '借りたお金'],
+        ['資金調達', 'expense', '返したお金'],
+        ['振替', 'expense', '移し替え（収支に入れていない）'],
       ]) {
-        const rows = d.byCat.filter((r) => r.entity === ent && r.type === ty).slice(0, 25);
+        const rows = d.byCat.filter((r) => r.kind === kind && r.type === ty).slice(0, 25);
         if (!rows.length) continue;
         box.append(panel(title, rows.length + 'カテゴリ', tableOf([
-          { k: 'category', label: 'カテゴリ' },
+          { k: 'category', label: 'カテゴリ', fmt: (v, r) => (r.unsure
+            ? el('span', {}, v, el('span', { class: 'dim' }, '（要確認）')) : v) },
           { k: 'n', label: '件', r: true },
           { k: 'amount', label: '合計', r: true, cls: 'money', fmt: (v) => money(v) },
         ], rows)));
       }
 
       if (d.imports.length) {
-        box.append(panel('取り込み元のファイル', null, tableOf([
-          { k: 'name', label: 'ファイル' },
-          { k: 'entity', label: '区分', cls: 'nowrap' },
-          { k: 'rows', label: '件数', r: true },
-          { k: 'from_date', label: '開始', cls: 'nowrap' },
-          { k: 'to_date', label: '終了', cls: 'nowrap' },
-          { k: 'at', label: '取込日時', cls: 'nowrap' },
-        ], d.imports, { scroll: false })));
+        box.append(panel('取り込み元のファイル',
+          d.latest ? `いちばん新しい取引は ${d.latest}` : null, tableOf([
+            { k: 'name', label: 'ファイル' },
+            { k: 'entity', label: '口座', cls: 'nowrap',
+              fmt: (v) => (v === 'business' ? '事業' : v === 'personal' ? '個人' : v) },
+            { k: 'rows', label: '件数', r: true },
+            { k: 'from_date', label: '開始', cls: 'nowrap' },
+            { k: 'to_date', label: '終了', cls: 'nowrap' },
+            { k: 'at', label: '取込日時', cls: 'nowrap' },
+          ], d.imports, { scroll: false })));
       }
+
+      box.append(el('h2', { class: 'sec' }, 'お金の区分表（ここを直すと上の数字が変わる）'));
+      box.append(dataTable('money_kinds'));
 
       box.append(el('h2', { class: 'sec' }, '取引の明細（検索・絞り込み・編集）'));
       box.append(dataTable(d.from === 'money' ? 'mf_tx' : 'expenses'));
@@ -957,6 +1086,35 @@ const PAGES = {
         card('支出合計', money(d.cashflowExpense)),
         card('経費明細', money(d.expenseTotal))));
 
+      // 取り込みの誤りではなく、シートの中で数字が合っていないところ。
+      // ここを混ぜると「どこを直せばいいのか」が分からなくなるので、先に分けて出す
+      if (d.sheetIssues && d.sheetIssues.length) {
+        box.append(panel('シート側で数字が合っていないところ',
+          'このアプリの取り込みの誤りではありません。スプレッドシートを直してください', tableOf([
+            { k: 'where', label: '場所', cls: 'nowrap' },
+            { k: 'what', label: '内容' },
+            { k: 'detail', label: '中身' },
+            { k: 'gap', label: '差', r: true, cls: 'money', fmt: (v) => (v ? money(v) : '') },
+          ], d.sheetIssues, { scroll: false })));
+      }
+
+      if (d.salesVsBank && d.salesVsBank.length) {
+        box.append(panel('シートの売上と、口座に入った金額',
+          'どちらが正しいという話ではなく、ずれている月を見に行くための表', tableOf([
+            { k: 'month', label: '月', cls: 'nowrap' },
+            { k: 'sheet', label: 'シートの実績合計売上高', r: true, cls: 'money', fmt: (v) => money(v) },
+            { k: 'bank', label: '口座の入金（売上とみなした分）', r: true, cls: 'money', fmt: (v) => money(v) },
+            { k: '_d', label: '差', r: true, cls: 'money', fmt: (v, r) => {
+              const n = r.bank - r.sheet;
+              return el('span', { class: Math.abs(n) < 1 ? 'in' : 'out' },
+                (n < 0 ? '-¥' : '¥') + yen(Math.abs(n)));
+            } },
+          ], d.salesVsBank, { scroll: false })));
+        box.append(el('p', { class: 'hint' },
+          'ずれる理由はだいたい3つです。請求と入金の月が違う／シートに書いていない入金がある／'
+          + '口座の入金をこちらが売上以外に分類している。3つめは「お金の区分表」で直せます。'));
+      }
+
       box.append(panel('シートの月次サマリーとの突き合わせ',
         '一致していれば、明細が正しく取り込めている根拠になる', tableOf([
         { k: 'month', label: '月', cls: 'nowrap' },
@@ -970,8 +1128,8 @@ const PAGES = {
           r.income === r.myIncome ? '一致' : '差 ' + money(r.myIncome - r.income)) },
       ], d.summaryRows || [], { scroll: false })));
       box.append(el('p', { class: 'hint' },
-        '支出はすべて一致します。収入がずれる月があるのは、シート側が4月以降を見込み額で埋めているためで、'
-        + '取り込みの漏れではありません。'));
+        '支出はすべて一致します。収入がずれる月があるのはシート側の事情で、取り込みの漏れではありません。'
+        + '中身は上の「シート側で数字が合っていないところ」に出しています。'));
 
       box.append(panel('取り込んだ件数', '全' + d.counts.length + '表', tableOf([
         { k: 'label', label: '表' },

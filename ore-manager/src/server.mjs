@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { TABLES, tableOf, columnOf, coerce } from './tables.mjs';
 import { migrate } from './db/migrate.mjs';
+import { seedMoneyKinds } from './money-kinds.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = join(ROOT, 'public');
@@ -27,6 +28,7 @@ const SHURO = join(ROOT, '..', 'shuro-db', 'data', 'shuro.db');
 const db = new DatabaseSync(join(ROOT, 'data', 'ore.db'));
 db.exec(readFileSync(join(ROOT, 'src', 'db', 'schema.sql'), 'utf8'));
 migrate(db, Object.keys(TABLES));
+seedMoneyKinds(db);   // 新しいカテゴリが増えていたら区分表に足す
 
 // 事業所DBは、あちらの取り込みで作り直される。こちらからは書かない。
 let shuro = null;
@@ -38,6 +40,15 @@ try {
 
 const all = (sql, ...p) => db.prepare(sql).all(...p);
 const one = (sql, ...p) => db.prepare(sql).get(...p);
+
+/**
+ * 取引1件の区分を表すSQL。
+ *   1. その取引だけの上書き（mf_tx.kind）
+ *   2. 無ければカテゴリの区分表（money_kinds）
+ * 振替・資金調達をここで弾けるので、損益に自分のお金の移し替えが混ざらない。
+ */
+const KIND = `COALESCE(NULLIF(t.kind,''), k.kind, '個人')`;
+const JOIN = `FROM mf_tx t LEFT JOIN money_kinds k ON k.category = t.category`;
 
 /* ============================================================
    設定
@@ -69,15 +80,24 @@ function summary() {
   const m = (latest && latest.m) || thisMonth();
   const year = m.slice(0, 4);
   const stale = m !== thisMonth();
+  // 「9月の収支」と言いながら中身が3日分、ということが起きる。
+  // 最後の記帳がいつかを一緒に返して、画面に「◯日時点」と出す
+  const lastDay = (hasMf ? one('SELECT MAX(date) d FROM mf_tx') : one('SELECT MAX(date) d FROM cashflow'));
+  const asOf = (lastDay && lastDay.d) || '';
+  const today = new Date().toISOString().slice(0, 10);
+  const behindDays = asOf
+    ? Math.round((Date.parse(today) - Date.parse(asOf)) / 86400000) : null;
 
-  // 事業のお金だけを見る。個人の返済や貯蓄が混ざると事業の調子が読めない
+  // 事業のお金だけを見る。
+  // 口座間の移し替え・現金引き出し・借入とその返済は、稼いだお金でも
+  // 使ったお金でもない。区分表で外さないと売上も経費も倍近くに膨らむ。
   const cf = hasMf
     ? one(`SELECT
-        COALESCE(SUM(CASE WHEN substr(date,1,7)=? AND type='income'  THEN amount END),0) AS mIn,
-        COALESCE(SUM(CASE WHEN substr(date,1,7)=? AND type='expense' THEN amount END),0) AS mOut,
-        COALESCE(SUM(CASE WHEN substr(date,1,4)=? AND type='income'  THEN amount END),0) AS yIn,
-        COALESCE(SUM(CASE WHEN substr(date,1,4)=? AND type='expense' THEN amount END),0) AS yOut
-      FROM mf_tx WHERE entity='business'`, m, m, year, year)
+        COALESCE(SUM(CASE WHEN substr(t.date,1,7)=? AND ${KIND}='売上' THEN t.amount END),0) AS mIn,
+        COALESCE(SUM(CASE WHEN substr(t.date,1,7)=? AND ${KIND}='経費' THEN t.amount END),0) AS mOut,
+        COALESCE(SUM(CASE WHEN substr(t.date,1,4)=? AND ${KIND}='売上' THEN t.amount END),0) AS yIn,
+        COALESCE(SUM(CASE WHEN substr(t.date,1,4)=? AND ${KIND}='経費' THEN t.amount END),0) AS yOut
+      ${JOIN}`, m, m, year, year)
     : one(`SELECT
         COALESCE(SUM(CASE WHEN substr(date,1,7)=? THEN income END),0)  AS mIn,
         COALESCE(SUM(CASE WHEN substr(date,1,7)=? THEN expense END),0) AS mOut,
@@ -91,6 +111,7 @@ function summary() {
   return {
     month: m,
     stale,                       // 画面に「いつ時点か」を出すため
+    asOf, behindDays,            // 最後の記帳日と、そこから何日空いているか
     money: {
       monthIncome: cf.mIn, monthExpense: cf.mOut, monthNet: cf.mIn - cf.mOut,
       yearIncome: cf.yIn, yearExpense: cf.yOut, yearNet: cf.yIn - cf.yOut,
@@ -102,6 +123,11 @@ function summary() {
     },
     pipeline: all(`SELECT status, COUNT(*) n, COALESCE(SUM(quote_month),0) amount
       FROM pipeline GROUP BY status ORDER BY n DESC`),
+    // いま追うべき案件。終わったもの（契約・失注・取引なし）を外した残り。
+    // これが空でないかぎり、ダッシュボードで最初に目に入るべきはここ
+    live: all(`SELECT * FROM pipeline
+      WHERE status NOT IN ('契約','失注','取引なし','') 
+      ORDER BY (first_met = '') , first_met DESC`),
     contacts: {
       total: one('SELECT COUNT(*) c FROM contacts').c,
       todo: one("SELECT COUNT(*) c FROM contacts WHERE done <> '済み' AND next_action <> ''").c,
@@ -110,11 +136,11 @@ function summary() {
     from: hasMf ? 'money' : 'sheet',
     // 直近の動き。ダッシュボードで「最後に何をしたか」が見えるようにする
     recentCash: hasMf
-      ? all(`SELECT date, entity AS kind, category,
-               CASE WHEN type='income' THEN amount ELSE 0 END income,
-               CASE WHEN type='expense' THEN amount ELSE 0 END expense,
-               memo AS summary
-             FROM mf_tx ORDER BY date DESC, id DESC LIMIT 8`)
+      ? all(`SELECT t.date, ${KIND} AS kind, t.category,
+               CASE WHEN t.type='income' THEN t.amount ELSE 0 END income,
+               CASE WHEN t.type='expense' THEN t.amount ELSE 0 END expense,
+               t.memo AS summary
+             ${JOIN} ORDER BY t.date DESC, t.id DESC LIMIT 8`)
       : all(`SELECT date, kind, category, income, expense, summary
              FROM cashflow ORDER BY date DESC, id DESC LIMIT 8`),
     // 商談は「今どの月に何が動いているか」。累計は判断に使えない
@@ -129,6 +155,71 @@ function summary() {
         WHERE substr(first_met,1,7)=? GROUP BY 1 ORDER BY n DESC`, target) } : null;
     })(),
   };
+}
+
+/**
+ * シート自身の食い違いを拾う。
+ *
+ * 取り込みの誤りと、シートの中で数字が合っていないことは別の話。
+ * 混ぜると「どこを直せばいいのか」が分からなくなるので、分けて出す。
+ */
+function sheetIssues() {
+  const out = [];
+
+  // 1. 合計と内訳が合わない
+  for (const [kind, label] of [['目標', '収支計画の目標'], ['実績', '収支計画の実績']]) {
+    const t = one(`SELECT COALESCE(SUM(amount),0) a FROM plan_monthly
+      WHERE kind=? AND side='売上' AND is_total=1`, kind).a;
+    const parts = one(`SELECT COALESCE(SUM(amount),0) a FROM plan_monthly
+      WHERE kind=? AND side='売上' AND is_total=0`, kind).a;
+    if (t && Math.abs(t - parts) > 1) {
+      out.push({ where: label, what: '総売上と内訳が合わない',
+        detail: `総売上 ${t.toLocaleString('ja-JP')}円 / 内訳の合計 ${parts.toLocaleString('ja-JP')}円`,
+        gap: t - parts });
+    }
+  }
+
+  /*
+   * 2. 同じ数字が1ずつ増えて並ぶ行。
+   *    セルを下に引っぱった跡で、計画でも実績でもない。
+   *    収支ダッシュボードの4月以降が 412,030 / 412,031 / … になっていた。
+   */
+  const ms = all('SELECT month, income, expense FROM monthly_summary ORDER BY month');
+  for (const col of ['income', 'expense']) {
+    let run = [];
+    const flush = () => {
+      if (run.length >= 4) {
+        out.push({ where: '月次収支サマリーの' + (col === 'income' ? '収入' : '支出'),
+          what: 'セルを下に引っぱった跡（1円ずつ増える並び）',
+          detail: `${run[0].month}〜${run[run.length - 1].month} が `
+            + `${run[0][col].toLocaleString('ja-JP')}円から1円ずつ増えています`, gap: 0 });
+      }
+      run = [];
+    };
+    for (let i = 0; i < ms.length; i++) {
+      const prev = ms[i - 1];
+      if (prev && ms[i][col] - prev[col] === 1) {
+        if (!run.length) run.push(prev);
+        run.push(ms[i]);
+      } else flush();
+    }
+    flush();
+  }
+  return out;
+}
+
+/**
+ * シートの売上と、口座に実際に入った金額を月ごとに並べる。
+ * どちらかが正しいという話ではなく、ずれている月を自分で見に行けるようにする。
+ */
+function salesVsBank() {
+  if (!one('SELECT COUNT(*) c FROM mf_tx').c) return [];
+  return all(`SELECT m month,
+      COALESCE((SELECT SUM(amount) FROM pl_monthly
+        WHERE month=m AND section='売上' AND category='実績合計売上高'),0) sheet,
+      COALESCE((SELECT SUM(t.amount) ${JOIN}
+        WHERE substr(t.date,1,7)=m AND t.type='income' AND ${KIND}='売上'),0) bank
+    FROM (SELECT DISTINCT substr(date,1,7) m FROM mf_tx) ORDER BY m`);
 }
 
 const one2 = (conn, sql, ...p) => conn.prepare(sql).get(...p);
@@ -337,6 +428,13 @@ function listTable(name, q) {
   };
 }
 
+/**
+ * 主キーの受け取り方。
+ * mf_tx の id は「お金の流れ管理」側の文字列IDなので、数値に変換すると NaN になり
+ * 更新も削除も静かに何もしなくなる。数字だけのときに限って数値にする。
+ */
+const key = (id) => (/^\d+$/.test(String(id)) ? Number(id) : String(id));
+
 /** 1行の作成・更新。tables.mjs に無い列は捨てる。 */
 function writeRow(name, id, body) {
   const t = tableOf(name);
@@ -352,8 +450,8 @@ function writeRow(name, id, body) {
   if (id) {
     const set = pairs.map(([k]) => `${k}=?`).join(', ');
     db.prepare(`UPDATE ${name} SET ${set}, edited_at=? WHERE id=?`)
-      .run(...pairs.map((p) => p[1]), now, Number(id));
-    return { ok: true, id: Number(id), row: one(`SELECT * FROM ${name} WHERE id=?`, Number(id)) };
+      .run(...pairs.map((p) => p[1]), now, key(id));
+    return { ok: true, id, row: one(`SELECT * FROM ${name} WHERE id=?`, key(id)) };
   }
   const keys = pairs.map(([k]) => k).concat('edited_at');
   const vals = pairs.map((p) => p[1]).concat(now);
@@ -383,7 +481,15 @@ function serveStatic(res, pathname) {
   if (!file.startsWith(PUBLIC)) { res.writeHead(403).end('Forbidden'); return; }
   if (!existsSync(file) || !statSync(file).isFile()) { res.writeHead(404).end('Not found'); return; }
   const body = readFileSync(file);
-  res.writeHead(200, { 'Content-Type': MIME[extname(file)] || 'application/octet-stream', 'Content-Length': body.length });
+  /*
+   * 手元で動かすソフトなので、キャッシュはしない。
+   * 画面を直したのに古いままで出る、というのがいちばん困る。
+   */
+  res.writeHead(200, {
+    'Content-Type': MIME[extname(file)] || 'application/octet-stream',
+    'Content-Length': body.length,
+    'Cache-Control': 'no-store',
+  });
   res.end(body);
 }
 
@@ -448,7 +554,8 @@ const server = createServer(async (req, res) => {
         // 年ごとの粗い形。どの年に何で稼いだかを1行で見る
         summary: all(`SELECT substr(month,1,4) y,
             COALESCE(SUM(CASE WHEN is_total=0 AND section='売上' THEN amount END),0) sales,
-            COALESCE(SUM(CASE WHEN is_total=0 AND section='経費' THEN amount END),0) cost
+            COALESCE(SUM(CASE WHEN is_total=0 AND section='事業経費' THEN amount END),0) cost,
+            COALESCE(SUM(CASE WHEN is_total=0 AND section='個人支出' THEN amount END),0) personal
           FROM pl_monthly GROUP BY 1 ORDER BY 1`),
         bySource: all(`SELECT subcategory, category, SUM(amount) amount, COUNT(*) n
           FROM pl_monthly WHERE is_total=0 AND section='売上' AND month LIKE ?
@@ -466,20 +573,33 @@ const server = createServer(async (req, res) => {
       const hasMf = one('SELECT COUNT(*) c FROM mf_tx').c > 0;
 
       if (hasMf) {
-        const rows = all(`SELECT substr(date,1,7) month,
-            COALESCE(SUM(CASE WHEN entity='business' AND type='income'  THEN amount END),0) bizIn,
-            COALESCE(SUM(CASE WHEN entity='business' AND type='expense' THEN amount END),0) bizOut,
-            COALESCE(SUM(CASE WHEN entity='personal' AND type='income'  THEN amount END),0) perIn,
-            COALESCE(SUM(CASE WHEN entity='personal' AND type='expense' THEN amount END),0) perOut
-          FROM mf_tx GROUP BY 1 ORDER BY 1`);
-        const byCat = all(`SELECT entity, type, category, SUM(amount) amount, COUNT(*) n
-          FROM mf_tx GROUP BY 1,2,3 ORDER BY amount DESC`);
+        // 区分は money_kinds を通す。向こうの business / personal は
+        // 「どの口座から出たか」でしかないので、そのままでは損益に使えない
+        const sum = (kind, type) =>
+          `COALESCE(SUM(CASE WHEN ${KIND} = '${kind}' AND t.type='${type}' THEN t.amount END),0)`;
+        const rows = all(`SELECT substr(t.date,1,7) month,
+            ${sum('売上', 'income')} sales,
+            ${sum('経費', 'expense')} cost,
+            ${sum('個人', 'expense')} personal,
+            ${sum('資金調達', 'income')} raised,
+            ${sum('資金調達', 'expense')} repaid,
+            ${sum('振替', 'income')} moveIn,
+            ${sum('振替', 'expense')} moveOut
+          ${JOIN} GROUP BY 1 ORDER BY 1`);
+        const byCat = all(`SELECT ${KIND} kind, t.type, t.category,
+            SUM(t.amount) amount, COUNT(*) n, MAX(COALESCE(k.unsure,1)) unsure
+          ${JOIN} GROUP BY 1,2,3 ORDER BY amount DESC`);
         return json(res, {
           from: 'money',
           rows, byCat,
+          // 人が見ていない区分。ここが多いほど下の数字は当てにならない
+          unsure: all(`SELECT k.category, k.kind, COUNT(*) n, SUM(t.amount) amount
+            FROM money_kinds k JOIN mf_tx t ON t.category = k.category
+            WHERE k.unsure = 1 AND k.edited_at IS NULL
+            GROUP BY 1,2 ORDER BY amount DESC`),
           uncertain: one('SELECT COUNT(*) c FROM mf_tx WHERE uncertain=1').c,
           imports: all('SELECT * FROM mf_imports ORDER BY at DESC'),
-          source: { income: 'お金の流れ管理（実取引）', cost: 'お金の流れ管理（事業／個人は向こうの仕分け）' },
+          latest: one('SELECT MAX(date) d FROM mf_tx').d,
         });
       }
 
@@ -487,18 +607,18 @@ const server = createServer(async (req, res) => {
       const kindJoin = `LEFT JOIN cost_kinds k ON k.category = e.category`;
       const rows = all(`
         SELECT m AS month,
-          COALESCE((SELECT SUM(income) FROM cashflow WHERE substr(date,1,7)=m),0) AS bizIn,
+          COALESCE((SELECT SUM(income) FROM cashflow WHERE substr(date,1,7)=m),0) AS sales,
           COALESCE((SELECT SUM(e.amount) FROM expenses e ${kindJoin}
-                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='事業'),0) AS bizOut,
-          0 AS perIn,
+                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='事業'),0) AS cost,
           COALESCE((SELECT SUM(e.amount) FROM expenses e ${kindJoin}
-                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='個人'),0) AS perOut
+                    WHERE substr(e.date,1,7)=m AND COALESCE(k.kind,'事業')='個人'),0) AS personal,
+          0 AS raised, 0 AS repaid, 0 AS moveIn, 0 AS moveOut
         FROM (SELECT DISTINCT substr(date,1,7) m FROM expenses
               UNION SELECT DISTINCT substr(date,1,7) FROM cashflow) ORDER BY m`);
       return json(res, {
-        from: 'sheet', rows, byCat: [], uncertain: 0, imports: [],
+        from: 'sheet', rows, byCat: [], unsure: [], uncertain: 0, imports: [],
+        latest: one('SELECT MAX(date) d FROM cashflow').d,
         guessedPersonal: one("SELECT COUNT(*) c FROM cost_kinds WHERE guessed=1 AND kind='個人'").c,
-        source: { income: '入出金明細の収入', cost: '経費明細（事業／個人はカテゴリ名からの推測）' },
       });
     }
 
@@ -513,7 +633,11 @@ const server = createServer(async (req, res) => {
           UNION ALL
           SELECT substr(closed_on,1,7) m FROM pipeline WHERE closed_on <> ''
         ) WHERE m GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]' GROUP BY m ORDER BY m DESC`);
-      const month = q.get('month') || (months[0] && months[0].m) || '';
+      // 初期表示は「今月か、それより前でいちばん新しい月」。
+      // 未来の面談予定が入っていると、開いた瞬間に来月が出て読み違える
+      const now = thisMonth();
+      const month = q.get('month')
+        || (months.find((r) => r.m <= now) || months[0] || {}).m || '';
       // 月が決まらないときに '%' を渡すと全件に当たってしまう。空なら何も返さない
       if (!month) {
         return json(res, { months: [], month: '', met: [], closed: [], byStatus: [] });
@@ -552,6 +676,10 @@ const server = createServer(async (req, res) => {
         cashflowIncome: one('SELECT COALESCE(SUM(income),0) a FROM cashflow').a,
         cashflowExpense: one('SELECT COALESCE(SUM(expense),0) a FROM cashflow').a,
         expenseTotal: one('SELECT COALESCE(SUM(amount),0) a FROM expenses').a,
+        // シートそのものの食い違い。こちらの取り込みの誤りと区別して出す
+        sheetIssues: sheetIssues(),
+        // シートの売上と、口座に実際に入った金額の突き合わせ
+        salesVsBank: salesVsBank(),
       });
     }
     if (p === '/api/pipeline') return json(res, { rows: all('SELECT * FROM pipeline ORDER BY id DESC') });
@@ -713,13 +841,13 @@ const server = createServer(async (req, res) => {
       // 「シートの値に戻す」。編集の印を外すと、次の取り込みで上書きされるようになる。
       // 汎用の POST（新規作成）より先に見ること
       if (req.method === 'POST' && id && rest[2] === 'release') {
-        db.prepare(`UPDATE ${name} SET edited_at=NULL WHERE id=?`).run(Number(id));
+        db.prepare(`UPDATE ${name} SET edited_at=NULL WHERE id=?`).run(key(id));
         return json(res, { ok: true });
       }
       if (req.method === 'POST' && !id) return json(res, writeRow(name, null, await readJson(req)), 201);
       if (req.method === 'PATCH' && id) return json(res, writeRow(name, id, await readJson(req)));
       if (req.method === 'DELETE' && id) {
-        db.prepare(`DELETE FROM ${name} WHERE id=?`).run(Number(id));
+        db.prepare(`DELETE FROM ${name} WHERE id=?`).run(key(id));
         return json(res, { ok: true });
       }
       return json(res, { error: '未対応の操作です' }, 405);

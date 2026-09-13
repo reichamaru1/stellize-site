@@ -282,7 +282,18 @@ function importPipeline(db, lines) {
       if (year > thisYear) year = thisYear;
       lastMonth = lead.m;
     }
-    const iso = (x) => (x ? year + '-' + String(x.m).padStart(2, '0') + '-' + String(x.d).padStart(2, '0') : '');
+    /*
+     * 年を書かない「10/24」を年月日にする。
+     * 並びの途中で月が飛ぶ行があり、そこだけ年が1つ進んで未来の日付になる
+     * （例: 2月の並びの中の「10/24」が 2026-10-24 になっていた）。
+     * 済んだ商談の表なので、未来に出たぶんは1年戻す。
+     */
+    const today = new Date().toISOString().slice(0, 10);
+    const iso = (x) => {
+      if (!x) return '';
+      const at = (y) => y + '-' + String(x.m).padStart(2, '0') + '-' + String(x.d).padStart(2, '0');
+      return at(year) > today ? at(year - 1) : at(year);
+    };
 
     // 締結日は「5月」「夏以降」「未定」も入る。月だけ分かるものは年月にし、
     // それ以外は書かれたまま残す（勝手に日付にしない）
@@ -368,7 +379,7 @@ function importPl(db, lines) {
 
     let section = '売上';
     // 結合セルは下に続く。大分類と中分類の2段を覚えておく
-    let carriedBig = '', carriedMid = '';
+    let carriedBig = '', carriedMid = '', bigHasMid = false;
 
     for (let j = start; j < lines.length; j++) {
       const d = cols(lines[j]);
@@ -398,7 +409,7 @@ function importPl(db, lines) {
         else if (/^経費合計/.test(head1)) section = '個人支出';   // ここから下は個人のお金
         else if (/^支出合計/.test(head1)) section = '指標';
         else if (/^合計$/.test(head1)) section = '指標';           // 2024年の書き方
-        carriedBig = ''; carriedMid = '';
+        carriedBig = ''; carriedMid = ''; bigHasMid = false;
         continue;
       }
 
@@ -410,7 +421,14 @@ function importPl(db, lines) {
        *          |          | 真誓会   → 中も空。中を上から引き継がないと分類が消える
        * 1段しか引き継がないと、最後の形で分類が空になる。
        */
-      if (head1) { carriedBig = head1; carriedMid = ''; }
+      /*
+       * 「大分類だけ書いて中分類を飛ばす」並びがある（借金返済 |  | 親族）。
+       * この大分類は中分類の親ではないので、次に中分類だけの行が来たら
+       * 引き継ぎを切る。切らないと「借金返済／積立保険／アクサ生命」のように
+       * 別の項目が前の分類にぶら下がる。
+       */
+      if (head1) { carriedBig = head1; carriedMid = ''; bigHasMid = !!d[2]; }
+      else if (d[2] && !bigHasMid) { carriedBig = ''; carriedMid = ''; }
       if (d[2]) carriedMid = d[2];
       const big = carriedBig, mid = carriedMid, detail = d[3] || '';
       const category = big || mid;
@@ -760,8 +778,18 @@ function importPlan(db, lines) {
   const monthCols = monthColumns(cols(lines[headIdx]));
   if (!monthCols) return 0;
 
-  // ---- 1回目：実績側を読んで、個人のお金にあたる項目名を覚える ----
+  /*
+   * ---- 1回目：実績側を読んで、個人のお金にあたる項目名を覚える ----
+   *
+   * 実績側には「経費合計」という区切りがあるので、どこからが個人かが分かる。
+   * 目標側にはこの区切りが無いので、ここで覚えた名前を手がかりにする。
+   *
+   * ただし「借金返済」は販管費にも個人にも出てくる。両方に出る名前で
+   * 区切りを判断すると、目標側の経費が丸ごと個人になってしまうので、
+   * 「個人のところにしか出てこない名前」を別に持っておく。
+   */
   const personal = new Set();
+  const businessSide = new Set();
   {
     let inActual = false, afterKeihi = false;
     for (let i = headIdx + 1; i < lines.length; i++) {
@@ -769,23 +797,27 @@ function importPlan(db, lines) {
       if (isRule(c)) break;
       if (/〈結果数値〉/.test(c.join(''))) { inActual = true; continue; }
       if (!inActual) continue;
-      const h = (c[0] || '') + (c[1] || '');
       if (/^経費合計/.test(c[0] || '') || /^経費合計/.test(c[1] || '')) { afterKeihi = true; continue; }
       if (/^支出合計/.test(c[0] || '') || /^支出合計/.test(c[1] || '')) break;
-      if (!afterKeihi) continue;
       // 「借金返済 / 親族」のように明細まで見ないと、目標側で拾えない
       for (const v of [c[0], c[1], c[2]]) {
-        if (v && !PLAN_METRIC.test(v)) personal.add(v);
+        if (!v || PLAN_METRIC.test(v)) continue;
+        (afterKeihi ? personal : businessSide).add(v);
       }
     }
   }
+  // 個人のところにしか出てこない名前。目標側で「ここから下は個人」を決めるのに使う
+  const personalOnly = new Set([...personal].filter((v) => !businessSide.has(v)));
 
   const put = prep(db, `INSERT INTO plan_monthly (month,kind,side,category,subcategory,amount,is_total)
     VALUES (?,?,?,?,?,?,?)
     ON CONFLICT(month,kind,side,category,subcategory) DO UPDATE SET
       amount=excluded.amount, is_total=excluded.is_total`);
 
-  let kind = '目標', side = '売上', carriedBig = '', carriedMid = '', n = 0;
+  let kind = '目標', side = '売上', carriedBig = '', carriedMid = '', bigHasMid = false, n = 0;
+  let personalFrom = false;   // 目標側で「ここから下は個人」に入ったか
+  let running = new Map();    // 区切りからの明細の積み上げ（無名の合計行を見分けるため）
+  const skipped = [];         // 分類が付かず、合計でもなかった行
 
   for (let i = headIdx + 1; i < lines.length; i++) {
     const c = cols(lines[i]);
@@ -793,19 +825,58 @@ function importPlan(db, lines) {
     if (isRule(c)) break;                     // ここから下は料金表など別の表
 
     const joined = c.join('');
-    const reset = () => { carriedBig = ''; carriedMid = ''; };
-    if (/〈結果数値〉/.test(joined)) { kind = '実績'; side = '売上'; reset(); continue; }
+    const reset = () => { carriedBig = ''; carriedMid = ''; bigHasMid = false; };
+    const newBlock = () => { reset(); running = new Map(); };
+    if (/〈結果数値〉/.test(joined)) {
+      kind = '実績'; side = '売上'; personalFrom = false; newBlock(); continue;
+    }
 
     const sec = joined.match(/〈(売上|支出)〉/);
-    if (sec) { side = sec[1] === '売上' ? '売上' : '事業経費'; reset(); continue; }
+    if (sec) { side = sec[1] === '売上' ? '売上' : '事業経費'; newBlock(); continue; }
 
     const head0 = c[0] || '', head1 = c[1] || '';
-    if (/販売費及び一般管理費/.test(head0 + head1)) { side = '事業経費'; reset(); continue; }
+    if (/販売費及び一般管理費/.test(head0 + head1)) { side = '事業経費'; newBlock(); continue; }
     if (/^経費合計/.test(head0) || /^経費合計/.test(head1)) { side = '個人支出'; reset(); continue; }
-    if (/^支出合計/.test(head0) || /^支出合計/.test(head1)) { side = '指標'; reset(); continue; }
+    if (/^支出合計/.test(head0) || /^支出合計/.test(head1)) { side = '指標'; newBlock(); continue; }
+
+    const vals = monthCols.map((mc) => money(c[mc.i]));
+    const hasValue = vals.some(Boolean);
+
+    // 何も書かれていない行は、結合セルの引き継ぎを切る。
+    // 切らないと、次に来る「利益」が直前の分類にぶら下がってしまう
+    if (!head0 && !head1 && !(c[2] || '')) {
+      if (!hasValue) { reset(); continue; }
+      /*
+       * 分類名が無いのに金額だけある行。
+       * シートでは、支出をぜんぶ足した行がこの形で入っている（項目名が
+       * 上のセルと結合されていて空になる）。引き継ぎに任せると、直前の
+       * 分類名（「その他雑費」）が付いて、経費が倍に膨らむ。
+       * 積み上げと一致するかどうかで、合計行かどうかを確かめる。
+       */
+      const isSum = vals.every((v, j) => v === (running.get(j) || 0));
+      if (isSum) {
+        for (let j = 0; j < monthCols.length; j++) {
+          if (!vals[j]) continue;
+          put.run(year + '-' + String(monthCols[j].m).padStart(2, '0'),
+            kind, '指標', '支出合計', '', vals[j], 1);
+          n++;
+        }
+      } else {
+        skipped.push(`${kind} ${side} 行${i + 1}`);
+      }
+      reset();
+      continue;
+    }
 
     // 分類名。結合セルは大分類にも中分類にも掛かるので、2段とも引き継ぐ
-    if (head0) { carriedBig = head0; carriedMid = ''; }
+    /*
+     * 「大分類だけ書いて中分類を飛ばす」並びがある（借金返済 |  | 親族）。
+     * この大分類は中分類の親ではないので、次に中分類だけの行が来たら
+     * 引き継ぎを切る。切らないと「借金返済／積立保険／アクサ生命」のように
+     * 別の項目が前の分類にぶら下がる。
+     */
+    if (head0) { carriedBig = head0; carriedMid = ''; bigHasMid = !!c[1]; }
+    else if (c[1] && !bigHasMid) { carriedBig = ''; carriedMid = ''; }
     if (c[1]) carriedMid = c[1];
     const big = carriedBig, mid = carriedMid, detail = c[2] || '';
     const category = big || mid;
@@ -815,20 +886,37 @@ function importPlan(db, lines) {
     if (!category && !subcategory) continue;
 
     const label = subcategory || category;
+    const isMetric = PLAN_METRIC.test(label) || PLAN_METRIC.test(category);
+
+    /*
+     * 目標側には「経費合計」の区切りが無い。
+     * 実績側の個人のところにしか出てこない大分類（家賃光熱費）が現れたら、
+     * そこから下は生活のお金として扱う。これで食費・光熱費・美容関連費まで届く。
+     */
+    if (side !== '売上' && head0 && personalOnly.has(head0)) personalFrom = true;
+
     let rowSide = side;
-    if (PLAN_METRIC.test(label) || PLAN_METRIC.test(category)) rowSide = '指標';
-    else if (side === '事業経費'
-      && (personal.has(category) || personal.has(label) || personal.has(subcategory))) rowSide = '個人支出';
+    if (isMetric) rowSide = '指標';
+    else if (side === '事業経費' && (personalFrom
+      || personalOnly.has(category) || personalOnly.has(label) || personalOnly.has(subcategory))) {
+      rowSide = '個人支出';
+    }
 
     // 「総売上」は内訳の合計。印を付けないと内訳と一緒に足して二重に数える
     const isTotal = /^(総売上|合計)$/.test(label) ? 1 : 0;
 
-    for (const mc of monthCols) {
-      const v = money(c[mc.i]);
+    for (let j = 0; j < monthCols.length; j++) {
+      const v = vals[j];
       if (!v) continue;
-      put.run(year + '-' + String(mc.m).padStart(2, '0'), kind, rowSide, category, subcategory, v, isTotal);
+      // 支出の積み上げ。無名の合計行を見分けるのに使う（指標と合計は足さない）
+      if (side !== '売上' && !isMetric && !isTotal) running.set(j, (running.get(j) || 0) + v);
+      put.run(year + '-' + String(monthCols[j].m).padStart(2, '0'),
+        kind, rowSide, category, subcategory, v, isTotal);
       n++;
     }
+  }
+  if (skipped.length) {
+    console.log(`  ※ 分類が付かなかった行が ${skipped.length}件あります: ${skipped.join(' / ')}`);
   }
   return n;
 }
@@ -858,56 +946,75 @@ function seedCostKinds(db) {
 }
 
 
-const src = process.argv[2] || join(ROOT, 'data', 'sheet-export.md');
-const lines = readFileSync(src, 'utf8').split('\n');
-const db = openDb();
+/* ここから下は、このファイルを直接実行したときだけ動く（テストから読み込めるように） */
+export { importPlan, importPl, importPipeline };
 
-console.log('取り込み元: ' + src);
-const done = {
-  '入出金明細': importCashflow(db, lines),
-  '経費明細': importExpenses(db, lines),
-  '人脈台帳': importContacts(db, lines),
-  '案件・契約': importDeals(db, lines),
-  '商談パイプライン': importPipeline(db, lines),
-  '週次KPI': importKpi(db, lines),
-  '収支計画・実績': importPlan(db, lines),
-  '月次損益': importPl(db, lines),
-  '料金表': importPricing(db, lines),
-  '名刺': importCards(db, lines),
-  '交流会': importEvents(db, lines),
-  '協業先': importPartners(db, lines),
-  '事業パラメータ': importMetrics(db, lines),
-  '目安数値': importForecast(db, lines),
-  '月次収支サマリー': importMonthlySummary(db, lines),
-  'PDF取込ログ': importPdfLog(db, lines),
-  'カテゴリ判定ルール': importCategoryRules(db, lines),
-};
+if (process.argv[1] && process.argv[1].endsWith('sheet.mjs')) {
+  const src = process.argv[2] || join(ROOT, 'data', 'sheet-export.md');
+  const lines = readFileSync(src, 'utf8').split('\n');
+  const db = openDb();
 
-// 「販管費」という呼び方はしない。
-// source_key に区分名が入っているので、名前を変えるとキーが変わり、
-// 古い行が残ったまま新しい行が増えて二重になる。古いキーの行を先に消す。
-// source_key に区分名が入っているので、区分の呼び方を変えると古い行が残る。
-// 取り込みのたびに、いまの区分名でない行を掃除する。
-db.exec(`DELETE FROM pl_monthly WHERE edited_at IS NULL AND section NOT IN
-  ('売上','売上原価','事業経費','個人支出','指標')`);
-db.exec(`DELETE FROM pl_monthly WHERE edited_at IS NULL AND source_key NOT LIKE
-  'pl:%:' || section || ':%'`);
-done['経費の事業/個人 区分'] = seedCostKinds(db);
-for (const [k, v] of Object.entries(done)) {
-  console.log('  ' + (v ? '✓' : '—') + ' ' + k + ' : ' + v + '件');
+  console.log('取り込み元: ' + src);
+
+  /*
+   * 計画・損益の2表は、シートの行をそのまま並べ替えて持っているだけなので、
+   * 取り込みのたびに作り直す。
+   *
+   * upsert だけにしていると、分類の付け方を直したときに古い行が残る。
+   * 「借金返済／積立保険／アクサ生命」と「積立保険／アクサ生命」が並んで
+   * 立って、同じ金額を二度数えた。画面で直した行（edited_at）は残す。
+   */
+  for (const t of ['plan_monthly', 'pl_monthly']) {
+    db.prepare(`DELETE FROM ${t} WHERE edited_at IS NULL`).run();
+  }
+
+  const done = {
+    '入出金明細': importCashflow(db, lines),
+    '経費明細': importExpenses(db, lines),
+    '人脈台帳': importContacts(db, lines),
+    '案件・契約': importDeals(db, lines),
+    '商談パイプライン': importPipeline(db, lines),
+    '週次KPI': importKpi(db, lines),
+    '収支計画・実績': importPlan(db, lines),
+    '月次損益': importPl(db, lines),
+    '料金表': importPricing(db, lines),
+    '名刺': importCards(db, lines),
+    '交流会': importEvents(db, lines),
+    '協業先': importPartners(db, lines),
+    '事業パラメータ': importMetrics(db, lines),
+    '目安数値': importForecast(db, lines),
+    '月次収支サマリー': importMonthlySummary(db, lines),
+    'PDF取込ログ': importPdfLog(db, lines),
+    'カテゴリ判定ルール': importCategoryRules(db, lines),
+  };
+
+  // 「販管費」という呼び方はしない。
+  // source_key に区分名が入っているので、名前を変えるとキーが変わり、
+  // 古い行が残ったまま新しい行が増えて二重になる。古いキーの行を先に消す。
+  // source_key に区分名が入っているので、区分の呼び方を変えると古い行が残る。
+  // 取り込みのたびに、いまの区分名でない行を掃除する。
+  db.exec(`DELETE FROM pl_monthly WHERE edited_at IS NULL AND section NOT IN
+    ('売上','売上原価','事業経費','個人支出','指標')`);
+  db.exec(`DELETE FROM pl_monthly WHERE edited_at IS NULL AND source_key NOT LIKE
+    'pl:%:' || section || ':%'`);
+  done['経費の事業/個人 区分'] = seedCostKinds(db);
+  for (const [k, v] of Object.entries(done)) {
+    console.log('  ' + (v ? '✓' : '—') + ' ' + k + ' : ' + v + '件');
+  }
+
+  // 画面で直した行は上書きしていない。黙って飛ばすと気づけないので数を出す
+  const kept = Object.keys(TABLES)
+    .map((t) => {
+      try {
+        const n = db.prepare(`SELECT COUNT(*) c FROM ${t} WHERE edited_at IS NOT NULL`).get().c;
+        return n ? `${TABLES[t].label} ${n}件` : null;
+      } catch { return null; }
+    })
+    .filter(Boolean);
+  if (kept.length) {
+    console.log('\n  ※ 画面で編集済みのため上書きしませんでした： ' + kept.join(' / '));
+    console.log('     シートの値に戻したいときは、その行の編集画面で「シートの値に戻す」を押してください。');
+  }
+  db.close();
+
 }
-
-// 画面で直した行は上書きしていない。黙って飛ばすと気づけないので数を出す
-const kept = Object.keys(TABLES)
-  .map((t) => {
-    try {
-      const n = db.prepare(`SELECT COUNT(*) c FROM ${t} WHERE edited_at IS NOT NULL`).get().c;
-      return n ? `${TABLES[t].label} ${n}件` : null;
-    } catch { return null; }
-  })
-  .filter(Boolean);
-if (kept.length) {
-  console.log('\n  ※ 画面で編集済みのため上書きしませんでした： ' + kept.join(' / '));
-  console.log('     シートの値に戻したいときは、その行の編集画面で「シートの値に戻す」を押してください。');
-}
-db.close();

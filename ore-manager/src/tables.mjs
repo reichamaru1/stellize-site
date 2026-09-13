@@ -10,6 +10,13 @@
 
 const T = (label, opts) => ({ label, ...opts });
 
+/**
+ * お金の区分。
+ * 「振替」と「資金調達」を売上・経費から外さないと、口座間の移し替えや
+ * 借入が収入として立って、損益がまったく読めなくなる。
+ */
+export const MONEY_KIND_CHOICES = ['売上', '経費', '個人', '振替', '資金調達'];
+
 /** 型は画面での見せ方と、保存するときの変換に使う */
 // text | money | number | date（YYYY-MM-DD）| month（YYYY-MM）| bool
 
@@ -352,17 +359,33 @@ export const TABLES = {
     order: 'date DESC, id',
     dateCol: 'date',
     search: ['memo', 'category'],
-    filters: ['entity', 'type', 'category', 'src'],
+    filters: ['kind', 'entity', 'type', 'category', 'src'],
     columns: [
       { k: 'date', label: '日付', type: 'date', w: 110 },
-      { k: 'entity', label: '事業/個人', type: 'text', w: 90 },
-      { k: 'type', label: '収支', type: 'text', w: 80 },
+      { k: 'type', label: '収支', type: 'text', w: 80, map: { income: '収入', expense: '支出' } },
       { k: 'category', label: 'カテゴリ', type: 'text' },
+      // 空欄ならカテゴリの区分表に従う。1件だけ例外にしたいときに埋める
+      { k: 'kind', label: '区分', type: 'text', w: 100, opts: MONEY_KIND_CHOICES, blank: '（表のとおり）' },
       { k: 'amount', label: '金額', type: 'money' },
       { k: 'memo', label: 'メモ', type: 'text' },
+      { k: 'entity', label: '出どころ', type: 'text', w: 100,
+        map: { business: '事業口座', personal: '個人口座' } },
       { k: 'recurring', label: '定期', type: 'bool', w: 70 },
       { k: 'uncertain', label: '要確認', type: 'bool', w: 80 },
       { k: 'src', label: '取込元', type: 'text', w: 90 },
+    ],
+  }),
+
+  money_kinds: T('お金の区分表（カテゴリ→何のお金か）', {
+    order: `CASE kind WHEN '売上' THEN 0 WHEN '経費' THEN 1 WHEN '個人' THEN 2
+              WHEN '資金調達' THEN 3 ELSE 4 END, category`,
+    search: ['category', 'note'],
+    filters: ['kind', 'unsure'],
+    columns: [
+      { k: 'category', label: 'カテゴリ', type: 'text' },
+      { k: 'kind', label: '何のお金か', type: 'text', w: 120, opts: MONEY_KIND_CHOICES },
+      { k: 'unsure', label: '要確認', type: 'bool', w: 90 },
+      { k: 'note', label: 'メモ', type: 'text' },
     ],
   }),
 

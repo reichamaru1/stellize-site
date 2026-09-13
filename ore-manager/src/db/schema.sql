@@ -317,7 +317,8 @@ CREATE TABLE IF NOT EXISTS mf_tx (
   recurring  INTEGER NOT NULL DEFAULT 0,
   src        TEXT,                      -- csv / manual など
   uncertain  INTEGER NOT NULL DEFAULT 0, -- 向こうで自動仕分けの確信が低かったもの
-  import_id  TEXT
+  import_id  TEXT,
+  kind       TEXT                        -- この1件だけ区分を変えたいとき。空ならカテゴリの表に従う
 );
 CREATE INDEX IF NOT EXISTS idx_mf_date ON mf_tx(date);
 CREATE INDEX IF NOT EXISTS idx_mf_ent ON mf_tx(entity, type);
@@ -422,4 +423,21 @@ CREATE INDEX IF NOT EXISTS idx_sr_acc ON sns_refs(account);
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
+);
+
+-- ============================================================
+-- お金の区分表
+--
+-- 「お金の流れ管理」の business / personal は、どの口座から出たかで
+-- 決まっている。事業口座で払った生活費が経費になり、口座間の移し替えが
+-- 収入にも支出にも立つ。カテゴリごとに「何のお金か」をこちらで決める。
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS money_kinds (
+  id        INTEGER PRIMARY KEY,
+  category  TEXT NOT NULL UNIQUE,
+  kind      TEXT NOT NULL,               -- 売上 / 経費 / 個人 / 振替 / 資金調達
+  unsure    INTEGER NOT NULL DEFAULT 0,  -- 自動で当てた（人が見ていない）
+  note      TEXT,
+  edited_at TEXT
 );

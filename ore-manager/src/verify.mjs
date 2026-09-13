@@ -198,6 +198,65 @@ console.log('\n■ 収支管理ダッシュボード（シートの月次サマ�
   }
 }
 
+/* ---------- 4. 分類の取りこぼし・二重計上 ---------- */
+/*
+ * 件数では分からないことを見る。
+ *   ・区分に分けたあと、足し戻すとシートの合計に戻るか（＝落としも二重も無い）
+ *   ・分類の名前が空のまま残っていないか
+ */
+console.log('\n■ 分類の足し戻し');
+for (const kind of ['目標', '実績']) {
+  const part = db.prepare(`SELECT COALESCE(SUM(amount),0) a FROM plan_monthly
+    WHERE kind=? AND is_total=0 AND side IN ('事業経費','個人支出')`).get(kind).a;
+  const tot = db.prepare(`SELECT COALESCE(SUM(amount),0) a FROM plan_monthly
+    WHERE kind=? AND category='支出合計'`).get(kind).a;
+  if (!tot) { say('△', `収支計画の${kind} 支出`, 'シートに支出合計の行がありません'); continue; }
+  say(part === tot ? '✓' : '×', `収支計画の${kind} 支出`,
+    `事業経費＋個人支出 ${yen(part)} / シートの支出合計 ${yen(tot)}`);
+}
+{
+  // 経費合計の行がある月だけを、その月の内訳と突き合わせる
+  const rows = db.prepare(`SELECT t.month,
+      (SELECT COALESCE(SUM(amount),0) FROM pl_monthly
+       WHERE month=t.month AND section='事業経費' AND is_total=0) part,
+      t.a tot
+    FROM (SELECT month, SUM(amount) a FROM pl_monthly
+          WHERE section='事業経費' AND category='経費合計' GROUP BY month) t
+    ORDER BY t.month`).all();
+  const bad = rows.filter((r) => r.part !== r.tot);
+  say(bad.length === 0 ? '✓' : '×', '月次損益の経費',
+    `${rows.length - bad.length}/${rows.length} か月で 内訳＝シートの経費合計`
+    + (bad.length ? '　ずれ: ' + bad.map((r) => `${r.month} ${yen(r.part - r.tot)}`).join(' / ') : ''));
+}
+for (const [t, label] of [['pl_monthly', '月次損益'], ['plan_monthly', '収支計画']]) {
+  const n = db.prepare(`SELECT COUNT(*) c FROM ${t} WHERE category=''`).get().c;
+  say(n === 0 ? '✓' : '×', `${label} 分類が空の行`, n + '件');
+}
+{
+  const future = db.prepare(`SELECT COUNT(*) c FROM pipeline
+    WHERE first_met GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' AND first_met > ?`)
+    .get(new Date().toISOString().slice(0, 10)).c;
+  say(future === 0 ? '✓' : '×', '商談の初回面談が未来', future + '件');
+}
+
+/* ---------- 5. お金の区分 ---------- */
+{
+  const un = db.prepare('SELECT COUNT(*) c FROM money_kinds WHERE unsure=1 AND edited_at IS NULL').get().c;
+  const cats = db.prepare(`SELECT COUNT(*) c FROM (
+    SELECT DISTINCT category FROM mf_tx WHERE category <> ''
+    EXCEPT SELECT category FROM money_kinds)`).get().c;
+  console.log('\n■ お金の区分');
+  say(cats === 0 ? '✓' : '×', '区分表にあるカテゴリ', cats === 0 ? 'すべて登録済み' : cats + '件が未登録');
+  say(un === 0 ? '✓' : '△', '人が見ていない区分', un + '件');
+  for (const r of db.prepare(`SELECT COALESCE(k.kind,'(未登録)') kind, t.type,
+      COUNT(*) n, SUM(t.amount) a
+    FROM mf_tx t LEFT JOIN money_kinds k ON k.category=t.category
+    GROUP BY 1,2 ORDER BY 1,2`).all()) {
+    console.log(`     ${(r.kind + ' ' + (r.type === 'income' ? '入' : '出')).padEnd(14)}`
+      + `${String(r.n).padStart(6)}件  ${yen(r.a)}`);
+  }
+}
+
 console.log('\n■ 取り込んだ件数');
 for (const [label, tbl] of [
   ['入出金明細', 'cashflow'], ['経費明細', 'expenses'], ['人脈台帳', 'contacts'],
